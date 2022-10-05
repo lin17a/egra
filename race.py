@@ -18,6 +18,7 @@ class Camera:
         self.position =glm.vec3(0,10,0)
         self.up = glm.vec3(1,0,0)
         self.lookat = glm.vec3(0)
+        self.radians = 170
         # view_matrix
         self.m_view = self.get_view_matrix()
         # projection matrix
@@ -27,26 +28,41 @@ class Camera:
         return glm.lookAt(self.position, self.lookat, self.up)
     
     def get_projection_matrix(self):
-        return glm.perspective(glm.radians(170), self.aspec_ratio, 0.1, 100)
+        return glm.perspective(glm.radians(self.radians), self.aspec_ratio, 0.1, 100)
 
     def rotate(self, vec):
-        self.lookat = self.lookat + glm.vec3((vec[0]*0.1, 0, vec[1]*0.1))
+        """self.lookat = self.lookat + glm.vec3((-vec[0]*0.1, 0, -vec[1]*0.1))
+        self.m_view = self.get_view_matrix()"""
+        if 180 > self.radians + vec[0] + vec[1] > 0:
+            self.radians = self.radians + vec[0] + vec[1]
+            self.m_proj = self.get_projection_matrix()
+
+    """    def move_forward(self):
+        self.position = self.position + glm.vec3((0, 0.1/self.radians, 0))
         self.m_view = self.get_view_matrix()
     
-    def forward(self):
-        self.position = self.position + glm.vec3((0, 0.1, 0))
-        self.m_view = self.get_view_matrix()
+    def move_backward(self):
+        self.position = self.position + glm.vec3((0, -0.1/self.radians, 0))
+        self.m_view = self.get_view_matrix()"""
     
-    def backward(self):
-        self.position = self.position + glm.vec3((0, -0.1, 0))
-        self.m_view = self.get_view_matrix()
-    
-    def right(self):
-        self.position = self.position + glm.vec3((0, 0, 0.1))
+    def move_right(self):
+        self.lookat = self.lookat + glm.vec3((0, 0, 0.0001*self.radians))
+        self.position = self.position + glm.vec3((0, 0, 0.0001*self.radians))
         self.m_view = self.get_view_matrix()
 
-    def left(self):
-        self.position = self.position + glm.vec3((0, 0, -0.1))
+    def move_left(self):
+        self.lookat = self.lookat + glm.vec3((0, 0, -0.0001*self.radians))
+        self.position = self.position + glm.vec3((0, 0, -0.0001*self.radians))
+        self.m_view = self.get_view_matrix()
+
+    def move_up(self):
+        self.lookat = self.lookat + glm.vec3((0.0001*self.radians, 0, 0))
+        self.position = self.position + glm.vec3((0.0001*self.radians, 0, 0))
+        self.m_view = self.get_view_matrix()
+    
+    def move_down(self):
+        self.lookat = self.lookat + glm.vec3((-0.0001*self.radians, 0, 0))
+        self.position = self.position + glm.vec3((-0.0001*self.radians, 0, 0))
         self.m_view = self.get_view_matrix()
     
 class lookat:
@@ -165,7 +181,7 @@ class Object:
 
         vertex_data = []
         for k in range(1, len(vertices)-1):
-            xk, xk1 = 0, 1
+            xk, xk1 = 0, 1000
             mk, mk1 = 1/2*((vertices[k+1]-vertices[k])/(xk1-xk) + (vertices[k]-vertices[k-1])/(xk1-xk)), 1/2*((vertices[k+1]-vertices[k])/(xk1-xk) + (vertices[k]-vertices[k-1])/(xk1-xk))
             for t_int in range(0, 100):
                 t = t_int/100
@@ -236,29 +252,26 @@ class GraphicsEngine:
         
         
     def check_events(self):
-        left, middle, right = pg.mouse.get_pressed()
-        keys = pg.key.get_pressed()
         for event in pg.event.get():
-            mouseMove = pg.mouse.get_rel()
             if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
                 self.scene.destroy()
                 pg.quit()
                 sys.exit()
-            if left:
-                self.camera.rotate(mouseMove)
-                self.scene.on_init()
-            if keys[pg.K_w]:
-                self.camera.forward()
-                self.scene.on_init()
-            if keys[pg.K_s]:
-                self.camera.backward()
-                self.scene.on_init()
-            if keys[pg.K_d]:
-                self.camera.right()
-                self.scene.on_init()
-            if keys[pg.K_a]:
-                self.camera.left()
-                self.scene.on_init()
+
+        left, middle, right = pg.mouse.get_pressed()
+        keys = pg.key.get_pressed()
+        if left:
+            mouseMove = pg.mouse.get_rel()
+            self.camera.rotate(mouseMove)
+        if keys[pg.K_w]:
+            self.camera.move_up()
+        if keys[pg.K_s]:
+            self.camera.move_down()
+        if keys[pg.K_d]:
+            self.camera.move_right()
+        if keys[pg.K_a]:
+            self.camera.move_left()
+        self.scene.on_init()
 
     def render(self):
         # clear framebuffer

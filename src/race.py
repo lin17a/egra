@@ -95,7 +95,11 @@ class Object:
         return vao
 
     def get_vertex_data(self):
+        #Cubic Hermite spline
+        #Finite difference
         vertices, indices = generation_track()
+        vertices = [(29, 42), (65, 66), (8, 56), (5, 77), (50, 60), (59, 32), (92, 52), (13, 6), (17, 61), (6, 54)]
+        indices = [(0, 8), (0, 7), (1, 4), (1, 6), (2, 8), (2, 9), (3, 9), (3, 4), (5, 6), (5, 7)]
 
         v = []
         sig = 0
@@ -109,14 +113,15 @@ class Object:
                     indices.remove(indice)
                     break
             v.append(np.array(vertices[sig]))
-        vertices = v+v[:2]
+        vertices = v+v[:3]
 
         vertex_data = []
-        for k in range(1, len(vertices)-1):
-            xk, xk1 = 0, 1
-            mk, mk1 = 1/2*((vertices[k+1]-vertices[k])/(xk1-xk) + (vertices[k]-vertices[k-1])/(xk1-xk)), 1/2*((vertices[k+1]-vertices[k])/(xk1-xk) + (vertices[k]-vertices[k-1])/(xk1-xk))
-            for t_int in range(0, 100):
-                t = t_int/100
+        for k in range(1, len(vertices)-2):
+            xk, xk1 = 0, 10000
+            mk = 1/2*((vertices[k+1]-vertices[k])/(xk1-xk) + (vertices[k]-vertices[k-1])/(xk1-xk))
+            mk1 = 1/2*((vertices[k+2]-vertices[k+1])/(xk1-xk) + (vertices[k+1]-vertices[k])/(xk1-xk))
+            for t_int in range(0, 1000):
+                t = t_int/1000
                 h00 = (1+2*t)*(1-t)**2
                 h10 = t*(1-t)**2
                 h01 = t**2*(3-2*t)

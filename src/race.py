@@ -83,7 +83,7 @@ class Object:
         self.shader_program['m_model'].write(self.m_model)
 
     def render(self):
-        self.vao.render(mgl.LINE_LOOP)
+        self.vao.render(mgl.TRIANGLE_STRIP)
         
     def destroy (self):
         self.vbo.release()
@@ -98,8 +98,8 @@ class Object:
         #Cubic Hermite spline
         #Finite difference
         vertices, indices = generation_track()
-        vertices = [(29, 42), (65, 66), (8, 56), (5, 77), (50, 60), (59, 32), (92, 52), (13, 6), (17, 61), (6, 54)]
-        indices = [(0, 8), (0, 7), (1, 4), (1, 6), (2, 8), (2, 9), (3, 9), (3, 4), (5, 6), (5, 7)]
+        #vertices = [(29, 42), (65, 66), (8, 56), (5, 77), (50, 60), (59, 32), (92, 52), (13, 6), (17, 61), (6, 54)]
+        #indices = [(0, 8), (0, 7), (1, 4), (1, 6), (2, 8), (2, 9), (3, 9), (3, 4), (5, 6), (5, 7)]
 
         v = []
         sig = 0
@@ -113,7 +113,7 @@ class Object:
                     indices.remove(indice)
                     break
             v.append(np.array(vertices[sig]))
-        vertices = v+v[:3]
+        vertices = v+v[:4]
 
         vertex_data = []
         for k in range(1, len(vertices)-2):
@@ -130,7 +130,19 @@ class Object:
                 vertex_data.append([p[0], 0, p[1]])
 
         vertex_data = np.array(vertex_data, dtype='f4')
-        return vertex_data
+
+        vertex_2d = []
+        weight = 1
+        for i in range(len(vertex_data)-1):
+            vec = vertex_data[i]-vertex_data[i+1]
+            vec1 = np.array([-vec[2], 0, vec[0]])
+            vec2 = np.array((vec[2], 0, -vec[0]))
+            module1 = sum(vec1**2)**(1/2)
+            vertex_2d.append(vertex_data[i]+vec1/module1*weight)
+            vertex_2d.append(vertex_data[i]+vec2/module1*weight)
+
+        vertex_2d = np.array(vertex_2d, dtype='f4')
+        return vertex_2d
     
     @staticmethod
     def get_data(vertices, indices): 

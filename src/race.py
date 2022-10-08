@@ -34,33 +34,25 @@ class Camera:
         if 180 > self.radians + vec[0] + vec[1] > 0:
             self.radians = self.radians + vec[0] + vec[1]
             self.m_proj = self.get_projection_matrix()
-
-    """    def move_forward(self):
-        self.position = self.position + glm.vec3((0, 0.1/self.radians, 0))
-        self.m_view = self.get_view_matrix()
-    
-    def move_backward(self):
-        self.position = self.position + glm.vec3((0, -0.1/self.radians, 0))
-        self.m_view = self.get_view_matrix()"""
     
     def move_right(self):
-        self.lookat = self.lookat + glm.vec3((0, 0, 0.0001*self.radians))
-        self.position = self.position + glm.vec3((0, 0, 0.0001*self.radians))
+        self.lookat = self.lookat + glm.vec3((0, 0, 0.01*self.radians))
+        self.position = self.position + glm.vec3((0, 0, 0.01*self.radians))
         self.m_view = self.get_view_matrix()
 
     def move_left(self):
-        self.lookat = self.lookat + glm.vec3((0, 0, -0.0001*self.radians))
-        self.position = self.position + glm.vec3((0, 0, -0.0001*self.radians))
+        self.lookat = self.lookat + glm.vec3((0, 0, -0.01*self.radians))
+        self.position = self.position + glm.vec3((0, 0, -0.01*self.radians))
         self.m_view = self.get_view_matrix()
 
     def move_up(self):
-        self.lookat = self.lookat + glm.vec3((0.0001*self.radians, 0, 0))
-        self.position = self.position + glm.vec3((0.0001*self.radians, 0, 0))
+        self.lookat = self.lookat + glm.vec3((0.01*self.radians, 0, 0))
+        self.position = self.position + glm.vec3((0.01*self.radians, 0, 0))
         self.m_view = self.get_view_matrix()
     
     def move_down(self):
-        self.lookat = self.lookat + glm.vec3((-0.0001*self.radians, 0, 0))
-        self.position = self.position + glm.vec3((-0.0001*self.radians, 0, 0))
+        self.lookat = self.lookat + glm.vec3((-0.01*self.radians, 0, 0))
+        self.position = self.position + glm.vec3((-0.01*self.radians, 0, 0))
         self.m_view = self.get_view_matrix()
 
 class Object:
@@ -98,8 +90,6 @@ class Object:
         #Cubic Hermite spline
         #Finite difference
         vertices, indices = generation_track()
-        #vertices = [(29, 42), (65, 66), (8, 56), (5, 77), (50, 60), (59, 32), (92, 52), (13, 6), (17, 61), (6, 54)]
-        #indices = [(0, 8), (0, 7), (1, 4), (1, 6), (2, 8), (2, 9), (3, 9), (3, 4), (5, 6), (5, 7)]
 
         v = []
         sig = 0
@@ -196,9 +186,13 @@ class GraphicsEngine:
         self.camera = Camera(self)
         # scene
         self.scene = Object(self)
+        # clock
+        self.clock = pg.time.Clock()
+        self.time = 0
 
-        
-        
+    def get_time(self):
+        self.time =pg.time.get_ticks() * 0.001
+
     def check_events(self):
         for event in pg.event.get():
             if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
@@ -232,8 +226,10 @@ class GraphicsEngine:
 
     def run(self):
         while True:
+            self.get_time()
             self.check_events()
             self.render()
+            self.clock.tick(60)
 
 
 if __name__ == '__main__':

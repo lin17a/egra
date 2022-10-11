@@ -6,7 +6,7 @@ import sys
 import random
 import itertools as it
 import numpy as np
-from generation import generation_track
+from generation import generation_track, generation_track_2
 import time
 from OpenGL.GL import *
 
@@ -59,6 +59,8 @@ class Object:
     def __init__(self,app):
         self.app = app
         self.ctx = app.ctx
+        self.edgy = 0.1
+        self.rad = 0.1
         self.vbo = self.get_vbo()
         self.shader_program = self.get_shader_program()
         self.vao = self.get_vao()
@@ -76,6 +78,8 @@ class Object:
 
     def render(self):
         self.vao.render(mgl.TRIANGLE_STRIP)
+        #self.vao.render(mgl.LINES)
+        #self.vao.render(mgl.POINTS)
         
     def destroy (self):
         self.vbo.release()
@@ -86,12 +90,46 @@ class Object:
         vao = self.ctx.vertex_array(self.shader_program, [(self.vbo, '3f', 'in_position')])
         return vao
 
+    def up_edgy(self):
+        self.edgy += 0.1
+        self.new_road()
+    
+    def down_edgy(self):
+        self.edgy -= 0.1
+        self.new_road()
+
+    def up_rad(self):
+        self.rad += 0.1
+        self.new_road()
+    
+    def down_rad(self):
+        self.rad -= 0.1
+        self.new_road()
+
     def get_vertex_data(self):
         #Cubic Hermite spline
         #Finite difference
-        vertices, indices = generation_track()
+        xs, ys = generation_track_2(10, self.rad, self.edgy)
 
-        v = []
+        vertex_data = np.array([np.array([x, 0, y]) for x, y in zip(xs, ys)], dtype='f4')
+
+        vertex_2d = []
+        weight = 1
+        for i in range(len(vertex_data)-1):
+            vec = vertex_data[i]-vertex_data[i+1]
+            vec1 = np.array([-vec[2], 0, vec[0]])
+            vec2 = np.array((vec[2], 0, -vec[0]))
+            module1 = sum(vec1**2)**(1/2)
+            point1 = vertex_data[i]+vec1/module1*weight
+            point2 = vertex_data[i]+vec2/module1*weight
+            vertex_2d.append(point1)
+            vertex_2d.append(point2)
+        vertex_2d = np.array(vertex_2d, dtype='f4')
+        print(vertex_2d.shape)
+        return vertex_2d
+
+        
+        """v = []
         sig = 0
         for _ in range(len(indices)):
             for indice in indices:
@@ -107,7 +145,7 @@ class Object:
 
         vertex_data = []
         for k in range(1, len(vertices)-2):
-            xk, xk1 = 0, 10000
+            xk, xk1 = 0, 1
             mk = 1/2*((vertices[k+1]-vertices[k])/(xk1-xk) + (vertices[k]-vertices[k-1])/(xk1-xk))
             mk1 = 1/2*((vertices[k+2]-vertices[k+1])/(xk1-xk) + (vertices[k+1]-vertices[k])/(xk1-xk))
             for t_int in range(0, 1000):
@@ -128,11 +166,19 @@ class Object:
             vec1 = np.array([-vec[2], 0, vec[0]])
             vec2 = np.array((vec[2], 0, -vec[0]))
             module1 = sum(vec1**2)**(1/2)
-            vertex_2d.append(vertex_data[i]+vec1/module1*weight)
-            vertex_2d.append(vertex_data[i]+vec2/module1*weight)
-
+            point1 = vertex_data[i]+vec1/module1*weight
+            point2 = vertex_data[i]+vec2/module1*weight
+            vertex_2d.append(point1)
+            vertex_2d.append(point2)
         vertex_2d = np.array(vertex_2d, dtype='f4')
-        return vertex_2d
+        return vertex_2d"""
+
+    def new_road(self):
+        print("edgy",self.edgy,"rad",self.rad)
+        self.vbo = self.get_vbo()
+        self.vao = self.get_vao()
+        self.render()
+
     
     @staticmethod
     def get_data(vertices, indices): 
@@ -148,6 +194,7 @@ class Object:
         program = self.ctx.program(    
             vertex_shader='''
                 #version 330
+                #extension GL_PROGRAM_POINT_SIZE: enable
                 layout (location = 0) in vec3 in_position;
                 uniform mat4 m_proj;
                 uniform mat4 m_view;
@@ -213,6 +260,16 @@ class GraphicsEngine:
             self.camera.move_right()
         if keys[pg.K_a]:
             self.camera.move_left()
+        if keys[pg.K_r]:
+            self.scene.new_road()
+        if keys[pg.K_UP]:
+            self.scene.up_edgy()
+        if keys[pg.K_DOWN]:
+            self.scene.down_edgy()
+        if keys[pg.K_LEFT]:
+            self.scene.down_rad()
+        if keys[pg.K_RIGHT]:
+            self.scene.up_rad()
         self.scene.on_init()
 
     def render(self):

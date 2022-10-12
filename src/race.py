@@ -78,8 +78,6 @@ class Object:
 
     def render(self):
         self.vao.render(mgl.TRIANGLE_STRIP)
-        #self.vao.render(mgl.LINES)
-        #self.vao.render(mgl.POINTS)
         
     def destroy (self):
         self.vbo.release()
@@ -107,8 +105,6 @@ class Object:
         self.new_road()
 
     def get_vertex_data(self):
-        #Cubic Hermite spline
-        #Finite difference
         xs, ys = generation_track_2(10, self.rad, self.edgy)
 
         vertex_data = np.array([np.array([x, 0, y]) for x, y in zip(xs, ys)], dtype='f4')
@@ -119,59 +115,14 @@ class Object:
             vec = vertex_data[i]-vertex_data[i+1]
             vec1 = np.array([-vec[2], 0, vec[0]])
             vec2 = np.array((vec[2], 0, -vec[0]))
-            module1 = sum(vec1**2)**(1/2)
-            point1 = vertex_data[i]+vec1/module1*weight
-            point2 = vertex_data[i]+vec2/module1*weight
-            vertex_2d.append(point1)
-            vertex_2d.append(point2)
+            module = sum(vec1**2)**(1/2)+sum(vec2**2)**(1/2)
+            if module==0:
+                continue
+            vertex_2d.append(vertex_data[i]+vec1/module*weight)
+            vertex_2d.append(vertex_data[i]+vec2/module*weight)
+        vertex_2d = vertex_2d + vertex_2d[:-2]
         vertex_2d = np.array(vertex_2d, dtype='f4')
-        print(vertex_2d.shape)
         return vertex_2d
-
-        
-        """v = []
-        sig = 0
-        for _ in range(len(indices)):
-            for indice in indices:
-                if sig in indice:
-                    if sig == indice[0]:
-                        sig = indice[1]
-                    else:
-                        sig = indice[0]
-                    indices.remove(indice)
-                    break
-            v.append(np.array(vertices[sig]))
-        vertices = v+v[:4]
-
-        vertex_data = []
-        for k in range(1, len(vertices)-2):
-            xk, xk1 = 0, 1
-            mk = 1/2*((vertices[k+1]-vertices[k])/(xk1-xk) + (vertices[k]-vertices[k-1])/(xk1-xk))
-            mk1 = 1/2*((vertices[k+2]-vertices[k+1])/(xk1-xk) + (vertices[k+1]-vertices[k])/(xk1-xk))
-            for t_int in range(0, 1000):
-                t = t_int/1000
-                h00 = (1+2*t)*(1-t)**2
-                h10 = t*(1-t)**2
-                h01 = t**2*(3-2*t)
-                h11 = t**2*(t-1)
-                p = h00*vertices[k] + h10*(xk1-xk)*mk + h01*vertices[k+1] + h11*(xk1-xk)*mk1
-                vertex_data.append([p[0], 0, p[1]])
-
-        vertex_data = np.array(vertex_data, dtype='f4')
-
-        vertex_2d = []
-        weight = 1
-        for i in range(len(vertex_data)-1):
-            vec = vertex_data[i]-vertex_data[i+1]
-            vec1 = np.array([-vec[2], 0, vec[0]])
-            vec2 = np.array((vec[2], 0, -vec[0]))
-            module1 = sum(vec1**2)**(1/2)
-            point1 = vertex_data[i]+vec1/module1*weight
-            point2 = vertex_data[i]+vec2/module1*weight
-            vertex_2d.append(point1)
-            vertex_2d.append(point2)
-        vertex_2d = np.array(vertex_2d, dtype='f4')
-        return vertex_2d"""
 
     def new_road(self):
         print("edgy",self.edgy,"rad",self.rad)

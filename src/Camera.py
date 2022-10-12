@@ -19,9 +19,9 @@ class Camera:
     def get_projection_matrix(self):
         return glm.perspective(glm.radians(self.radians), self.aspec_ratio, 0.1, 100)
 
-    def rotate(self, vec):
-        if 180 > self.radians + vec[0] + vec[1] > 0:
-            self.radians = self.radians + vec[0] + vec[1]
+    def zoom(self, scroll):
+        if 180 > self.radians +  scroll> 0:
+            self.radians = self.radians + scroll
             self.m_proj = self.get_projection_matrix()
     
     def move_right(self):

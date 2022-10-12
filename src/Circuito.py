@@ -42,7 +42,6 @@ class Circuito:
         xs, ys = generation_track(10, self.rad, self.edgy)
 
         vertex_data = np.array([np.array([x, 0, y]) for x, y in zip(xs, ys)], dtype='f4')
-        print(vertex_data)
 
         vertex_2d = []
         weight = 1

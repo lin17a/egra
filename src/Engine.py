@@ -39,12 +39,10 @@ class GraphicsEngine:
                 self.scene.destroy()
                 pg.quit()
                 sys.exit()
+            if event.type == pg.MOUSEWHEEL:
+                self.camera.zoom(-event.y*3)
 
-        left, middle, right = pg.mouse.get_pressed()
         keys = pg.key.get_pressed()
-        if left:
-            mouseMove = pg.mouse.get_rel()
-            self.camera.rotate(mouseMove)
         if keys[pg.K_w]:
             self.camera.move_up()
         if keys[pg.K_s]:

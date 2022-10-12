@@ -33,11 +33,14 @@ class Object:
         self.x = 0
         self.y = 0
         self.z = 0
+        self.degree = 0
         self.translate = glm.translate(glm.mat4(), glm.vec3(self.x, self.y, self.z))
+        self.rotation = glm.rotate(glm.mat4(), glm.radians(self.degree), glm.vec3(0, 1, 0))
         self.vbo = self.get_vbo()
         self.shader_program = self.get_shader_program()
         self.vao = self.get_vao()
         self.m_model = self.get_model_matrix()
+        self.move = False
         self.on_init()
 
     def get_model_matrix(self):
@@ -47,8 +50,7 @@ class Object:
         una transformación respecto al eje de las Y con desplazamiento
         hacia los ejes X y Z
         """
-        rotation = glm.rotate(glm.mat4(), glm.radians(45), glm.vec3(0, 1, 0))
-        m_model = rotation * self.translate
+        m_model = self.rotation * self.translate
         return m_model
 
     def on_init(self):
@@ -56,7 +58,16 @@ class Object:
         self.shader_program['m_view'].write(self.app.camera.m_view)
         self.shader_program['m_model'].write(self.m_model)
 
+    def update(self):
+        if self.move:
+            self.z -= 0.05
+        self.translate = glm.translate(glm.mat4(), glm.vec3(self.x,
+                                                            self.y,
+                                                            self.z))
+        self.shader_program['m_model'].write(self.get_model_matrix())
+
     def render(self):
+        self.update()
         self.vao.render()
 
     def destroy(self):
@@ -160,10 +171,16 @@ class GraphicsEngine:
         pg.display.set_mode(self.WIN_SIZE, flags=pg.OPENGL | pg.DOUBLEBUF)
         # detect and use exixting opengl context
         self.ctx = mgl.create_context()
+        # clock
+        self.clock = pg.time.Clock()
+        self.time = 0
         # camera
         self.camera = Camera(self)
         # scene
         self.scene = Object(self)
+
+    def get_time(self):
+        self.time = pg.time.get_ticks() * 0.001
 
     def check_events(self):
         for event in pg.event.get():
@@ -171,6 +188,8 @@ class GraphicsEngine:
                 self.scene.destroy()
                 pg.quit()
                 sys.exit()
+            if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
+                self.scene.move = not self.scene.move
             if event.type == pg.KEYDOWN and event.key == pg.K_UP:
                 # UP
                 self.scene.z -= 0.5
@@ -178,6 +197,7 @@ class GraphicsEngine:
                                                                           self.scene.y,
                                                                           self.scene.z))
                 self.scene.shader_program['m_model'].write(self.scene.get_model_matrix())
+            """
             if event.type == pg.KEYDOWN and event.key == pg.K_DOWN:
                 # DOWN
                 self.scene.z += 0.5
@@ -185,19 +205,28 @@ class GraphicsEngine:
                                                                           self.scene.y,
                                                                           self.scene.z))
                 self.scene.shader_program['m_model'].write(self.scene.get_model_matrix())
+            """
             if event.type == pg.KEYDOWN and event.key == pg.K_RIGHT:
                 # RIGHT
+                self.scene.degree -= 5
+                self.scene.rotation = glm.rotate(glm.mat4(), glm.radians(self.scene.degree), glm.vec3(0, 1, 0))
+                """
                 self.scene.x += 0.5
                 self.scene.translate = glm.translate(glm.mat4(), glm.vec3(self.scene.x,
                                                                           self.scene.y,
                                                                           self.scene.z))
+                """
                 self.scene.shader_program['m_model'].write(self.scene.get_model_matrix())
             if event.type == pg.KEYDOWN and event.key == pg.K_LEFT:
                 # LEFT
+                self.scene.degree += 5
+                self.scene.rotation = glm.rotate(glm.mat4(), glm.radians(self.scene.degree), glm.vec3(0, 1, 0))
+                """
                 self.scene.x -= 0.5
                 self.scene.translate = glm.translate(glm.mat4(), glm.vec3(self.scene.x,
                                                                           self.scene.y,
                                                                           self.scene.z))
+                """
                 self.scene.shader_program['m_model'].write(self.scene.get_model_matrix())
 
     def render(self):
@@ -210,8 +239,10 @@ class GraphicsEngine:
 
     def run(self):
         while True:
+            self.get_time()
             self.check_events()
             self.render()
+            self.clock.tick(60)
 
 
 if __name__ == '__main__':

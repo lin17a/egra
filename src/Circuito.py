@@ -27,7 +27,6 @@ class Circuito:
 
     def render(self):
         self.vao.render(mgl.TRIANGLE_STRIP)
-        #self.vao.render(mgl.POINTS)
         
     def destroy (self):
         self.vbo.release()

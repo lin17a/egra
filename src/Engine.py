@@ -5,7 +5,7 @@ import sys
 import itertools as it
 import numpy as np
 from OpenGL.GL import *
-from Camera import Camera, Axis
+from Camera import Camera, Axis, DriverCamera
 from Circuito import Circuito
 
 
@@ -25,6 +25,7 @@ class GraphicsEngine:
         self.ctx = mgl.create_context()
         # camera
         self.camera = Camera(self)
+        self.camera_mode = "bird"
         # scene
         self.scene = Circuito(self)
         # axis
@@ -34,7 +35,15 @@ class GraphicsEngine:
         self.time = 0
 
     def get_time(self):
-        self.time =pg.time.get_ticks() * 0.001
+        self.time = pg.time.get_ticks() * 0.001
+
+    def change_camera(self):
+        if self.camera_mode == "bird":
+            self.camera_mode = "drive"
+            self.camera = DriverCamera(self, self.scene.start_vertex)
+        else:
+            self.camera_mode = "bird"
+            self.camera = Camera(self)
 
     def check_events(self):
         for event in pg.event.get():
@@ -42,6 +51,9 @@ class GraphicsEngine:
                 self.scene.destroy()
                 pg.quit()
                 sys.exit()
+            if event.type == pg.KEYDOWN and event.key == pg.K_c:
+                print("change camera")
+                self.change_camera()
             if event.type == pg.MOUSEWHEEL:
                 self.camera.zoom(-event.y*3)
 
@@ -56,8 +68,6 @@ class GraphicsEngine:
             self.camera.move_left()
         if keys[pg.K_r]:
             self.scene.new_road()
-        if keys[pg.K_c]:
-            print("change camera")
         self.scene.on_init()
 
     def render(self):

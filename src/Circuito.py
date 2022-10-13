@@ -72,7 +72,8 @@ class Circuito:
 
     def get_vbo(self):
         vertex_data = self.get_vertex_data()
-        self.start_vertex = vertex_data[-1]
+        idx = np.random.randint((len(vertex_data)/2) * 2)
+        self.start_vertex = (vertex_data[idx+1] + vertex_data[idx])/2
         vbo = self.ctx.buffer(vertex_data)
         return vbo
     

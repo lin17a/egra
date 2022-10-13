@@ -23,7 +23,7 @@ class Camera:
         return glm.perspective(glm.radians(self.radians), self.aspect_ratio, 0.1, 100)
 
     def zoom(self, scroll):
-        if 180 > self.radians +  scroll> 0:
+        if 180 > self.radians + scroll> 0:
             self.radians = self.radians + scroll
             self.m_proj = self.get_projection_matrix()
     
@@ -46,6 +46,20 @@ class Camera:
         self.lookat = self.lookat + glm.vec3((-0.01*self.radians, 0, 0))
         self.position = self.position + glm.vec3((-0.01*self.radians, 0, 0))
         self.m_view = self.get_view_matrix()
+
+
+class DriverCamera(Camera):
+    def __init__(self, app, start_point):
+        self.app = app
+        self.aspect_ratio = app.WIN_SIZE[0] / app.WIN_SIZE[1]
+        self.position = glm.vec3(start_point[0], 0.1, start_point[2])
+        self.up = glm.vec3(1, 0, 0)
+        self.lookat = glm.vec3(start_point[0], 0, start_point[2])
+        self.radians = 170
+        # view_matrix
+        self.m_view = self.get_view_matrix()
+        # projection matrix
+        self.m_proj = self.get_projection_matrix()
 
 
 class Axis:

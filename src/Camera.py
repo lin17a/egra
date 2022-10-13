@@ -14,7 +14,6 @@ class Camera:
         self.m_proj = self.get_projection_matrix()
         
     def get_view_matrix(self):
-        print(self.position, self.lookat, self.up)
         return glm.lookAt(self.position, self.lookat, self.up)
     
     def get_projection_matrix(self):

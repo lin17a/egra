@@ -10,6 +10,7 @@ class Circuito:
         self.ctx = app.ctx
         self.edgy = 0.1
         self.rad = 0.1
+        self.start_vertex = None
         self.vbo = self.get_vbo()
         self.shader_program = self.get_shader_program()
         self.vao = self.get_vao()
@@ -17,7 +18,7 @@ class Circuito:
         self.on_init()
         
     def get_model_matrix(self):
-        m_model = glm.rotate(glm.mat4(),glm.radians(0),glm.vec3(0,1,0))
+        m_model = glm.rotate(glm.mat4(), glm.radians(0), glm.vec3(0,1,0))
         return m_model
         
     def on_init(self):
@@ -39,9 +40,7 @@ class Circuito:
 
     def get_vertex_data(self):
         xs, ys = generation_track(10, self.rad, self.edgy)
-
         vertex_data = np.array([np.array([x, 0, y]) for x, y in zip(xs, ys)], dtype='f4')
-
         vertex_2d = []
         weight = 1
         for i in range(len(vertex_data)-1):
@@ -49,12 +48,16 @@ class Circuito:
             vec1 = np.array([-vec[2], 0, vec[0]])
             vec2 = np.array((vec[2], 0, -vec[0]))
             module = sum(vec1**2)**(1/2)+sum(vec2**2)**(1/2)
-            if module==0:
+            if module == 0:
                 continue
             vertex_2d.append(vertex_data[i]+vec1/module*weight)
             vertex_2d.append(vertex_data[i]+vec2/module*weight)
         vertex_2d = vertex_2d + vertex_2d[:-2]
         vertex_2d = np.array(vertex_2d, dtype='f4')
+        x_mid_point = (np.array(vertex_2d)[:, 0].max() - np.array(vertex_2d)[:, 0].min())/2
+        y_mid_point = (np.array(vertex_2d)[:, 2].max() - np.array(vertex_2d)[:, 2].min()) / 2
+        vertex_2d[:, 0] = vertex_2d[:, 0] - x_mid_point
+        vertex_2d[:, 2] = vertex_2d[:, 2] - y_mid_point
         return vertex_2d
 
     def new_road(self):
@@ -62,7 +65,6 @@ class Circuito:
         self.vao = self.get_vao()
         self.render()
 
-    
     @staticmethod
     def get_data(vertices, indices): 
         data = [vertices[ind] for triangle in indices for ind in triangle]
@@ -70,6 +72,7 @@ class Circuito:
 
     def get_vbo(self):
         vertex_data = self.get_vertex_data()
+        self.start_vertex = vertex_data[-1]
         vbo = self.ctx.buffer(vertex_data)
         return vbo
     

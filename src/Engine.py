@@ -5,9 +5,10 @@ import sys
 import itertools as it
 import numpy as np
 from OpenGL.GL import *
-from Camera import Camera
+from Camera import Camera, Axis
 from Circuito import Circuito
-        
+
+
 class GraphicsEngine:
     def __init__(self, win_size=(900,900)):
         # init pygame modules
@@ -26,6 +27,8 @@ class GraphicsEngine:
         self.camera = Camera(self)
         # scene
         self.scene = Circuito(self)
+        # axis
+        self.axis = Axis(self)
         # clock
         self.clock = pg.time.Clock()
         self.time = 0
@@ -53,16 +56,19 @@ class GraphicsEngine:
             self.camera.move_left()
         if keys[pg.K_r]:
             self.scene.new_road()
+        if keys[pg.K_c]:
+            print("change camera")
         self.scene.on_init()
 
     def render(self):
         # clear framebuffer
-        self.ctx.clear(color=(86/256,125/256,70/256))
+        self.ctx.clear(color=(86/256, 125/256, 70/256))
+        # render axis
+        self.axis.render()
         # render scene
         self.scene.render()
         # swap buffers
         pg.display.flip()
-
 
     def run(self):
         while True:

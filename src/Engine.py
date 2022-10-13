@@ -7,6 +7,7 @@ import numpy as np
 from OpenGL.GL import *
 from Camera import Camera, Axis, DriverCamera
 from Circuito import Circuito
+from car import Vehicle
 
 
 class GraphicsEngine:
@@ -30,6 +31,8 @@ class GraphicsEngine:
         self.scene = Circuito(self)
         # axis
         self.axis = Axis(self)
+        # car
+        self.car = Vehicle(self)
         # clock
         self.clock = pg.time.Clock()
         self.time = 0
@@ -68,6 +71,12 @@ class GraphicsEngine:
             self.camera.move_left()
         if keys[pg.K_r]:
             self.scene.new_road()
+        if keys[pg.K_UP]:
+            self.car.move_forward()
+        if keys[pg.K_RIGHT]:
+            self.car.move_right()
+        if keys[pg.K_LEFT]:
+            self.car.move_left()
         self.scene.on_init()
 
     def render(self):
@@ -77,6 +86,8 @@ class GraphicsEngine:
         self.axis.render()
         # render scene
         self.scene.render()
+        # render car
+        self.car.render()
         # swap buffers
         pg.display.flip()
 

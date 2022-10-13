@@ -7,25 +7,7 @@ import sys
 import numpy as np
 
 
-class Camera:
-    def __init__(self, app):
-        self.app = app
-        self.aspect_ratio = app.WIN_SIZE[0] / app.WIN_SIZE[1]
-        self.position = glm.vec3(0, 100, 0)
-        self.up = glm.vec3(0, 0, -1)
-        # view_matrix
-        self.m_view = self.get_view_matrix()
-        # projection matrix
-        self.m_proj = self.get_projection_matrix()
-
-    def get_view_matrix(self):
-        return glm.lookAt(self.position, glm.vec3(0), self.up)
-
-    def get_projection_matrix(self):
-        return glm.perspective(glm.radians(20), self.aspect_ratio, 10, 100)
-
-
-class Object:
+class Vehicle:
     def __init__(self, app):
         self.app = app
         self.ctx = app.ctx
@@ -40,7 +22,6 @@ class Object:
         self.shader_program = self.get_shader_program()
         self.vao = self.get_vao()
         self.m_model = self.get_model_matrix()
-        self.move = False
         self.on_init()
 
     def get_model_matrix(self):
@@ -58,16 +39,7 @@ class Object:
         self.shader_program['m_view'].write(self.app.camera.m_view)
         self.shader_program['m_model'].write(self.m_model)
 
-    def update(self):
-        if self.move:
-            self.z -= 0.05
-        self.translate = glm.translate(glm.mat4(), glm.vec3(self.x,
-                                                            self.y,
-                                                            self.z))
-        self.shader_program['m_model'].write(self.get_model_matrix())
-
     def render(self):
-        self.update()
         self.vao.render()
 
     def destroy(self):
@@ -78,6 +50,21 @@ class Object:
     def get_vao(self):
         vao = self.ctx.vertex_array(self.shader_program, [(self.vbo, '3f 3f', 'in_colors', 'in_position')])
         return vao
+
+    def move_right(self):
+        self.degree -= 0.5
+        self.rotation = glm.rotate(glm.mat4(), glm.radians(self.degree), glm.vec3(0, 1, 0))
+        self.shader_program['m_model'].write(self.get_model_matrix())
+
+    def move_left(self):
+        self.degree += 0.5
+        self.rotation = glm.rotate(glm.mat4(), glm.radians(self.degree), glm.vec3(0, 1, 0))
+        self.shader_program['m_model'].write(self.get_model_matrix())
+
+    def move_forward(self):
+        self.z -= 0.05
+        self.translate = glm.translate(glm.mat4(), glm.vec3(self.x, self.y, self.z))
+        self.shader_program['m_model'].write(self.get_model_matrix())
 
     def get_vertex_data(self):
 
@@ -155,96 +142,3 @@ class Object:
             ''',
         )
         return program
-
-
-class GraphicsEngine:
-    def __init__(self, win_size=(600, 600)):
-        # init pygame modules
-        pg.init()
-        # window size
-        self.WIN_SIZE = win_size
-        # set opengl attr
-        pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION, 3)
-        pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
-        pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE)
-        # create opengl context
-        pg.display.set_mode(self.WIN_SIZE, flags=pg.OPENGL | pg.DOUBLEBUF)
-        # detect and use exixting opengl context
-        self.ctx = mgl.create_context()
-        # clock
-        self.clock = pg.time.Clock()
-        self.time = 0
-        # camera
-        self.camera = Camera(self)
-        # scene
-        self.scene = Object(self)
-
-    def get_time(self):
-        self.time = pg.time.get_ticks() * 0.001
-
-    def check_events(self):
-        for event in pg.event.get():
-            if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
-                self.scene.destroy()
-                pg.quit()
-                sys.exit()
-            if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
-                self.scene.move = not self.scene.move
-            if event.type == pg.KEYDOWN and event.key == pg.K_UP:
-                # UP
-                self.scene.z -= 0.5
-                self.scene.translate = glm.translate(glm.mat4(), glm.vec3(self.scene.x,
-                                                                          self.scene.y,
-                                                                          self.scene.z))
-                self.scene.shader_program['m_model'].write(self.scene.get_model_matrix())
-            """
-            if event.type == pg.KEYDOWN and event.key == pg.K_DOWN:
-                # DOWN
-                self.scene.z += 0.5
-                self.scene.translate = glm.translate(glm.mat4(), glm.vec3(self.scene.x,
-                                                                          self.scene.y,
-                                                                          self.scene.z))
-                self.scene.shader_program['m_model'].write(self.scene.get_model_matrix())
-            """
-            if event.type == pg.KEYDOWN and event.key == pg.K_RIGHT:
-                # RIGHT
-                self.scene.degree -= 5
-                self.scene.rotation = glm.rotate(glm.mat4(), glm.radians(self.scene.degree), glm.vec3(0, 1, 0))
-                """
-                self.scene.x += 0.5
-                self.scene.translate = glm.translate(glm.mat4(), glm.vec3(self.scene.x,
-                                                                          self.scene.y,
-                                                                          self.scene.z))
-                """
-                self.scene.shader_program['m_model'].write(self.scene.get_model_matrix())
-            if event.type == pg.KEYDOWN and event.key == pg.K_LEFT:
-                # LEFT
-                self.scene.degree += 5
-                self.scene.rotation = glm.rotate(glm.mat4(), glm.radians(self.scene.degree), glm.vec3(0, 1, 0))
-                """
-                self.scene.x -= 0.5
-                self.scene.translate = glm.translate(glm.mat4(), glm.vec3(self.scene.x,
-                                                                          self.scene.y,
-                                                                          self.scene.z))
-                """
-                self.scene.shader_program['m_model'].write(self.scene.get_model_matrix())
-
-    def render(self):
-        # clear framebuffer
-        self.ctx.clear(color=(0, 0, 0))
-        # render scene
-        self.scene.render()
-        # swap buffers
-        pg.display.flip()
-
-    def run(self):
-        while True:
-            self.get_time()
-            self.check_events()
-            self.render()
-            self.clock.tick(60)
-
-
-if __name__ == '__main__':
-    app = GraphicsEngine()
-    app.run()

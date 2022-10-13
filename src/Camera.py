@@ -4,9 +4,9 @@ class Camera:
     def __init__(self, app):
         self.app = app
         self.aspec_ratio = app.WIN_SIZE[0]/app.WIN_SIZE[1]
-        self.position =glm.vec3(0,10,0)
+        self.position =glm.vec3(45,10,45)
         self.up = glm.vec3(1,0,0)
-        self.lookat = glm.vec3(0)
+        self.lookat = glm.vec3(45,0,45)
         self.radians = 170
         # view_matrix
         self.m_view = self.get_view_matrix()
@@ -14,6 +14,7 @@ class Camera:
         self.m_proj = self.get_projection_matrix()
         
     def get_view_matrix(self):
+        print(self.position, self.lookat, self.up)
         return glm.lookAt(self.position, self.lookat, self.up)
     
     def get_projection_matrix(self):

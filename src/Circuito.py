@@ -58,7 +58,6 @@ class Circuito:
         return vertex_2d
 
     def new_road(self):
-        print("edgy",self.edgy,"rad",self.rad)
         self.vbo = self.get_vbo()
         self.vao = self.get_vao()
         self.render()

@@ -77,7 +77,7 @@ class Object:
         # indices = [(0,2,1),(0,3,2),(4,5,6),(4,6,7),(0,1,4),(1,4,5),
         #           (7,2,3),(2,7,6),(1,2,6),(6,5,1),(0,4,7),(0,7,3)]
 
-        scene = pywavefront.Wavefront('car/Car-Model/Car.obj', collect_faces=True)
+        scene = pywavefront.Wavefront('models/car/Car.obj', collect_faces=True)
 
         # scene_box = (scene.vertices[0], scene.vertices[0])
         # for vertex in scene.vertices:

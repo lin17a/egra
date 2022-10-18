@@ -7,6 +7,7 @@ import numpy as np
 from OpenGL.GL import *
 from Camera import Camera, Axis, DriverCamera
 from Circuito import Circuito
+from grass import Grass
 
 
 class GraphicsEngine:
@@ -27,6 +28,7 @@ class GraphicsEngine:
         self.camera = Camera(self)
         self.camera_mode = "bird"
         # scene
+        self.grass = Grass(self)
         self.scene = Circuito(self)
         # axis
         self.axis = Axis(self)
@@ -69,12 +71,14 @@ class GraphicsEngine:
         if keys[pg.K_r]:
             self.scene.new_road()
         self.scene.on_init()
-
+        self.grass.on_init()
+        
     def render(self):
         # clear framebuffer
-        self.ctx.clear(color=(86/256, 125/256, 70/256))
+        self.ctx.clear(color=(0, 0, 0))
+        self.grass.render()
         # render axis
-        self.axis.render()
+        #self.axis.render()
         # render scene
         self.scene.render()
         # swap buffers

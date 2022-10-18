@@ -2,7 +2,7 @@ import glm
 import moderngl as mgl
 from generation import generation_track
 import numpy as np
-
+import pygame as pg
 
 class Circuito:
     def __init__(self,app):
@@ -17,7 +17,7 @@ class Circuito:
         self.vao = self.get_vao()
         self.m_model = self.get_model_matrix()
         self.on_init()
-        
+
     def get_model_matrix(self):
         m_model = glm.rotate(glm.mat4(), glm.radians(0), glm.vec3(0,1,0))
         return m_model

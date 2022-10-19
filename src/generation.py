@@ -49,7 +49,8 @@ def get_curve(points, **kw):
 def ccw_sort(p):
     d = p-np.mean(p, axis=0)
     s = np.arctan2(d[:,0], d[:,1])
-    return p[np.argsort(s),:]
+    p = p[np.argsort(s),:]
+    return p
 
 
 def get_bezier_curve(a, rad=0.2, edgy=0):
@@ -60,7 +61,6 @@ def get_bezier_curve(a, rad=0.2, edgy=0):
     *edgy* is a parameter which controls how "edgy" the curve is,
         edgy=0 is smoothest."""
     p = np.arctan(edgy)/np.pi+.5
-    a = ccw_sort(a)
     a = np.append(a, np.atleast_2d(a[0,:]), axis=0)
     d = np.diff(a, axis=0)
     ang = np.arctan2(d[:,1],d[:,0])
@@ -90,6 +90,13 @@ def get_random_points(n=5, scale=0.8, mindst=None, rec=0):
 
 def generation_track(points, rad, edgy):
     a = get_random_points(n=points, scale=100)
+    a = ccw_sort(a)
+    dis_max = 0
+    for i in range(points):
+        dis = ((a[i-1][0]-a[i][0])**2+(a[i-1][1]-a[i][1])**2)**(1/2)
+        if dis > dis_max:
+            dis_max = dis
+            punto_max = i-1
     x,y, _ = get_bezier_curve(a,rad=rad, edgy=edgy)
-
-    return x, y
+    
+    return x, y, punto_max

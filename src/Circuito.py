@@ -10,8 +10,8 @@ class Circuito:
         self.ctx = app.ctx
         self.edgy = 0.1
         self.rad = 0.1
-        self.start_vertex = np.array([0,0,0], dtype='f4')
-        self.vbo, self.vboc = self.get_vbo()
+        self.start_vertex = None
+        self.vbo = self.get_vbo()
         self.shader_program = self.get_shader_program()
         self.vao = self.get_vao()
         self.m_model = self.get_model_matrix()
@@ -31,16 +31,15 @@ class Circuito:
         
     def destroy (self):
         self.vbo.release()
-        self.vboc.release()
         self.shader_program.release()
         self.vao.release()
     
     def get_vao(self):
-        vao = self.ctx.vertex_array(self.shader_program, [(self.vbo, '3f', 'in_position'), (self.vboc, '3f', 'in_color')])
+        vao = self.ctx.vertex_array(self.shader_program, [(self.vbo, '3f', 'in_position')])
         return vao
 
     def get_vertex_data(self):
-        xs, ys, inicio = generation_track(10, self.rad, self.edgy)
+        xs, ys = generation_track(10, self.rad, self.edgy)
         vertex_data = np.array([np.array([x, 0, y]) for x, y in zip(xs, ys)], dtype='f4')
         vertex_2d = []
         weight = 1
@@ -53,25 +52,16 @@ class Circuito:
                 continue
             vertex_2d.append(vertex_data[i]+vec1/module*weight)
             vertex_2d.append(vertex_data[i]+vec2/module*weight)
-        vertex_2d = vertex_2d + vertex_2d[:2]
+        vertex_2d = vertex_2d + vertex_2d[:-2]
         vertex_2d = np.array(vertex_2d, dtype='f4')
-        x_mid_point = (np.array(vertex_2d)[:, 0].max() - np.array(vertex_2d)[:, 0].min()) / 2
+        x_mid_point = (np.array(vertex_2d)[:, 0].max() - np.array(vertex_2d)[:, 0].min())/2
         y_mid_point = (np.array(vertex_2d)[:, 2].max() - np.array(vertex_2d)[:, 2].min()) / 2
         vertex_2d[:, 0] = vertex_2d[:, 0] - x_mid_point
         vertex_2d[:, 2] = vertex_2d[:, 2] - y_mid_point
-
-
-        color = [(0,0,0) for _ in range(vertex_2d.shape[0])]
-        self.start_vertex = np.array([0,0,0], dtype='f4')
-        for i in range(4):
-            color[inicio*200+98+i] = (1,1,1)
-            self.start_vertex = self.start_vertex+vertex_2d[inicio*200+98+i]/4
-
-        color = np.array(color, dtype='f4')
-        return vertex_2d, color
+        return vertex_2d
 
     def new_road(self):
-        self.vbo, self.vboc = self.get_vbo()
+        self.vbo = self.get_vbo()
         self.vao = self.get_vao()
         self.render()
 
@@ -81,31 +71,30 @@ class Circuito:
         return np.array(data, dtype='f4')
 
     def get_vbo(self):
-        vertex_data, color_data = self.get_vertex_data()
+        vertex_data = self.get_vertex_data()
+        idx = np.random.randint((len(vertex_data)/2) * 2)
+        self.start_vertex = (vertex_data[idx+1] + vertex_data[idx])/2
         vbo = self.ctx.buffer(vertex_data)
-        vboc = self.ctx.buffer(color_data)
-        return vbo, vboc
+        return vbo
     
     def get_shader_program(self):
         program = self.ctx.program(    
             vertex_shader='''
                 #version 330
+                #extension GL_PROGRAM_POINT_SIZE: enable
                 layout (location = 0) in vec3 in_position;
-                layout (location = 1) in vec3 in_color;
-                out vec3 color;
                 uniform mat4 m_proj;
                 uniform mat4 m_view;
                 uniform mat4 m_model;
                 void main() {
-                    color = in_color;
                     gl_Position = m_proj * m_view * m_model * vec4(in_position, 1.0);
                 }
             ''',
             fragment_shader='''
                 #version 330
                 layout (location = 0) out vec4 fragColor;
-                in vec3 color;
                 void main() { 
+                    vec3 color = vec3(0,0,0);
                     fragColor = vec4(color,1.0);
                 }
             ''',

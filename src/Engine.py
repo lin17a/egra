@@ -8,6 +8,7 @@ from OpenGL.GL import *
 from Camera import Camera, Axis, DriverCamera
 from Circuito import Circuito
 from car import Vehicle
+from Car3D import Car3D
 
 
 class GraphicsEngine:
@@ -33,6 +34,7 @@ class GraphicsEngine:
         self.axis = Axis(self)
         # car
         self.car = Vehicle(self)
+        self.car3D = Car3D(self)
         # clock
         self.clock = pg.time.Clock()
         self.time = 0
@@ -85,9 +87,10 @@ class GraphicsEngine:
         # render axis
         self.axis.render()
         # render scene
-        self.scene.render()
+        #self.scene.render()
         # render car
-        self.car.render()
+        #self.car.render()
+        self.car3D.render()
         # swap buffers
         pg.display.flip()
 

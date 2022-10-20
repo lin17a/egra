@@ -1,8 +1,5 @@
 # basado en: https://www.youtube.com/watch?v=eJDIsFJN4OQ
-import pygame as pg
-import moderngl as mgl
 import glm
-import sys
 
 import numpy as np
 

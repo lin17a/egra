@@ -62,7 +62,7 @@ class Circuito:
         vertex_2d[:, 2] = vertex_2d[:, 2] - y_mid_point
         self.all_vertex = vertex_2d
 
-        color = [(0,0,0) for _ in range(vertex_2d.shape[0])]
+        color = [(0.2,0.2,0.2) for _ in range(vertex_2d.shape[0])]
         start_vertex = np.array([0,0,0], dtype='f4')
         for i in range(4):
             color[inicio*200+98+i] = (1,1,1)

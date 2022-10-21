@@ -1,5 +1,7 @@
+from turtle import distance
 import numpy as np
 from scipy.special import binom
+from scipy.interpolate import interp1d
 
 np.random.seed(123456)
 
@@ -87,16 +89,50 @@ def get_random_points(n=5, scale=0.8, mindst=None, rec=0):
     else:
         return get_random_points(n=n, scale=scale, mindst=mindst, rec=rec+1)
 
+def homogenizar(xs, ys):
+    dist_homogenia = 0.1
+    coor = np.array([np.array([x, y]) for x, y in zip(xs, ys)], dtype='f4')
+    dist = []
+    dist_total = 0
+    for i in range(coor.shape[0]):
+        d = np.linalg.norm(abs(coor[i-1] - coor[i]))
+        dist_total += d
+        dist.append(dist_total)
+    dist = np.array(dist, dtype='f4')
+    
+    seen = set()
+    dupes = [x for x in range(len(dist)) if dist[x] in seen or seen.add(dist[x])] 
+    mask = np.ones(len(dist), dtype=bool)
+    mask[dupes] = False
+    coor = coor[mask,:]
+    dist = dist[mask]
+    
+    f = interp1d(dist, coor.transpose(), kind="cubic")
+    x = []
+    y = []
+    for i in range(0, int((dist_total+dist_homogenia)/dist_homogenia)):
+        i = i*dist_homogenia
+        vertice = f(i)
+        x.append(vertice[0])
+        y.append(vertice[1])
+    return x, y
+
+def calcular_inicio(a):
+    dis_max = 0
+    for i in range(len(a)):
+        dis = ((a[i-1][0]-a[i][0])**2+(a[i-1][1]-a[i][1])**2)**(1/2)
+        if dis > dis_max:
+            dis_max = dis
+            punto_max = i
+    x = a[punto_max][0]+(a[punto_max-1][0]-a[punto_max][0])/2
+    y = a[punto_max][1]+(a[punto_max-1][1]-a[punto_max][1])/2
+    return (x, y)
 
 def generation_track(points, rad, edgy):
     a = get_random_points(n=points, scale=100)
     a = ccw_sort(a)
-    dis_max = 0
-    for i in range(points):
-        dis = ((a[i-1][0]-a[i][0])**2+(a[i-1][1]-a[i][1])**2)**(1/2)
-        if dis > dis_max:
-            dis_max = dis
-            punto_max = i-1
+    punto_inicio = calcular_inicio(a)
     x,y, _ = get_bezier_curve(a,rad=rad, edgy=edgy)
+    x,y = homogenizar(x, y)
     
-    return x, y, punto_max
+    return x, y, punto_inicio

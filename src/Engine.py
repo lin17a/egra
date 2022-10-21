@@ -40,7 +40,7 @@ class GraphicsEngine:
     def change_camera(self):
         if self.camera_mode == "bird":
             self.camera_mode = "drive"
-            self.camera = DriverCamera(self, self.scene.start_vertex)
+            self.camera = DriverCamera(self, self.scene.all_vertex, self.scene.current_vertex)
         else:
             self.camera_mode = "bird"
             self.camera = Camera(self)

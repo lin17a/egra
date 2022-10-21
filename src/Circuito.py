@@ -10,7 +10,8 @@ class Circuito:
         self.ctx = app.ctx
         self.edgy = 0.1
         self.rad = 0.1
-        self.start_vertex = np.array([0,0,0], dtype='f4')
+        self.current_vertex = None
+        self.all_vertex = np.empty(0,  dtype='f4')
         self.vbo, self.vboc = self.get_vbo()
         self.shader_program = self.get_shader_program()
         self.vao = self.get_vao()
@@ -59,13 +60,15 @@ class Circuito:
         y_mid_point = (np.array(vertex_2d)[:, 2].max() - np.array(vertex_2d)[:, 2].min()) / 2
         vertex_2d[:, 0] = vertex_2d[:, 0] - x_mid_point
         vertex_2d[:, 2] = vertex_2d[:, 2] - y_mid_point
-
+        self.all_vertex = vertex_2d
 
         color = [(0,0,0) for _ in range(vertex_2d.shape[0])]
-        self.start_vertex = np.array([0,0,0], dtype='f4')
+        start_vertex = np.array([0,0,0], dtype='f4')
         for i in range(4):
             color[inicio*200+98+i] = (1,1,1)
-            self.start_vertex = self.start_vertex+vertex_2d[inicio*200+98+i]/4
+            start_vertex = start_vertex+vertex_2d[inicio*200+98+i]/4
+        idx = (np.abs(self.all_vertex - start_vertex)).sum(axis=1).argmin()
+        self.current_vertex = idx
 
         color = np.array(color, dtype='f4')
         return vertex_2d, color

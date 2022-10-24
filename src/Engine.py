@@ -28,10 +28,10 @@ class GraphicsEngine:
         self.camera = Camera(self)
         self.camera_mode = "bird"
         # scene
-        self.grass = Grass(self)
         self.scene = Circuito(self)
         # axis
         self.axis = Axis(self)
+        self.grass = Grass(self)
         # clock
         self.clock = pg.time.Clock()
         self.time = 0
@@ -70,16 +70,18 @@ class GraphicsEngine:
             self.camera.move_left()
         if keys[pg.K_r]:
             self.scene.new_road()
-        self.scene.on_init()
+
         self.grass.on_init()
+        self.scene.on_init()
+        
         
     def render(self):
         # clear framebuffer
         self.ctx.clear(color=(0, 0, 0))
-        self.grass.render()
         # render axis
         #self.axis.render()
         # render scene
+        self.grass.render()
         self.scene.render()
         # swap buffers
         pg.display.flip()

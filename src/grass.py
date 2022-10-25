@@ -22,7 +22,7 @@ class Grass:
         
     def get_texture_cube(self, dir_path):
         faces = ['right', 'left', 'top', 'bottom', 'front', 'back']
-        textures = [pg.image.load(dir_path + f"{face}.png").convert() for face in faces]
+        textures = [pg.image.load(dir_path + f"{face}.jpg").convert() for face in faces]
         size = textures[0].get_size()
         texture_cube = self.ctx.texture_cube(size=size, components=3, data=None)
 

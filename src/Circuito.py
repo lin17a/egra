@@ -2,6 +2,7 @@ import glm
 import moderngl as mgl
 from generation import generation_track
 import numpy as np
+from scipy.spatial.distance import cdist
 
 
 class Circuito:
@@ -41,7 +42,7 @@ class Circuito:
         return vao
 
     def get_vertex_data(self):
-        xs, ys, inicio = generation_track(10, self.rad, self.edgy)
+        xs, ys, punto_inicio = generation_track(10, self.rad, self.edgy)
         vertex_data = np.array([np.array([x, 0, y]) for x, y in zip(xs, ys)], dtype='f4')
         vertex_2d = []
         weight = 1
@@ -60,17 +61,12 @@ class Circuito:
         y_mid_point = (np.array(vertex_2d)[:, 2].max() - np.array(vertex_2d)[:, 2].min()) / 2
         vertex_2d[:, 0] = vertex_2d[:, 0] - x_mid_point
         vertex_2d[:, 2] = vertex_2d[:, 2] - y_mid_point
-        self.all_vertex = vertex_2d
-
-        color = [(0,0,0) for _ in range(vertex_2d.shape[0])]
-        start_vertex = np.array([0,0,0], dtype='f4')
-        for i in range(4):
-            color[inicio*200+98+i] = (1,1,1)
-            start_vertex = start_vertex+vertex_2d[inicio*200+98+i]/4
-        idx = (np.abs(self.all_vertex - start_vertex)).sum(axis=1).argmin()
-        self.current_vertex = idx
-
-        color = np.array(color, dtype='f4')
+        punto_inicio = np.array([[punto_inicio[0],0,punto_inicio[1]]], dtype='f4')
+        d = cdist(punto_inicio, vertex_data)
+        idx_inicio = np.argmin(d)
+        color = np.array([(0,0,0) for _ in range(vertex_2d.shape[0])], dtype='f4')
+        n = idx_inicio*2
+        color[n-2:n+2] = (1,1,1)
         return vertex_2d, color
 
     def new_road(self):

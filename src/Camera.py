@@ -10,7 +10,7 @@ class Camera:
         self.position = glm.vec3(0,10,0)
         self.up = glm.vec3(1,0,0)
         self.lookat = glm.vec3(0)
-        self.radians = 165
+        self.radians = 120
         # view_matrix
         self.m_view = self.get_view_matrix()
         # projection matrix
@@ -61,8 +61,8 @@ class DriverCamera(Camera):
                                                   self.all_vertex[self.next_vertex_idx+1])
         self.position = glm.vec3(self.current_vertex[0], 0.5, self.current_vertex[2])
         self.up = glm.vec3(0, 1, 0)
-        self.lookat = glm.vec3(self.next_vertex[0], 0.1, self.next_vertex[2])
-        self.radians = 170
+        self.lookat = glm.vec3(self.next_vertex[0], 0.4, self.next_vertex[2])
+        self.radians = 120
         # view_matrix
         self.m_view = self.get_view_matrix()
         # projection matrix
@@ -86,7 +86,7 @@ class DriverCamera(Camera):
         self.next_vertex = self.get_center_vertex(self.all_vertex[self.next_vertex_idx],
                                                   self.all_vertex[self.next_vertex_idx + 1])
         self.position = glm.vec3(self.current_vertex[0], 0.5, self.current_vertex[2])
-        self.lookat = glm.vec3(self.next_vertex[0], 0.1, self.next_vertex[2])
+        self.lookat = glm.vec3(self.next_vertex[0], 0.4, self.next_vertex[2])
         self.m_view = self.get_view_matrix()
 
     def move_down(self):
@@ -97,7 +97,7 @@ class DriverCamera(Camera):
         self.next_vertex = self.get_center_vertex(self.all_vertex[self.next_vertex_idx],
                                                   self.all_vertex[self.next_vertex_idx + 1])
         self.position = glm.vec3(self.current_vertex[0], 0.5, self.current_vertex[2])
-        self.lookat = glm.vec3(self.next_vertex[0], 0.1, self.next_vertex[2])
+        self.lookat = glm.vec3(self.next_vertex[0], 0.4, self.next_vertex[2])
         self.m_view = self.get_view_matrix()
 
     @staticmethod

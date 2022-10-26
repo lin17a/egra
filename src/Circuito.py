@@ -2,7 +2,8 @@ import glm
 import moderngl as mgl
 from generation import generation_track
 import numpy as np
-import pygame as pg
+from scipy.spatial.distance import cdist
+
 
 class Circuito:
     def __init__(self,app):
@@ -41,10 +42,12 @@ class Circuito:
         return vao
 
     def get_vertex_data(self):
-        xs, ys, inicio = generation_track(10, self.rad, self.edgy)
+        # Generacion de la forma del circuito
+        xs, ys, punto_inicio = generation_track(10, self.rad, self.edgy)
         vertex_data = np.array([np.array([x, 0, y]) for x, y in zip(xs, ys)], dtype='f4')
         vertex_2d = []
         weight = 1
+        # Genera los bordes de la carretera a partir de la forma
         for i in range(len(vertex_data)-1):
             vec = vertex_data[i]-vertex_data[i+1]
             vec1 = np.array([-vec[2], 0, vec[0]])
@@ -54,23 +57,25 @@ class Circuito:
                 continue
             vertex_2d.append(vertex_data[i]+vec1/module*weight)
             vertex_2d.append(vertex_data[i]+vec2/module*weight)
+
+        # Añadimos los primeros vertices al final para cerrar el circuito
         vertex_2d = vertex_2d + vertex_2d[:2]
         vertex_2d = np.array(vertex_2d, dtype='f4')
+        # Se centra el circuito
         x_mid_point = (np.array(vertex_2d)[:, 0].max() - np.array(vertex_2d)[:, 0].min()) / 2
         y_mid_point = (np.array(vertex_2d)[:, 2].max() - np.array(vertex_2d)[:, 2].min()) / 2
         vertex_2d[:, 0] = vertex_2d[:, 0] - x_mid_point
         vertex_2d[:, 2] = vertex_2d[:, 2] - y_mid_point
+
         self.all_vertex = vertex_2d
 
-        color = [(0.2,0.2,0.2) for _ in range(vertex_2d.shape[0])]
-        start_vertex = np.array([0,0,0], dtype='f4')
-        for i in range(4):
-            color[inicio*200+98+i] = (1,1,1)
-            start_vertex = start_vertex+vertex_2d[inicio*200+98+i]/4
-        idx = (np.abs(self.all_vertex - start_vertex)).sum(axis=1).argmin()
-        self.current_vertex = idx
+        start_vertex = np.array([[punto_inicio[0],0,punto_inicio[1]]], dtype='f4')
+        d = cdist(start_vertex, vertex_data)
+        idx_inicio = np.argmin(d)*2
+        color = np.array([(0.2,0.2,0.2) for _ in range(vertex_2d.shape[0])], dtype='f4')
+        color[idx_inicio-2:idx_inicio+2] = (1,1,1)
+        self.current_vertex = idx_inicio
 
-        color = np.array(color, dtype='f4')
         return vertex_2d, color
 
     def new_road(self):

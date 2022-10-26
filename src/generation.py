@@ -129,7 +129,7 @@ def calcular_inicio(a):
     return (x, y)
 
 def generation_track(points, rad, edgy):
-    a = get_random_points(n=points, scale=100)
+    a = get_random_points(n=points, scale=40)
     a = ccw_sort(a)
     punto_inicio = calcular_inicio(a)
     x,y, _ = get_bezier_curve(a,rad=rad, edgy=edgy)

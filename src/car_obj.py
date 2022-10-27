@@ -57,6 +57,7 @@ class Object:
         # self.shader_program['light.Id'].write(self.app.light.Id)
         self.shader_program['m_proj'].write(self.app.camera.m_proj)
         self.shader_program['m_view'].write(self.app.camera.m_view)
+        self.shader_program['view_pos'].write(self.app.camera.position)
         self.shader_program['m_model'].write(self.m_model)
 
     def render(self):
@@ -68,8 +69,8 @@ class Object:
         self.vao.release()
     
     def get_vao(self):
-        vao = self.ctx.vertex_array(self.shader_program, [(self.vbo, '3f 3f 3f 3f', 'in_normal', 'in_position',
-                                                           'in_diffuse', 'in_ambient')])
+        vao = self.ctx.vertex_array(self.shader_program, [(self.vbo, '3f 3f 3f 3f 3f', 'in_normal', 'in_position',
+                                                           'in_diffuse', 'in_ambient', 'in_specular')])
         return vao
     
     def get_vertex_data(self):
@@ -77,7 +78,7 @@ class Object:
         # indices = [(0,2,1),(0,3,2),(4,5,6),(4,6,7),(0,1,4),(1,4,5),
         #           (7,2,3),(2,7,6),(1,2,6),(6,5,1),(0,4,7),(0,7,3)]
 
-        scene = pywavefront.Wavefront('models/car/Car.obj', collect_faces=True)
+        scene = pywavefront.Wavefront('models/car/F1.obj', collect_faces=True)
 
         # scene_box = (scene.vertices[0], scene.vertices[0])
         # for vertex in scene.vertices:
@@ -108,6 +109,7 @@ class Object:
                 data.extend(vertices[name][i:i+6])
                 data.extend(material.diffuse[0:3])
                 data.extend(material.ambient[0:3])
+                data.extend(material.specular[0:3])
 
         data_np = np.array(data, dtype='f4')
         return data_np
@@ -125,6 +127,7 @@ class Object:
                 layout (location = 1) in vec3 in_normal;
                 layout (location = 2) in vec3 in_diffuse;
                 layout (location = 3) in vec3 in_ambient;
+                layout (location = 4) in vec3 in_specular;
 
                 out vec3 color;
                 struct Light {
@@ -135,17 +138,23 @@ class Object:
                 uniform mat4 m_proj;
                 uniform mat4 m_view;
                 uniform mat4 m_model;
+                uniform vec3 view_pos;
+
                 void main() {
                     gl_Position = m_proj * m_view * m_model * vec4(in_position, 1.0);
                     vec3 frag_pos = vec3(m_model * vec4(in_position, 1.0));
-                    vec3 norm = normalize(-in_normal);
+                    vec3 norm = normalize(in_normal);
                     vec3 light_dir = normalize(light.position - frag_pos);  
-                    vec3 diffuse1 = in_diffuse * max(dot(norm, light_dir), 0.0);
-                    vec3 light_dir2 = normalize(vec3(0,5,-5));
-                    vec3 light_dir3 = normalize(vec3(5,5,0));
-                    vec3 diffuse2 = in_diffuse * max(dot(norm, light_dir2), 0.0);
-                    vec3 diffuse3 = in_diffuse * max(dot(norm, light_dir3), 0.0);
-                    color = in_ambient / 2 + (diffuse1 + diffuse2 + diffuse3) / 2;
+                    
+                    mat3 inverse_m_model = mat3(transpose(inverse(m_model)));
+                    vec3 normal = inverse_m_model * normalize(in_normal);
+                    vec3 diffuse = in_diffuse * max(0, dot(normalize(normal), light_dir));
+                    
+                    vec3 view_dir =  normalize(view_pos - frag_pos);
+                    vec3 reflect_dir = reflect(-light_dir, normal);  
+                    vec3 specular = in_specular *  pow(max(dot(view_dir, reflect_dir), 0.0), 256);
+                    color = (in_ambient + diffuse + specular * 2) * vec3(1,1,1);
+                    
                 }
             ''',
             fragment_shader='''

@@ -7,10 +7,10 @@ class Camera:
     def __init__(self, app):
         self.app = app
         self.aspect_ratio = app.WIN_SIZE[0]/app.WIN_SIZE[1]
-        self.position = glm.vec3(0,10,0)
+        self.position = glm.vec3(0,60,0)
         self.up = glm.vec3(1,0,0)
         self.lookat = glm.vec3(0)
-        self.radians = 165
+        self.radians = 100
         # view_matrix
         self.m_view = self.get_view_matrix()
         # projection matrix
@@ -23,9 +23,10 @@ class Camera:
         return glm.perspective(glm.radians(self.radians), self.aspect_ratio, 0.1, 100)
 
     def zoom(self, scroll):
-        if 180 > self.radians + scroll> 0:
-            self.radians = self.radians + scroll
-            self.m_proj = self.get_projection_matrix()
+        if 99 >= self.position[1]+scroll*0.5 >= 0:
+            self.lookat = self.lookat + glm.vec3((0, scroll, 0))
+            self.position = self.position + glm.vec3((0, scroll, 0))
+            self.m_view = self.get_view_matrix()
     
     def move_right(self):
         self.lookat = self.lookat + glm.vec3((0, 0, 0.01*self.radians))

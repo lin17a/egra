@@ -7,6 +7,8 @@ import numpy as np
 from OpenGL.GL import *
 from Camera import Camera, Axis, DriverCamera
 from Circuito import Circuito
+from car import Car
+from Light import Light
 from texturing import Grass, RaceTrackTexture
 
 
@@ -36,6 +38,9 @@ class GraphicsEngine:
         # clock
         self.clock = pg.time.Clock()
         self.time = 0
+        # Car
+        self.light = Light()
+        self.car = Car(self)
 
     def get_time(self):
         self.time = pg.time.get_ticks() * 0.001
@@ -72,6 +77,17 @@ class GraphicsEngine:
                 self.camera.move_left()
             if keys[pg.K_r]:
                 self.scene.new_road()
+            if keys[pg.K_UP]:
+                self.car.move_forward()
+            if keys[pg.K_RIGHT]:
+                self.car.move_right()
+            if keys[pg.K_LEFT]:
+                self.car.move_left()
+            if keys[pg.K_DOWN]:
+                self.car.move_backward()
+        
+        self.scene.on_init()
+        self.car.on_init()
 
         self.asphalt.on_init()
         self.grass.on_init()
@@ -87,6 +103,8 @@ class GraphicsEngine:
         self.grass.render()
         #self.asphalt.render()
         self.scene.render()
+        # render car
+        self.car.render()
         # swap buffers
         pg.display.flip()
 

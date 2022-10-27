@@ -105,8 +105,13 @@ class Circuito:
                 uniform mat4 m_proj;
                 uniform mat4 m_view;
                 uniform mat4 m_model;
+
+                float random2d(vec2 coord){
+                    return fract(sin(dot(coord.xy, vec2(12.9898, 78.233))) * 43758.5453);
+                }
+
                 void main() {
-                    color = in_color;
+                    color = in_color - random2d(floor(in_position.xy + 0.5)) * 0.06;
                     xy = in_position.xy;
                     gl_Position = m_proj * m_view * m_model * vec4(in_position, 1.0);
                 }
@@ -117,16 +122,18 @@ class Circuito:
                 in vec3 color;
                 in vec2 xy;
 
-                float random2d(vec2 coord){
-                    return fract(sin(dot(coord.xy, vec2(12.9898, 78.233))) * 43758.5453);
+                
+
+                float round(float x){
+                    return floor(x + 0.5);
                 }
 
                 void main() { 
-                    int x = int(xy.x) % 1000;
-                    int y = int(xy.y) % 20;
-                    vec2 coord = vec2(x,y);
-                    float r = random2d(coord);
-                    fragColor = vec4(color - r*0.1, 1.0);
+                    //float x = round(100*xy.x) / 100;
+                    //float y = xy.y;
+                    //vec2 coord = vec2(xy.x, xy.y);
+                    //float r = random2d(coord);
+                    fragColor = vec4(color, 1.0);
                 }
             ''',
         )

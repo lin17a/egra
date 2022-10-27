@@ -16,7 +16,7 @@ class GraphicsEngine:
     def __init__(self, win_size=(1280,720)):
         # init pygame modules
         pg.init()
-        # window size
+        # window sizeq
         self.WIN_SIZE = win_size
         # set opengl attr
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION,3)

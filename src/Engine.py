@@ -7,11 +7,11 @@ import numpy as np
 from OpenGL.GL import *
 from Camera import Camera, Axis, DriverCamera
 from Circuito import Circuito
-from grass import Grass
+from texturing import Grass, RaceTrackTexture
 
 
 class GraphicsEngine:
-    def __init__(self, win_size=(900,900)):
+    def __init__(self, win_size=(1280,720)):
         # init pygame modules
         pg.init()
         # window size
@@ -29,6 +29,7 @@ class GraphicsEngine:
         self.camera_mode = "bird"
         # scene
         self.scene = Circuito(self)
+        self.asphalt = RaceTrackTexture(self)
         # axis
         self.axis = Axis(self)
         self.grass = Grass(self)
@@ -59,6 +60,7 @@ class GraphicsEngine:
             if event.type == pg.MOUSEWHEEL:
                 self.camera.zoom(-event.y*3)
 
+        #if self.camera_mode == "drive":
         keys = pg.key.get_pressed()
         if keys[pg.K_w]:
             self.camera.move_up()
@@ -71,6 +73,7 @@ class GraphicsEngine:
         if keys[pg.K_r]:
             self.scene.new_road()
 
+        self.asphalt.on_init()
         self.grass.on_init()
         self.scene.on_init()
         
@@ -82,6 +85,7 @@ class GraphicsEngine:
         #self.axis.render()
         # render scene
         self.grass.render()
+        #self.asphalt.render()
         self.scene.render()
         # swap buffers
         pg.display.flip()

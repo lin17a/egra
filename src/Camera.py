@@ -62,7 +62,7 @@ class DriverCamera(Camera):
         self.position = glm.vec3(self.current_vertex[0], 0.5, self.current_vertex[2])
         self.up = glm.vec3(0, 1, 0)
         self.lookat = glm.vec3(self.next_vertex[0], 0.4, self.next_vertex[2])
-        self.radians = 120
+        self.radians = 110
         # view_matrix
         self.m_view = self.get_view_matrix()
         # projection matrix

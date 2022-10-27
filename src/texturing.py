@@ -82,24 +82,6 @@ class Grass:
         vertex_data = self.get_data(vertices, indices)
         vertex_data = np.flip(vertex_data, 1).copy(order='C')
 
-        '''
-                vertices = [
-                    (-0.5, 0, -0.5), # (0,0)
-                    (0.5, 0, -0.5), # (1,0)
-                    (0.5, 0, 0.5), # (1,1)
-                    (-0.5, 0, 0.5), # (0,1)
-                    ]
-        indices = [
-                (0,2,3),(0,1,2)
-        ]
-        tex_coord = [(0,0), (1,0), (0,1), (1,1)]
-        tex_coord_indices = [(0, 3, 1), (0, 2, 3)]
-        
-        tex_coord_data = self.get_data(tex_coord, tex_coord_indices)
-
-        data = np.hstack([tex_coord_data, vertex_data])
-        '''
-
         return vertex_data
 
     def get_vao(self):
@@ -142,6 +124,126 @@ class Grass:
                 void main() 
                 { 
                     fragColor = texture(u_texture_skybox, texCubeCoords);
+                }
+            ''',
+        )
+        return program
+
+
+
+
+class RaceTrackTexture:
+    def __init__(self,app):
+        self.app = app
+        self.ctx = app.ctx
+        self.vbo = self.get_vbo()
+        self.shader_program = self.get_shader_program()
+        self.vao = self.get_vao()
+        self.m_model = self.get_model_matrix()
+        self.texture = self.get_texture('./textures/asphalta.jpg')
+        self.on_init()
+
+    def get_model_matrix(self):
+        m_model = glm.scale(glm.mat4(1), glm.vec3(100,1,100))
+        #m_model = glm.rotate(glm.mat4(),glm.radians(0),glm.vec3(0,1,0))
+        return m_model
+
+    def get_texture(self, path):
+        texture = pg.image.load(path).convert()
+        texture = pg.transform.flip(texture, flip_x=False, flip_y=True)
+        texture = self.ctx.texture(size=texture.get_size(), components=3, 
+                                    data=pg.image.tostring(texture, 'RGB'))
+        return texture
+
+
+    def on_init(self):
+        self.shader_program['u'] = 0
+        self.texture.use()
+        self.shader_program['m_proj'].write(self.app.camera.m_proj)
+        self.shader_program['m_view'].write(self.app.camera.m_view)
+        self.shader_program['m_model'].write(self.m_model)
+
+    def o(self, x):
+        self.obj = x
+        return self.obj
+
+    def ax(self, x):
+        self.ax = x
+        return self.ax
+
+    def render(self):
+        if self.o:
+            self.vao.render()
+        #if self.ax:
+            #self.vaoa.render(mgl.LINE_LOOP)
+        #self.vaop.render(mgl.POINTS)
+
+    def destroy (self):
+        self.vbo.release()
+        self.shader_program.release()
+        self.vao.release()
+
+    def get_vertex_data(self):
+        vertices = [
+                    (-0.5, 0, -0.5), # (0,0)
+                    (0.5, 0, -0.5), # (1,0)
+                    (0.5, 0, 0.5), # (1,1)
+                    (-0.5, 0, 0.5), # (0,1)
+                    ]
+        indices = [
+                (0,2,3),(0,1,2)
+        ]
+
+        vertex_data = self.get_data(vertices, indices)
+
+        tex_coord = [(0,0), (1,0), (0,1), (1,1)]
+        tex_coord_indices = [(0, 3, 1), (0, 2, 3)]
+
+        tex_coord_data = self.get_data(tex_coord, tex_coord_indices)
+
+        data = np.hstack([tex_coord_data, vertex_data])
+
+        return data
+
+    def get_vao(self):
+        vao = self.ctx.vertex_array(self.shader_program, [(self.vbo, '2f 3f','in_texcoord', 'in_position')])
+        return vao                      
+
+    @staticmethod
+    def get_data(vertices, indices): 
+        data = [vertices[ind] for triangle in indices for ind in triangle]
+        return np.array(data, dtype='f4')
+
+    def get_vbo(self):
+        vertex_data = self.get_vertex_data()
+        vbo = self.ctx.buffer(vertex_data)
+        return vbo
+
+    def get_shader_program(self):
+        program = self.ctx.program(    
+            vertex_shader='''
+                #version 330
+                layout (location = 0) in vec2 in_texcoord;
+                layout (location = 1) in vec3 in_position;
+                out vec2 uv_0;
+                uniform mat4 m_proj;
+                uniform mat4 m_view;
+                uniform mat4 m_model;
+                void main() 
+                {
+                    uv_0 = in_texcoord;
+                    gl_Position = m_proj * m_view * m_model * vec4(in_position, 1.0);
+                }
+            ''',
+            fragment_shader='''
+                #version 330
+                layout (location = 0) out vec4 fragColor;
+                in vec2 uv_0;
+                uniform sampler2D u;
+                void main() 
+                { 
+                    vec3 color = texture(u, uv_0*5).rgb;
+                    fragColor = vec4(color, 1.0);
                 }
             ''',
         )

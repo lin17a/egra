@@ -60,18 +60,18 @@ class GraphicsEngine:
             if event.type == pg.MOUSEWHEEL:
                 self.camera.zoom(-event.y*3)
 
-        #if self.camera_mode == "drive":
-        keys = pg.key.get_pressed()
-        if keys[pg.K_w]:
-            self.camera.move_up()
-        if keys[pg.K_s]:
-            self.camera.move_down()
-        if keys[pg.K_d]:
-            self.camera.move_right()
-        if keys[pg.K_a]:
-            self.camera.move_left()
-        if keys[pg.K_r]:
-            self.scene.new_road()
+        if self.camera_mode == "drive":
+            keys = pg.key.get_pressed()
+            if keys[pg.K_w]:
+                self.camera.move_up()
+            if keys[pg.K_s]:
+                self.camera.move_down()
+            if keys[pg.K_d]:
+                self.camera.move_right()
+            if keys[pg.K_a]:
+                self.camera.move_left()
+            if keys[pg.K_r]:
+                self.scene.new_road()
 
         self.asphalt.on_init()
         self.grass.on_init()

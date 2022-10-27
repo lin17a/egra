@@ -5,41 +5,50 @@ import glm
 import sys
 
 import numpy as np
+import pywavefront
 
-
-class Vehicle:
+class Car:
     def __init__(self, app):
         self.app = app
         self.ctx = app.ctx
-        # init car positions
-        self.x = 0
-        self.y = 0
-        self.z = 0
-        self.degree = 0
-        self.translate = glm.translate(glm.mat4(), glm.vec3(self.x, self.y, self.z))
-        self.rotation = glm.rotate(glm.mat4(), glm.radians(self.degree), glm.vec3(0, 1, 0))
         self.vbo = self.get_vbo()
         self.shader_program = self.get_shader_program()
         self.vao = self.get_vao()
+        self.degree = 0
+        self.position = glm.vec3(0, 0, 0)
+        self.translate = glm.translate(glm.mat4(), glm.vec3(0, 0, 0))
+        self.rotation = glm.rotate(glm.mat4(), glm.radians(self.degree), glm.vec3(0, 1, 0))
         self.m_model = self.get_model_matrix()
         self.on_init()
 
     def get_model_matrix(self):
-        # m_model = glm.mat4()
-        """
-        Aquí debemos establecer el movimiento del coche con
-        una transformación respecto al eje de las Y con desplazamiento
-        hacia los ejes X y Z
-        """
-        m_model = self.rotation * self.translate
+        m_model = glm.mat4()
+        #m_model = glm.rotate(glm.mat4(), glm.radians(0), glm.vec3(0, 1, 0))
+        #m_model = self.rotation * self.translate
+
         return m_model
 
     def on_init(self):
+        self.shader_program['light.position'].write(self.app.light.position)
+        # self.shader_program['light.Ia'].write(self.app.light.Ia)
+        # self.shader_program['light.Id'].write(self.app.light.Id)
         self.shader_program['m_proj'].write(self.app.camera.m_proj)
         self.shader_program['m_view'].write(self.app.camera.m_view)
+        self.shader_program['view_pos'].write(self.app.camera.position)
         self.shader_program['m_model'].write(self.m_model)
 
+    def update(self):
+        self.shader_program['light.position'].write(self.app.light.position)
+        # self.shader_program['light.Ia'].write(self.app.light.Ia)
+        # self.shader_program['light.Id'].write(self.app.light.Id)
+        self.shader_program['m_proj'].write(self.app.camera.m_proj)
+        self.shader_program['m_view'].write(self.app.camera.m_view)
+        self.shader_program['view_pos'].write(self.app.camera.position)
+        self.shader_program['m_model'].write(self.m_model)
+
+
     def render(self):
+        self.shader_program['view_pos'].write(self.app.camera.position)
         self.vao.render()
 
     def destroy(self):
@@ -48,66 +57,31 @@ class Vehicle:
         self.vao.release()
 
     def get_vao(self):
-        vao = self.ctx.vertex_array(self.shader_program, [(self.vbo, '3f 3f', 'in_colors', 'in_position')])
+        vao = self.ctx.vertex_array(self.shader_program, [(self.vbo, '3f 3f 3f 3f 3f', 'in_normal', 'in_position',
+                                                           'in_diffuse', 'in_ambient', 'in_specular')])
         return vao
-
-    def move_right(self):
-        self.degree -= 0.5
-        self.rotation = glm.rotate(glm.mat4(), glm.radians(self.degree), glm.vec3(0, 1, 0))
-        self.shader_program['m_model'].write(self.get_model_matrix())
-
-    def move_left(self):
-        self.degree += 0.5
-        self.rotation = glm.rotate(glm.mat4(), glm.radians(self.degree), glm.vec3(0, 1, 0))
-        self.shader_program['m_model'].write(self.get_model_matrix())
-
-    def move_forward(self):
-        self.z -= 0.05
-        self.translate = glm.translate(glm.mat4(), glm.vec3(self.x, self.y, self.z))
-        self.shader_program['m_model'].write(self.get_model_matrix())
 
     def get_vertex_data(self):
 
-        vertices = [(0, 0, 0), (0, 0, 10), (5, 0, 0), (5, 0, 10),  # Car
-                    (0.7, 0, 2.5), (4.3, 0, 2.5), (1.2, 0, 4), (3.8, 0, 4),  # front window
-                    (0.7, 0, 7.5), (4.3, 0, 7.5), (1.2, 0, 6), (3.8, 0, 6),  # back window
-                    (0.7, 0, 2.8), (1.2, 0, 4.3), (0.7, 0, 7.2), (1.2, 0, 5.7),  # left window
-                    (4.3, 0, 2.8), (3.8, 0, 4.3), (4.3, 0, 7.2), (3.8, 0, 5.7),  # right window
-                    (0.7, 0, 0), (1.2, 0, 0), (0.7, 0, 0.15), (1.2, 0, 0.15),  # left front light
-                    (4.3, 0, 0), (3.8, 0, 0), (4.3, 0, 0.15), (3.8, 0, 0.15),  # right front light
-                    (0.7, 0, 10), (1.2, 0, 10), (0.7, 0, 9.85), (1.2, 0, 9.85),  # left back light
-                    (4.3, 0, 10), (3.8, 0, 10), (4.3, 0, 9.85), (3.8, 0, 9.85)]  # right back light
+        scene = pywavefront.Wavefront('models/car/F1.obj', collect_faces=True)
 
-        indices = [(0, 1, 2), (1, 3, 2),
-                   (4, 5, 6), (5, 6, 7),
-                   (8, 9, 10), (9, 10, 11),
-                   (12, 13, 14), (13, 14, 15),
-                   (16, 17, 18), (17, 18, 19),
-                   (20, 21, 22), (21, 22, 23),
-                   (24, 25, 26), (25, 26, 27),
-                   (28, 29, 30), (29, 30, 31),
-                   (32, 33, 34), (33, 34, 35)]
-
-        colors = [(0.7, 0, 0.1), (0.7, 0, 0.1),
-                  (0, 0, 0), (0, 0, 0),
-                  (0, 0, 0), (0, 0, 0),
-                  (0, 0, 0), (0, 0, 0),
-                  (0, 0, 0), (0, 0, 0),
-                  (1, 1, 0), (1, 1, 0),
-                  (1, 1, 0), (1, 1, 0),
-                  (1, 0, 0), (1, 0, 0),
-                  (1, 0, 0), (1, 0, 0)]
-
-        vertex_data = self.get_data(vertices, indices, colors)
+        vertex_data = self.get_data(scene)
 
         return vertex_data
 
-    @staticmethod
-    def get_data(vertices, indices, colors):
+    def get_data(self, scene):
+        vertices = {}
         data = []
-        for t, triangle in enumerate(indices):
-            for ind in triangle:
-                data.append(colors[t] + vertices[ind])
+
+        for name, material in scene.materials.items():
+            vertices[name] = material.vertices  # contains normals and vertices
+
+            for i in range(0, len(vertices[name]), 6):
+                data.extend(vertices[name][i:i + 6])
+                data.extend(material.diffuse[0:3])
+                data.extend(material.ambient[0:3])
+                data.extend(material.specular[0:3])
+
         data_np = np.array(data, dtype='f4')
         return data_np
 
@@ -116,19 +90,60 @@ class Vehicle:
         vbo = self.ctx.buffer(vertex_data)
         return vbo
 
+    def move_right(self):
+        self.degree -= 0.5
+        m_model = glm.translate(self.m_model, self.position)
+        m_model = glm.rotate(m_model, self.degree, glm.vec3(0,1,0))
+        self.m_model = glm.translate(m_model, -self.position)
+
+
+    def move_left(self):
+        self.degree += 0.5
+        m_model = glm.translate(self.m_model, self.position)
+        m_model = glm.rotate(m_model, self.degree, glm.vec3(0,1,0))
+        self.m_model = glm.translate(m_model, -self.position)
+
+    def move_forward(self):
+        x, y, z = self.position
+        self.position = glm.vec3(x+0.5, y, z)
+        self.m_model = glm.translate(self.m_model, glm.vec3(self.position))
+
     def get_shader_program(self):
         program = self.ctx.program(
             vertex_shader='''
                 #version 330
                 layout (location = 0) in vec3 in_position;
-                layout (location = 1) in vec3 in_colors;
+                layout (location = 1) in vec3 in_normal;
+                layout (location = 2) in vec3 in_diffuse;
+                layout (location = 3) in vec3 in_ambient;
+                layout (location = 4) in vec3 in_specular;
+
                 out vec3 color;
+                struct Light {
+                    vec3 position;
+                };
+
+                uniform Light light;
                 uniform mat4 m_proj;
                 uniform mat4 m_view;
                 uniform mat4 m_model;
+                uniform vec3 view_pos;
+
                 void main() {
                     gl_Position = m_proj * m_view * m_model * vec4(in_position, 1.0);
-                    color = in_colors;
+                    vec3 frag_pos = vec3(m_model * vec4(in_position, 1.0));
+                    vec3 norm = normalize(in_normal);
+                    vec3 light_dir = normalize(light.position - frag_pos);  
+
+                    mat3 inverse_m_model = mat3(transpose(inverse(m_model)));
+                    vec3 normal = inverse_m_model * normalize(in_normal);
+                    vec3 diffuse = in_diffuse * max(0, dot(normalize(normal), light_dir));
+
+                    vec3 view_dir =  normalize(view_pos - frag_pos);
+                    vec3 reflect_dir = reflect(-light_dir, normal);  
+                    vec3 specular = in_specular *  pow(max(dot(view_dir, reflect_dir), 0.0), 256);
+                    color = (in_ambient + diffuse + specular * 2) * vec3(1,1,1);
+
                 }
             ''',
             fragment_shader='''

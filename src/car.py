@@ -86,27 +86,34 @@ class Car:
         return vbo
 
     def move_right(self):
-        self.degree -= 0.5
-        m_model = glm.translate(self.m_model, self.position)
-        m_model = glm.rotate(m_model, self.degree, glm.vec3(0,1,0))
-        self.m_model = glm.translate(m_model, -self.position)
+        degree = -0.05
+        self.degree += degree
+        m_model = glm.translate(self.m_model, -self.position)
+        m_model = glm.rotate(m_model, degree, glm.vec3(0,1,0))
+        self.m_model = glm.translate(m_model,  glm.rotate(self.position, -degree, glm.vec3(0,1,0)))
 
 
     def move_left(self):
-        self.degree += 0.5
-        m_model = glm.translate(self.m_model, self.position)
-        m_model = glm.rotate(m_model, self.degree, glm.vec3(0,1,0))
-        self.m_model = glm.translate(m_model, -self.position)
+        degree = 0.05
+        self.degree += degree
+        old_position = self.position
+        self.m_model = glm.translate(self.m_model, -self.position)
+        self.m_model = glm.rotate(self.m_model, degree, glm.vec3(0,1,0))
+        self.m_model = glm.translate(self.m_model, glm.rotate(old_position, -degree, glm.vec3(0,1,0)))
+
 
     def move_forward(self):
         x, y, z = self.position
+        old_position = self.position
         self.position = glm.vec3(x+0.5, y, z)
-        self.m_model = glm.translate(self.m_model, glm.vec3(self.position))
+        self.m_model = glm.translate(self.m_model, self.position - old_position)
     
     def move_backward(self):
         x, y, z = self.position
+        old_position = self.position
         self.position = glm.vec3(x-0.5, y, z)
-        self.m_model = glm.translate(self.m_model, glm.vec3(self.position))
+        print(self.position)
+        self.m_model = glm.translate(self.m_model, self.position - old_position)
 
     def get_shader_program(self):
         program = self.ctx.program(

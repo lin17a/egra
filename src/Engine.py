@@ -9,6 +9,8 @@ from Camera import Camera, Axis, DriverCamera
 from Circuito import Circuito
 from car import Car
 from Light import Light
+import time
+
 
 class GraphicsEngine:
     def __init__(self, win_size=(900,900)):
@@ -83,6 +85,8 @@ class GraphicsEngine:
         
         self.scene.on_init()
         self.car.on_init()
+
+        time.sleep(0.1)
 
     def render(self):
         # clear framebuffer

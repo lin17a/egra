@@ -74,6 +74,7 @@ class GraphicsEngine:
             self.camera.move_left()
         if keys[pg.K_r]:
             self.scene.new_road()
+            self.car.move_to_start()
         if keys[pg.K_UP]:
             self.car.move_forward()
         if keys[pg.K_RIGHT]:

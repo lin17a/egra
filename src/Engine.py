@@ -5,7 +5,7 @@ import sys
 import itertools as it
 import numpy as np
 from OpenGL.GL import *
-from Camera import Camera, Axis, DriverCamera
+from Camera import Camera, DriverCamera
 from Circuito import Circuito
 from car import Car
 from Light import Light
@@ -67,7 +67,7 @@ class GraphicsEngine:
                 self.camera.zoom(-event.y*3)
 
         keys = pg.key.get_pressed()
-        
+
         if self.camera_mode == "bird":
             if keys[pg.K_w]:
                 self.camera.move_up()

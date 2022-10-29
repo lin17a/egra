@@ -33,8 +33,6 @@ class GraphicsEngine:
         # scene
         self.scene = Circuito(self)
         self.asphalt = RaceTrackTexture(self)
-        # axis
-        self.axis = Axis(self)
         self.grass = Grass(self)
         # clock
         self.clock = pg.time.Clock()
@@ -105,8 +103,6 @@ class GraphicsEngine:
     def render(self):
         # clear framebuffer
         self.ctx.clear(color=(0, 0, 0))
-        # render axis
-        #self.axis.render()
         # render scene
         self.grass.render()
         #self.asphalt.render()

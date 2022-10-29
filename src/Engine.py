@@ -9,6 +9,8 @@ from Camera import Camera, Axis, DriverCamera
 from Circuito import Circuito
 from car import Car
 from Light import Light
+import time
+
 
 class GraphicsEngine:
     def __init__(self, win_size=(900,900)):
@@ -72,6 +74,7 @@ class GraphicsEngine:
             self.camera.move_left()
         if keys[pg.K_r]:
             self.scene.new_road()
+            self.car.move_to_start()
         if keys[pg.K_UP]:
             self.car.move_forward()
         if keys[pg.K_RIGHT]:
@@ -84,11 +87,12 @@ class GraphicsEngine:
         self.scene.on_init()
         self.car.on_init()
 
+
     def render(self):
         # clear framebuffer
         self.ctx.clear(color=(86/256, 125/256, 70/256))
         # render axis
-        self.axis.render()
+        # self.axis.render()
         # render scene
         self.scene.render()
         # render car

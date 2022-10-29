@@ -130,7 +130,6 @@ class Car:
         x, y, z = self.position
         old_position = self.position
         self.position = glm.vec3(x-0.5, y, z)
-        print(self.position)
         self.m_model = glm.translate(self.m_model, self.position - old_position)
 
     def get_shader_program(self):

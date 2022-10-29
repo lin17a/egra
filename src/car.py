@@ -1,6 +1,7 @@
 import glm
 import numpy as np
 import pywavefront
+import math
 
 class Car:
     def __init__(self, app):
@@ -9,19 +10,36 @@ class Car:
         self.vbo = self.get_vbo()
         self.shader_program = self.get_shader_program()
         self.vao = self.get_vao()
-        self.degree = 0
-        self.position = glm.vec3(0, 0, 0)
-        self.translate = glm.translate(glm.mat4(), glm.vec3(0, 0, 0))
-        self.rotation = glm.rotate(glm.mat4(), glm.radians(self.degree), glm.vec3(0, 1, 0))
+        self.rotation = self.get_start_rotation()
+        self.position = self.get_start_position()
         self.m_model = self.get_model_matrix()
         self.on_init()
 
-    def get_model_matrix(self):
-        m_model = glm.mat4()
-        #m_model = glm.rotate(glm.mat4(), glm.radians(0), glm.vec3(0, 1, 0))
-        #m_model = self.rotation * self.translate
+    def get_start_position(self):
+        vertex = self.app.scene.all_vertex[self.app.scene.current_vertex - 20]
+        next_vertex = self.app.scene.all_vertex[self.app.scene.current_vertex - 19]
+        y_mid_point = (next_vertex[0].max() + vertex[0].min()) / 2
+        x_mid_point = (next_vertex[2].max() + vertex[2].min()) / 2
+        return glm.vec3((y_mid_point, 0, x_mid_point))
 
+    def get_start_rotation(self):
+        vertex = self.app.scene.all_vertex[self.app.scene.current_vertex - 20] # coordinate order: y, z, x
+        next_vertex = self.app.scene.all_vertex[self.app.scene.current_vertex - 19]
+        dir_vec = next_vertex - vertex
+        rot_rad = math.atan2(dir_vec[0], dir_vec[2]) # atan2(y, x)
+        return rot_rad
+
+    def get_model_matrix(self):
+        m_model = glm.rotate(glm.mat4(), self.rotation, glm.vec3(0, 1, 0))
+        m_model = glm.translate(m_model, glm.rotate(self.position, -self.rotation, glm.vec3(0, 1, 0)))
+        m_model = glm.scale(m_model, glm.vec3(0.2, 0.2, 0.2))
         return m_model
+
+    def move_to_start(self):
+        self.position = self.get_start_position()
+        self.rotation = self.get_start_rotation()
+        self.m_model = self.get_model_matrix()
+        self.on_init()
 
     def on_init(self):
         self.shader_program['light.position'].write(self.app.light.position)
@@ -86,27 +104,33 @@ class Car:
         return vbo
 
     def move_right(self):
-        self.degree -= 0.5
-        m_model = glm.translate(self.m_model, self.position)
-        m_model = glm.rotate(m_model, self.degree, glm.vec3(0,1,0))
-        self.m_model = glm.translate(m_model, -self.position)
+        degree = -0.05
+        self.rotation += degree
+        m_model = glm.translate(self.m_model, -self.position)
+        m_model = glm.rotate(m_model, degree, glm.vec3(0,1,0))
+        self.m_model = glm.translate(m_model,  glm.rotate(self.position, -degree, glm.vec3(0,1,0)))
 
 
     def move_left(self):
-        self.degree += 0.5
-        m_model = glm.translate(self.m_model, self.position)
-        m_model = glm.rotate(m_model, self.degree, glm.vec3(0,1,0))
-        self.m_model = glm.translate(m_model, -self.position)
+        degree = 0.05
+        self.rotation += degree
+        old_position = self.position
+        self.m_model = glm.translate(self.m_model, -self.position)
+        self.m_model = glm.rotate(self.m_model, degree, glm.vec3(0,1,0))
+        self.m_model = glm.translate(self.m_model, glm.rotate(old_position, -degree, glm.vec3(0,1,0)))
+
 
     def move_forward(self):
         x, y, z = self.position
+        old_position = self.position
         self.position = glm.vec3(x+0.5, y, z)
-        self.m_model = glm.translate(self.m_model, glm.vec3(self.position))
+        self.m_model = glm.translate(self.m_model, self.position - old_position)
     
     def move_backward(self):
         x, y, z = self.position
+        old_position = self.position
         self.position = glm.vec3(x-0.5, y, z)
-        self.m_model = glm.translate(self.m_model, glm.vec3(self.position))
+        self.m_model = glm.translate(self.m_model, self.position - old_position)
 
     def get_shader_program(self):
         program = self.ctx.program(

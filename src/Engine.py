@@ -10,6 +10,7 @@ from Circuito import Circuito
 from car import Car
 from Light import Light
 from texturing import Grass, RaceTrackTexture
+import time
 
 
 class GraphicsEngine:

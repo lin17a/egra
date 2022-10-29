@@ -46,7 +46,7 @@ class Circuito:
         xs, ys, punto_inicio = generation_track(10, self.rad, self.edgy)
         vertex_data = np.array([np.array([x, 0, y]) for x, y in zip(xs, ys)], dtype='f4')
         vertex_2d = []
-        weight = 1
+        weight = 3
         # Genera los bordes de la carretera a partir de la forma
         for i in range(len(vertex_data)-1):
             vec = vertex_data[i]-vertex_data[i+1]

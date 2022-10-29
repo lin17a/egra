@@ -10,7 +10,7 @@ class Camera:
         self.position = glm.vec3(0,60,0)
         self.up = glm.vec3(1,0,0)
         self.lookat = glm.vec3(0)
-        self.radians = 120
+        self.radians = 100
         # view_matrix
         self.m_view = self.get_view_matrix()
         # projection matrix

@@ -14,7 +14,7 @@ import time
 
 
 class GraphicsEngine:
-    def __init__(self, win_size=(1280,720)):
+    def __init__(self, win_size=(1280, 960)):
         # init pygame modules
         pg.init()
         # window sizeq

@@ -3,7 +3,7 @@ import numpy as np
 from scipy.special import binom
 from scipy.interpolate import interp1d
 
-np.random.seed(123456)
+#np.random.seed(123456)
 
 
 def bernstein(n, k, t):
@@ -129,7 +129,7 @@ def calcular_inicio(a):
     return (x, y)
 
 def generation_track(points, rad, edgy):
-    a = get_random_points(n=points, scale=30)
+    a = get_random_points(n=points, scale=100)
     a = ccw_sort(a)
     punto_inicio = calcular_inicio(a)
     x,y, _ = get_bezier_curve(a,rad=rad, edgy=edgy)

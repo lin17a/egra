@@ -87,13 +87,12 @@ class GraphicsEngine:
         self.scene.on_init()
         self.car.on_init()
 
-        time.sleep(0.1)
 
     def render(self):
         # clear framebuffer
         self.ctx.clear(color=(86/256, 125/256, 70/256))
         # render axis
-        self.axis.render()
+        # self.axis.render()
         # render scene
         self.scene.render()
         # render car

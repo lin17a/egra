@@ -76,7 +76,7 @@ class Car:
 
     def get_vertex_data(self):
 
-        scene = pywavefront.Wavefront('../models/car/F1.obj', collect_faces=True)
+        scene = pywavefront.Wavefront('models/car/F1.obj', collect_faces=True)
 
         vertex_data = self.get_data(scene)
 

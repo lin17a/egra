@@ -18,7 +18,7 @@ class Circuito:
         self.vao = self.get_vao()
         self.m_model = self.get_model_matrix()
         self.on_init()
-        
+
     def get_model_matrix(self):
         m_model = glm.rotate(glm.mat4(), glm.radians(0), glm.vec3(0,1,0))
         return m_model
@@ -101,11 +101,18 @@ class Circuito:
                 layout (location = 0) in vec3 in_position;
                 layout (location = 1) in vec3 in_color;
                 out vec3 color;
+                out vec2 xy;
                 uniform mat4 m_proj;
                 uniform mat4 m_view;
                 uniform mat4 m_model;
+
+                float random2d(vec2 coord){
+                    return fract(sin(dot(coord.xy, vec2(12.9898, 78.233))) * 43758.5453);
+                }
+
                 void main() {
-                    color = in_color;
+                    color = in_color - random2d(floor(in_position.xy + 0.5)) * 0.06;
+                    xy = in_position.xy;
                     gl_Position = m_proj * m_view * m_model * vec4(in_position, 1.0);
                 }
             ''',
@@ -113,8 +120,20 @@ class Circuito:
                 #version 330
                 layout (location = 0) out vec4 fragColor;
                 in vec3 color;
+                in vec2 xy;
+
+                
+
+                float round(float x){
+                    return floor(x + 0.5);
+                }
+
                 void main() { 
-                    fragColor = vec4(color,1.0);
+                    //float x = round(100*xy.x) / 100;
+                    //float y = xy.y;
+                    //vec2 coord = vec2(xy.x, xy.y);
+                    //float r = random2d(coord);
+                    fragColor = vec4(color, 1.0);
                 }
             ''',
         )

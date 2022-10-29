@@ -5,18 +5,19 @@ import sys
 import itertools as it
 import numpy as np
 from OpenGL.GL import *
-from Camera import Camera, Axis, DriverCamera
+from Camera import Camera, DriverCamera
 from Circuito import Circuito
 from car import Car
 from Light import Light
+from texturing import Grass, RaceTrackTexture
 import time
 
 
 class GraphicsEngine:
-    def __init__(self, win_size=(900,900)):
+    def __init__(self, win_size=(1280,720)):
         # init pygame modules
         pg.init()
-        # window size
+        # window sizeq
         self.WIN_SIZE = win_size
         # set opengl attr
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION,3)
@@ -31,8 +32,8 @@ class GraphicsEngine:
         self.camera_mode = "bird"
         # scene
         self.scene = Circuito(self)
-        # axis
-        self.axis = Axis(self)
+        self.asphalt = RaceTrackTexture(self)
+        self.grass = Grass(self)
         # clock
         self.clock = pg.time.Clock()
         self.time = 0
@@ -64,14 +65,22 @@ class GraphicsEngine:
                 self.camera.zoom(-event.y*3)
 
         keys = pg.key.get_pressed()
-        if keys[pg.K_w]:
-            self.camera.move_up()
-        if keys[pg.K_s]:
-            self.camera.move_down()
-        if keys[pg.K_d]:
-            self.camera.move_right()
-        if keys[pg.K_a]:
-            self.camera.move_left()
+
+        if self.camera_mode == "bird":
+            if keys[pg.K_w]:
+                self.camera.move_up()
+            if keys[pg.K_a]:
+                self.camera.move_left()
+            if keys[pg.K_s]:
+                self.camera.move_down()
+            if keys[pg.K_d]:
+                self.camera.move_right()
+        elif self.camera_mode == "drive":
+            if keys[pg.K_w]:
+                self.camera.move_up()
+            if keys[pg.K_s]:
+                self.camera.move_down()
+
         if keys[pg.K_r]:
             self.scene.new_road()
             self.car.move_to_start()
@@ -87,13 +96,17 @@ class GraphicsEngine:
         self.scene.on_init()
         self.car.on_init()
 
-
+        self.asphalt.on_init()
+        self.grass.on_init()
+        self.scene.on_init()
+        
+        
     def render(self):
         # clear framebuffer
-        self.ctx.clear(color=(86/256, 125/256, 70/256))
-        # render axis
-        # self.axis.render()
+        self.ctx.clear(color=(0, 0, 0))
         # render scene
+        self.grass.render()
+        #self.asphalt.render()
         self.scene.render()
         # render car
         self.car.render()

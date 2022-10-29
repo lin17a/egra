@@ -66,26 +66,33 @@ class GraphicsEngine:
             if event.type == pg.MOUSEWHEEL:
                 self.camera.zoom(-event.y*3)
 
-        if self.camera_mode == "drive":
-            keys = pg.key.get_pressed()
+        keys = pg.key.get_pressed()
+        
+        if self.camera_mode == "bird":
             if keys[pg.K_w]:
                 self.camera.move_up()
+            if keys[pg.K_a]:
+                self.camera.move_left()
             if keys[pg.K_s]:
                 self.camera.move_down()
             if keys[pg.K_d]:
                 self.camera.move_right()
-            if keys[pg.K_a]:
-                self.camera.move_left()
-            if keys[pg.K_r]:
-                self.scene.new_road()
-            if keys[pg.K_UP]:
-                self.car.move_forward()
-            if keys[pg.K_RIGHT]:
-                self.car.move_right()
-            if keys[pg.K_LEFT]:
-                self.car.move_left()
-            if keys[pg.K_DOWN]:
-                self.car.move_backward()
+        elif self.camera_mode == "drive":
+            if keys[pg.K_w]:
+                self.camera.move_up()
+            if keys[pg.K_s]:
+                self.camera.move_down()
+
+        if keys[pg.K_r]:
+            self.scene.new_road()
+        if keys[pg.K_UP]:
+            self.car.move_forward()
+        if keys[pg.K_RIGHT]:
+            self.car.move_right()
+        if keys[pg.K_LEFT]:
+            self.car.move_left()
+        if keys[pg.K_DOWN]:
+            self.car.move_backward()
         
         self.scene.on_init()
         self.car.on_init()

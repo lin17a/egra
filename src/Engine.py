@@ -47,7 +47,7 @@ class GraphicsEngine:
     def change_camera(self):
         if self.camera_mode == "bird":
             self.camera_mode = "drive"
-            self.camera = DriverCamera(self, self.scene.all_vertex, self.scene.current_vertex)
+            self.camera = DriverCamera(self, self.scene.all_vertex, self.car.position)
         else:
             self.camera_mode = "bird"
             self.camera = Camera(self)
@@ -75,23 +75,22 @@ class GraphicsEngine:
                 self.camera.move_down()
             if keys[pg.K_d]:
                 self.camera.move_right()
-        elif self.camera_mode == "drive":
-            if keys[pg.K_w]:
-                self.camera.move_up()
-            if keys[pg.K_s]:
-                self.camera.move_down()
 
         if keys[pg.K_r]:
             self.scene.new_road()
             self.car.move_to_start()
         if keys[pg.K_UP]:
             self.car.move_forward()
+            if self.camera_mode == "drive":
+                self.camera.move_up(self.car.position)
         if keys[pg.K_RIGHT]:
             self.car.move_right()
         if keys[pg.K_LEFT]:
             self.car.move_left()
         if keys[pg.K_DOWN]:
             self.car.move_backward()
+            if self.camera_mode == "drive":
+                self.camera.move_down(self.car.position)
         
         self.scene.on_init()
         self.car.on_init()
@@ -99,7 +98,6 @@ class GraphicsEngine:
         self.asphalt.on_init()
         self.grass.on_init()
         self.scene.on_init()
-        
         
     def render(self):
         # clear framebuffer

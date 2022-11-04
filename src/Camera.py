@@ -1,6 +1,7 @@
 import glm
-import moderngl as mgl
 import numpy as np
+from overrides import overrides
+from scipy.spatial.distance import cdist
 
 
 class Camera:
@@ -50,19 +51,21 @@ class Camera:
 
 
 class DriverCamera(Camera):
-    def __init__(self, app, all_vertex, current_vertex_idx):
+    def __init__(self, app, all_vertex, car_position):
         self.app = app
         self.aspect_ratio = app.WIN_SIZE[0] / app.WIN_SIZE[1]
+
         self.all_vertex = all_vertex
-        self.current_vertex_idx = (current_vertex_idx//2)*2
-        self.current_vertex = self.get_center_vertex(self.all_vertex[self.current_vertex_idx],
-                                                     self.all_vertex[self.current_vertex_idx+1])
-        self.next_vertex_idx = ((self.current_vertex_idx+2)//2)*2
-        self.next_vertex = self.get_center_vertex(all_vertex[self.next_vertex_idx],
-                                                  self.all_vertex[self.next_vertex_idx+1])
-        self.position = glm.vec3(self.current_vertex[0], 0.5, self.current_vertex[2])
+        self.car_position = np.array(car_position)
+        self.camera_d = 25
+
+        car_vertex, camera_vertex = self.get_camera_from_car(self.car_position)
+        self.car_vertex = car_vertex
+        self.camera_vertex = camera_vertex
+
+        self.position = glm.vec3(self.camera_vertex[0], 0.5, self.camera_vertex[2])
         self.up = glm.vec3(0, 1, 0)
-        self.lookat = glm.vec3(self.next_vertex[0], 0.4, self.next_vertex[2])
+        self.lookat = glm.vec3(self.car_vertex[0], 0.3, self.car_vertex[2])
         self.radians = 110
         # view_matrix
         self.m_view = self.get_view_matrix()
@@ -79,27 +82,47 @@ class DriverCamera(Camera):
         self.position = self.position + glm.vec3((0, 0, -0.01 * self.radians))
         self.m_view = self.get_view_matrix()
 
-    def move_up(self):
-        self.current_vertex_idx = ((self.current_vertex_idx + 2) % len(self.all_vertex))
-        self.current_vertex = self.get_center_vertex(self.all_vertex[self.current_vertex_idx],
-                                                     self.all_vertex[self.current_vertex_idx + 1])
-        self.next_vertex_idx = ((self.current_vertex_idx + 2) % len(self.all_vertex))
-        self.next_vertex = self.get_center_vertex(self.all_vertex[self.next_vertex_idx],
-                                                  self.all_vertex[self.next_vertex_idx + 1])
-        self.position = glm.vec3(self.current_vertex[0], 0.5, self.current_vertex[2])
-        self.lookat = glm.vec3(self.next_vertex[0], 0.4, self.next_vertex[2])
+    @overrides(check_signature=False)
+    def move_up(self, new_car_position):
+        car_vertex, camera_vertex = self.get_camera_from_car(new_car_position, move="up")
+        self.car_vertex = car_vertex
+        self.camera_vertex = camera_vertex
+        print("up:", self.car_vertex, self.camera_vertex)
+        self.position = glm.vec3(self.camera_vertex[0], 0.5, self.camera_vertex[2])
+        self.lookat = glm.vec3(self.car_vertex[0], 0.3, self.car_vertex[2])
         self.m_view = self.get_view_matrix()
 
-    def move_down(self):
-        self.current_vertex_idx = ((self.current_vertex_idx - 2) % len(self.all_vertex))
-        self.current_vertex = self.get_center_vertex(self.all_vertex[self.current_vertex_idx],
-                                                     self.all_vertex[self.current_vertex_idx + 1])
-        self.next_vertex_idx = ((self.current_vertex_idx - 2) % len(self.all_vertex))
-        self.next_vertex = self.get_center_vertex(self.all_vertex[self.next_vertex_idx],
-                                                  self.all_vertex[self.next_vertex_idx + 1])
+    @overrides(check_signature=False)
+    def move_down(self, new_car_position):
+        print("new car pos:", new_car_position)
+        current_vertex, next_vertex = self.get_camera_from_car(new_car_position, move="down")
+        self.current_vertex = current_vertex
+        self.next_vertex = next_vertex
+        print("down:", self.current_vertex, self.next_vertex)
         self.position = glm.vec3(self.current_vertex[0], 0.5, self.current_vertex[2])
-        self.lookat = glm.vec3(self.next_vertex[0], 0.4, self.next_vertex[2])
+        self.lookat = glm.vec3(self.next_vertex[0], 0.3, self.next_vertex[2])
         self.m_view = self.get_view_matrix()
+
+    def get_camera_from_car(self, car_position, move="up"):
+        car_position = np.array(car_position).reshape(1,3)
+        print("new car pos:", car_position)
+        d = cdist(car_position, self.all_vertex)
+        idx_car = np.argmin(d)
+        print("--> new idx:", idx_car)
+        if move == "up":
+            print("car vertex:", idx_car, (idx_car + 1) % len(self.all_vertex))
+            car_vertex = self.get_center_vertex(self.all_vertex[idx_car],
+                                                self.all_vertex[(idx_car + 1) % len(self.all_vertex)])
+            print("camera vertex:", (idx_car - self.camera_d) % len(self.all_vertex), (idx_car - (self.camera_d + 1)) % len(self.all_vertex))
+            camera_vertex = self.get_center_vertex(self.all_vertex[(idx_car - self.camera_d) % len(self.all_vertex)],
+                                                   self.all_vertex[(idx_car - (self.camera_d + 1)) % len(self.all_vertex)])
+            return car_vertex, camera_vertex
+        elif move == "down":
+            car_vertex = self.get_center_vertex(self.all_vertex[(idx_car - 1) % len(self.all_vertex)],
+                                                self.all_vertex[idx_car])
+            camera_vertex = self.get_center_vertex(self.all_vertex[(idx_car - self.camera_d - 1) % len(self.all_vertex)],
+                                                   self.all_vertex[(idx_car - self.camera_d) % len(self.all_vertex)])
+            return car_vertex, camera_vertex
 
     @staticmethod
     def get_center_vertex(vertex, next_vertex):

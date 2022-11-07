@@ -9,7 +9,7 @@ class Grass:
         self.app = app
         self.ctx = app.ctx
         self.vbo = self.get_vbo()
-        self.shader_program = self.get_shader_program()
+        self.shader_program = self.get_shader_program("skybox")
         self.vao = self.get_vao()
         self.m_model = self.get_model_matrix()
         self.texture = self.get_texture_cube(dir_path='./textures/sky/')
@@ -97,39 +97,17 @@ class Grass:
         vertex_data = self.get_vertex_data()
         vbo = self.ctx.buffer(vertex_data)
         return vbo
-    
-    def get_shader_program(self):
-        program = self.ctx.program(    
-            vertex_shader='''
-                #version 330
-                layout (location = 0) in vec3 in_position;
-                out vec3 texCubeCoords;
-                uniform mat4 m_proj;
-                uniform mat4 m_view;
-                //uniform mat4 m_model;
-                void main() 
-                {
-                    texCubeCoords = in_position;
-                    vec4 pos =  m_proj * m_view * vec4(in_position, 1.0);
-                    gl_Position = pos.xyww;
-                    gl_Position.z -= 0.0001;
-                    //gl_Position = m_proj * m_view * m_model * vec4(in_position, 1.0);
-                }
-            ''',
-            fragment_shader='''
-                #version 330
-                layout (location = 0) out vec4 fragColor;
-                in vec3 texCubeCoords;
-                uniform samplerCube u_texture_skybox;
-                void main() 
-                { 
-                    fragColor = texture(u_texture_skybox, texCubeCoords);
-                }
-            ''',
-        )
+
+    def get_shader_program(self, shader_program_name):
+        with open(f'shaders/{shader_program_name}.vert') as file:
+                    vertex_shader = file.read()
+
+        with open(f'shaders/{shader_program_name}.frag') as file:
+            fragment_shader = file.read()
+
+        program = self.ctx.program(vertex_shader=vertex_shader, 
+                                fragment_shader=fragment_shader)
         return program
-
-
 
 
 class RaceTrackTexture:

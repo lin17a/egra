@@ -10,7 +10,7 @@ class Camera:
         self.position = glm.vec3(0,60,0)
         self.up = glm.vec3(1,0,0)
         self.lookat = glm.vec3(0)
-        self.radians = 100
+        self.FOV = 100
         # view_matrix
         self.m_view = self.get_view_matrix()
         # projection matrix
@@ -20,7 +20,7 @@ class Camera:
         return glm.lookAt(self.position, self.lookat, self.up)
     
     def get_projection_matrix(self):
-        return glm.perspective(glm.radians(self.radians), self.aspect_ratio, 0.1, 100)
+        return glm.perspective(glm.radians(self.FOV), self.aspect_ratio, 0.1, 100)
 
     def zoom(self, scroll):
         if 99 >= self.position[1]+scroll*0.5 >= 0:
@@ -29,23 +29,23 @@ class Camera:
             self.m_view = self.get_view_matrix()
     
     def move_right(self):
-        self.lookat = self.lookat + glm.vec3((0, 0, 0.01*self.radians))
-        self.position = self.position + glm.vec3((0, 0, 0.01*self.radians))
+        self.lookat = self.lookat + glm.vec3((0, 0, 0.01*self.FOV))
+        self.position = self.position + glm.vec3((0, 0, 0.01*self.FOV))
         self.m_view = self.get_view_matrix()
 
     def move_left(self):
-        self.lookat = self.lookat + glm.vec3((0, 0, -0.01*self.radians))
-        self.position = self.position + glm.vec3((0, 0, -0.01*self.radians))
+        self.lookat = self.lookat + glm.vec3((0, 0, -0.01*self.FOV))
+        self.position = self.position + glm.vec3((0, 0, -0.01*self.FOV))
         self.m_view = self.get_view_matrix()
 
     def move_up(self):
-        self.lookat = self.lookat + glm.vec3((0.01*self.radians, 0, 0))
-        self.position = self.position + glm.vec3((0.01*self.radians, 0, 0))
+        self.lookat = self.lookat + glm.vec3((0.01*self.FOV, 0, 0))
+        self.position = self.position + glm.vec3((0.01*self.FOV, 0, 0))
         self.m_view = self.get_view_matrix()
     
     def move_down(self):
-        self.lookat = self.lookat + glm.vec3((-0.01*self.radians, 0, 0))
-        self.position = self.position + glm.vec3((-0.01*self.radians, 0, 0))
+        self.lookat = self.lookat + glm.vec3((-0.01*self.FOV, 0, 0))
+        self.position = self.position + glm.vec3((-0.01*self.FOV, 0, 0))
         self.m_view = self.get_view_matrix()
 
 
@@ -63,20 +63,20 @@ class DriverCamera(Camera):
         self.position = glm.vec3(self.current_vertex[0], 0.5, self.current_vertex[2])
         self.up = glm.vec3(0, 1, 0)
         self.lookat = glm.vec3(self.next_vertex[0], 0.4, self.next_vertex[2])
-        self.radians = 110
+        self.FOV = 110
         # view_matrix
         self.m_view = self.get_view_matrix()
         # projection matrix
         self.m_proj = self.get_projection_matrix()
 
     def move_right(self):
-        self.lookat = self.lookat + glm.vec3((0, 0, 0.01 * self.radians))
-        self.position = self.position + glm.vec3((0, 0, 0.01 * self.radians))
+        self.lookat = self.lookat + glm.vec3((0, 0, 0.01 * self.FOV))
+        self.position = self.position + glm.vec3((0, 0, 0.01 * self.FOV))
         self.m_view = self.get_view_matrix()
 
     def move_left(self):
-        self.lookat = self.lookat + glm.vec3((0, 0, -0.01 * self.radians))
-        self.position = self.position + glm.vec3((0, 0, -0.01 * self.radians))
+        self.lookat = self.lookat + glm.vec3((0, 0, -0.01 * self.FOV))
+        self.position = self.position + glm.vec3((0, 0, -0.01 * self.FOV))
         self.m_view = self.get_view_matrix()
 
     def move_up(self):

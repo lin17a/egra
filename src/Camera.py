@@ -2,6 +2,7 @@ import math
 
 import glm
 import numpy as np
+import moderngl as mgl
 from overrides import overrides
 from scipy.spatial.distance import cdist
 
@@ -56,88 +57,6 @@ class Camera:
 
 
 class DriverCamera(Camera):
-    def __init__(self, app, all_vertex, car_position):
-        self.app = app
-        self.aspect_ratio = app.WIN_SIZE[0] / app.WIN_SIZE[1]
-
-        self.all_vertex = all_vertex
-        self.car_position = np.array(car_position)
-        self.camera_d = 25
-
-        car_vertex, camera_vertex = self.get_camera_from_car(self.car_position)
-        self.car_vertex = car_vertex
-        self.camera_vertex = camera_vertex
-
-        self.position = glm.vec3(self.camera_vertex[0], 0.5, self.camera_vertex[2])
-        self.up = glm.vec3(0, 1, 0)
-        self.lookat = glm.vec3(self.car_vertex[0], 0.3, self.car_vertex[2])
-        self.radians = 110
-        # view_matrix
-        self.m_view = self.get_view_matrix()
-        # projection matrix
-        self.m_proj = self.get_projection_matrix()
-
-    def move_right(self):
-        self.lookat = self.lookat + glm.vec3((0, 0, 0.01 * self.radians))
-        self.position = self.position + glm.vec3((0, 0, 0.01 * self.radians))
-        self.m_view = self.get_view_matrix()
-
-    def move_left(self):
-        self.lookat = self.lookat + glm.vec3((0, 0, -0.01 * self.radians))
-        self.position = self.position + glm.vec3((0, 0, -0.01 * self.radians))
-        self.m_view = self.get_view_matrix()
-
-    @overrides(check_signature=False)
-    def move_up(self, new_car_position):
-        car_vertex, camera_vertex = self.get_camera_from_car(new_car_position, move="up")
-        self.car_vertex = car_vertex
-        self.camera_vertex = camera_vertex
-        print("up:", self.car_vertex, self.camera_vertex)
-        self.position = glm.vec3(self.camera_vertex[0], 0.5, self.camera_vertex[2])
-        self.lookat = glm.vec3(self.car_vertex[0], 0.3, self.car_vertex[2])
-        self.m_view = self.get_view_matrix()
-
-    @overrides(check_signature=False)
-    def move_down(self, new_car_position):
-        print("new car pos:", new_car_position)
-        current_vertex, next_vertex = self.get_camera_from_car(new_car_position, move="down")
-        self.current_vertex = current_vertex
-        self.next_vertex = next_vertex
-        print("down:", self.current_vertex, self.next_vertex)
-        self.position = glm.vec3(self.current_vertex[0], 0.5, self.current_vertex[2])
-        self.lookat = glm.vec3(self.next_vertex[0], 0.3, self.next_vertex[2])
-        self.m_view = self.get_view_matrix()
-
-    def get_camera_from_car(self, car_position, move="up"):
-        car_position = np.array(car_position).reshape(1,3)
-        print("new car pos:", car_position)
-        d = cdist(car_position, self.all_vertex)
-        idx_car = np.argmin(d)
-        print("--> new idx:", idx_car)
-        if move == "up":
-            print("car vertex:", idx_car, (idx_car + 1) % len(self.all_vertex))
-            car_vertex = self.get_center_vertex(self.all_vertex[idx_car],
-                                                self.all_vertex[(idx_car + 1) % len(self.all_vertex)])
-            print("camera vertex:", (idx_car - self.camera_d) % len(self.all_vertex), (idx_car - (self.camera_d + 1)) % len(self.all_vertex))
-            camera_vertex = self.get_center_vertex(self.all_vertex[(idx_car - self.camera_d) % len(self.all_vertex)],
-                                                   self.all_vertex[(idx_car - (self.camera_d + 1)) % len(self.all_vertex)])
-            return car_vertex, camera_vertex
-        elif move == "down":
-            car_vertex = self.get_center_vertex(self.all_vertex[(idx_car - 1) % len(self.all_vertex)],
-                                                self.all_vertex[idx_car])
-            camera_vertex = self.get_center_vertex(self.all_vertex[(idx_car - self.camera_d - 1) % len(self.all_vertex)],
-                                                   self.all_vertex[(idx_car - self.camera_d) % len(self.all_vertex)])
-            return car_vertex, camera_vertex
-    def update(self):
-        pass
-
-    @staticmethod
-    def get_center_vertex(vertex, next_vertex):
-        y_mid_point = (next_vertex[0].max() + vertex[0].min()) / 2
-        x_mid_point = (next_vertex[2].max() + vertex[2].min()) / 2
-        return np.array([y_mid_point, 0, x_mid_point], dtype='f4')
-
-class FollowCarCamera(Camera):
     def __init__(self, app):
         self.app = app
         self.aspect_ratio = app.WIN_SIZE[0] / app.WIN_SIZE[1]
@@ -157,20 +76,32 @@ class FollowCarCamera(Camera):
         self.m_proj = self.get_projection_matrix()
 
     def get_position(self):
-        car_y, car_z, car_x = self.app.car.position
-        car_rot = np.pi - self.app.car.rotation
-        cam_rot = - ((car_rot % np.pi) - np.pi / 2) * 2 + np.pi # formula by experiment, doesn't work
-        view_dir = glm.vec3(math.sin(cam_rot), 0, math.cos(cam_rot)) # y, z, x  # usually cam_rot, should be car_rot
-        print('view dir:', view_dir)
-        position = glm.vec3(car_y - 2 * view_dir[0], 1, car_x - 2 * view_dir[2]) # y, z, x
-        print('camera: ', position)
+        car_x, car_z, car_y = self.app.car.position
+        car_rot = (3 * np.pi) / 2 - self.app.car.rotation
+        cam_rot = car_rot - ((car_rot % np.pi) - np.pi / 2) * 2 + np.pi  # formula by experiment, doesn't work
+        view_dir = self.app.car.direction_vector(cam_rot)
+        position = glm.vec3(car_x - 2 * view_dir[0], 1, car_y - 2 * view_dir[2])  # y, z, x
+        print("--> get camera position")
+        print("car position:", self.app.car.position)
+        print('direction:', view_dir)
+        print('camera position:', position)
         return position
 
+        """ Centered
+        car_x, car_z, car_y = self.app.car.position
+        # TODO Simplify this please!
+        car_rot = (3 * np.pi) / 2 - self.app.car.rotation
+        cam_rot = car_rot - ((car_rot % np.pi) - np.pi / 2) * 2 + np.pi  # formula by experiment, doesn't work
+        #
+        view_dir = glm.vec3(math.sin(cam_rot), 0, math.cos(cam_rot))  # y, z, x  # usually cam_rot, should be car_rot
+        position = glm.vec3(car_x - 2 * view_dir[0], 1, car_y - 2 * view_dir[2])  # y, z, x
+        print("--> get camera position")
+        print('view dir:', view_dir)
+        print('camera: ', position)
+        return position
+        """
+
     def get_look_at(self):
-        car_rot = self.app.car.rotation
-        #view_dir = glm.vec3(math.sin(car_rot), 0, math.cos(car_rot))
-        cam_rot = -(car_rot - np.pi / 2) * 2
-        view_dir = glm.vec3(math.sin(cam_rot), 0, math.cos(cam_rot))  # y, z, x
         return self.app.car.position
 
 

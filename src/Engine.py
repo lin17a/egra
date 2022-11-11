@@ -5,7 +5,7 @@ import sys
 import itertools as it
 import numpy as np
 from OpenGL.GL import *
-from Camera import Camera, Axis, DriverCamera, FollowCarCamera
+from Camera import Camera, Axis, DriverCamera
 from Circuito import Circuito
 from car import Car
 from Light import Light
@@ -40,6 +40,8 @@ class GraphicsEngine:
         # Car
         self.light = Light()
         self.car = Car(self)
+        # axis
+        self.axis = Axis(self)
 
     def get_time(self):
         self.time = pg.time.get_ticks() * 0.001
@@ -49,7 +51,7 @@ class GraphicsEngine:
             self.camera_mode = "drive"
             #self.camera = DriverCamera(self, self.scene.all_vertex, self.car.position)
             #self.camera = DriverCamera(self, self.scene.all_vertex, self.scene.current_vertex)
-            self.camera = FollowCarCamera(self)
+            self.camera = DriverCamera(self)
         else:
             self.camera_mode = "bird"
             self.camera = Camera(self)
@@ -61,7 +63,6 @@ class GraphicsEngine:
                 pg.quit()
                 sys.exit()
             if event.type == pg.KEYDOWN and event.key == pg.K_c:
-                print("change camera")
                 self.change_camera()
             if event.type == pg.MOUSEWHEEL:
                 self.camera.zoom(-event.y*3)
@@ -83,23 +84,17 @@ class GraphicsEngine:
             self.car.move_to_start()
         if keys[pg.K_UP]:
             self.car.move_forward()
-            # if self.camera_mode == "drive":
-            #     self.camera.move_up(self.car.position)
         if keys[pg.K_RIGHT]:
             self.car.move_right()
         if keys[pg.K_LEFT]:
             self.car.move_left()
         if keys[pg.K_DOWN]:
             self.car.move_backward()
-            # if self.camera_mode == "drive":
-            #     self.camera.move_down(self.car.position)
         
         self.scene.on_init()
         self.car.on_init()
         if any(keys):
             self.camera.update()
-
-        #time.sleep(0.5)
 
         self.asphalt.on_init()
         self.grass.on_init()
@@ -114,6 +109,8 @@ class GraphicsEngine:
         self.scene.render()
         # render car
         self.car.render()
+        # render axis
+        self.axis.render()
         # swap buffers
         pg.display.flip()
 

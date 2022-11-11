@@ -59,7 +59,6 @@ class Car:
         self.shader_program['view_pos'].write(self.app.camera.position)
         self.shader_program['m_model'].write(self.m_model)
 
-
     def render(self):
         self.shader_program['view_pos'].write(self.app.camera.position)
         self.vao.render()
@@ -111,8 +110,6 @@ class Car:
         self.m_model = glm.translate(m_model,  glm.rotate(self.position, -degree, glm.vec3(0,1,0)))
         print(self.rotation)
 
-
-
     def move_left(self):
         degree = 0.05
         self.rotation = (self.rotation + degree) % (2 * np.pi)
@@ -120,31 +117,23 @@ class Car:
         self.m_model = glm.translate(self.m_model, -self.position)
         self.m_model = glm.rotate(self.m_model, degree, glm.vec3(0,1,0))
         self.m_model = glm.translate(self.m_model, glm.rotate(old_position, -degree, glm.vec3(0,1,0)))
-        print(self.rotation)
-
 
     def move_forward(self):
-        x, y, z = self.position
-        old_position = self.position
         direction_vector = self.direction_vector(self.rotation)
-        self.position = glm.vec3(x, y, z) + 0.5 * direction_vector
-        print('car: ', self.position)
-        print('car rot: ', self.rotation)
+        self.position = self.position + 0.5 * direction_vector
+        print("--> move_forward")
+        print('direction:', direction_vector)
+        print('car position: ', self.position)
         self.m_model = glm.translate(self.m_model, glm.vec3(0.5, 0, 0))
     
     def move_backward(self):
-        #x, y, z = self.position
-        #old_position = self.position
         direction_vector = self.direction_vector(self.rotation)
         self.position = self.position - 0.5 * direction_vector
-        print('car: ', self.position)
-        print('car rot: ', self.rotation)
         self.m_model = glm.translate(self.m_model, glm.vec3(-0.5, 0, 0))  #self.position - old_position
 
     @staticmethod
     def direction_vector(rotation):
         direction_vector = glm.normalize(glm.vec3(np.sin(rotation), 0, np.cos(rotation)))
-        print('dir vec:', direction_vector)
         return direction_vector
 
     def get_shader_program(self):

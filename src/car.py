@@ -3,6 +3,7 @@ import numpy as np
 import pywavefront
 import math
 
+
 class Car:
     def __init__(self, app):
         self.app = app
@@ -121,19 +122,17 @@ class Car:
     def move_forward(self):
         direction_vector = self.direction_vector(self.rotation)
         self.position = self.position + 0.5 * direction_vector
-        print("--> move_forward")
-        print('direction:', direction_vector)
-        print('car position: ', self.position)
         self.m_model = glm.translate(self.m_model, glm.vec3(0.5, 0, 0))
     
     def move_backward(self):
         direction_vector = self.direction_vector(self.rotation)
         self.position = self.position - 0.5 * direction_vector
-        self.m_model = glm.translate(self.m_model, glm.vec3(-0.5, 0, 0))  #self.position - old_position
+        self.m_model = glm.translate(self.m_model, glm.vec3(-0.5, 0, 0))
 
-    @staticmethod
-    def direction_vector(rotation):
-        direction_vector = glm.normalize(glm.vec3(np.sin(rotation), 0, np.cos(rotation)))
+    def direction_vector(self, rotation):
+        # Hotfix: why do we need this formula
+        rotation = 7 * np.pi / 2 - rotation - 2 * ((np.pi / 2 - rotation) % np.pi)  # TODO why is the direction initialised wrong
+        direction_vector = glm.vec3(np.sin(rotation) / 5, 0, np.cos(rotation) / 5)  # TODO why do we need to divide by 5
         return direction_vector
 
     def get_shader_program(self):

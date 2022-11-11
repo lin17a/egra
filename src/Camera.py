@@ -1,10 +1,6 @@
-import math
-
 import glm
 import numpy as np
 import moderngl as mgl
-from overrides import overrides
-from scipy.spatial.distance import cdist
 
 
 class Camera:
@@ -60,6 +56,7 @@ class DriverCamera(Camera):
     def __init__(self, app):
         self.app = app
         self.aspect_ratio = app.WIN_SIZE[0] / app.WIN_SIZE[1]
+        self.cam_dist = 5
         self.position = self.get_position()
         self.up = glm.vec3(0, 1, 0)
         self.lookat = self.get_look_at()
@@ -77,29 +74,15 @@ class DriverCamera(Camera):
 
     def get_position(self):
         car_x, car_z, car_y = self.app.car.position
-        car_rot = (3 * np.pi) / 2 - self.app.car.rotation
-        cam_rot = car_rot - ((car_rot % np.pi) - np.pi / 2) * 2 + np.pi  # formula by experiment, doesn't work
-        view_dir = self.app.car.direction_vector(cam_rot)
-        position = glm.vec3(car_x - 2 * view_dir[0], 1, car_y - 2 * view_dir[2])  # y, z, x
+        view_dir = self.app.car.direction_vector(self.app.car.rotation)
+        # TODO the cam dist needs to match the direction_vector dividing factor
+        position = glm.vec3(car_x - self.cam_dist * view_dir[0], 1, car_y - self.cam_dist * view_dir[2])
         print("--> get camera position")
+        print("rotation:", self.app.car.rotation)
         print("car position:", self.app.car.position)
         print('direction:', view_dir)
         print('camera position:', position)
         return position
-
-        """ Centered
-        car_x, car_z, car_y = self.app.car.position
-        # TODO Simplify this please!
-        car_rot = (3 * np.pi) / 2 - self.app.car.rotation
-        cam_rot = car_rot - ((car_rot % np.pi) - np.pi / 2) * 2 + np.pi  # formula by experiment, doesn't work
-        #
-        view_dir = glm.vec3(math.sin(cam_rot), 0, math.cos(cam_rot))  # y, z, x  # usually cam_rot, should be car_rot
-        position = glm.vec3(car_x - 2 * view_dir[0], 1, car_y - 2 * view_dir[2])  # y, z, x
-        print("--> get camera position")
-        print('view dir:', view_dir)
-        print('camera: ', position)
-        return position
-        """
 
     def get_look_at(self):
         return self.app.car.position

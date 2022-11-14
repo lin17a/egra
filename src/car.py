@@ -98,7 +98,6 @@ class Car:
                 data.extend(material.specular[:3])
 
         data_np = np.array(data, dtype='f4')
-        print(data_np.shape)
         return data_np
 
     def get_vbo(self):

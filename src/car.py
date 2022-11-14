@@ -2,6 +2,7 @@ import glm
 import numpy as np
 import pywavefront
 import math
+from Physics import Physics
 
 class Car:
     def __init__(self, app):
@@ -12,7 +13,11 @@ class Car:
         self.vao = self.get_vao()
         self.rotation = self.get_start_rotation()
         self.position = self.get_start_position()
+        self.velocity = 0 #[x, y]
+        self.direction = self.get_start_rotation(return_vectors = True) # [x,y]
         self.m_model = self.get_model_matrix()
+        self.physics = Physics((self.position[0], self.position[2]), dt = 0.1)
+        self.velmax = 30
         self.on_init()
 
     def get_start_position(self):
@@ -22,11 +27,13 @@ class Car:
         x_mid_point = (next_vertex[2].max() + vertex[2].min()) / 2
         return glm.vec3((y_mid_point, 0, x_mid_point))
 
-    def get_start_rotation(self):
+    def get_start_rotation(self, return_vectors = False):
         vertex = self.app.scene.all_vertex[self.app.scene.current_vertex - 20] # coordinate order: y, z, x
         next_vertex = self.app.scene.all_vertex[self.app.scene.current_vertex - 19]
         dir_vec = next_vertex - vertex
         rot_rad = math.atan2(dir_vec[0], dir_vec[2]) # atan2(y, x)
+        if return_vectors:
+            return dir_vec[0], dir_vec[2]
         return rot_rad
 
     def get_model_matrix(self):
@@ -40,6 +47,7 @@ class Car:
         self.rotation = self.get_start_rotation()
         self.m_model = self.get_model_matrix()
         self.on_init()
+        
 
     def on_init(self):
         self.shader_program['light.position'].write(self.app.light.position)
@@ -95,7 +103,7 @@ class Car:
                 data.extend(material.ambient[0:3])
                 data.extend(material.specular[0:3])
 
-        data_np = np.array(data, dtype='f4')
+        data_np = np.array(data, dtype = 'f4')
         return data_np
 
     def get_vbo(self):
@@ -121,15 +129,29 @@ class Car:
 
 
     def move_forward(self):
-        x, y, z = self.position
-        old_position = self.position
-        self.position = glm.vec3(x+0.5, y, z)
-        self.m_model = glm.translate(self.m_model, self.position - old_position)
+        self.velocity += 0.5
+        self.velocity = self.velmax if self.velocity > self.velmax else self.velocity
+        
     
     def move_backward(self):
+        self.velocity -= 0.5
+        self.velocity = 0 if self.velocity < 0 else self.velocity
+        #x, y, z = self.position
+        #old_position = self.position
+        #self.position = glm.vec3(x-0.5, y, z)
+        #self.m_model = glm.translate(self.m_model, self.position - old_position)
+        
+    def up(self):
+        self.physics.Update(self.velocity, [1,0], 1)
+        self.velocity -= 0.1
+        print(f"velocidad de la física: {self.physics.Vel}")
+        print(f"velocidad que se le da: {self.velocity}")
+        print(f"miu: {self.physics.miu}")
+        
         x, y, z = self.position
         old_position = self.position
-        self.position = glm.vec3(x-0.5, y, z)
+        #self.position = glm.vec3(x+0.5, y, z)
+        self.position = glm.vec3(self.physics.Pos[0], y, z)
         self.m_model = glm.translate(self.m_model, self.position - old_position)
 
     def get_shader_program(self):

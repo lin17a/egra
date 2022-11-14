@@ -116,7 +116,7 @@ class Physics:
         Drag = self.k * ( ( ( self.Vel[ind] + self.PastVel[ind] )/2 )**2 )
         a = (self.Fant[ind] - Drag - Fr ) / self.m
         
-        self.Vel[ind] = self.PastVel[ind] + self.dt*(a + self.aant[ind])/2 - self.corr
+        self.Vel[ind] = self.PastVel[ind] + self.dt*(a + self.aant[ind])/2 - self.corr - self.miu
         
         
         self.Vel[ind] = self.Vel[ind] if self.Vel[ind] > 0 else 0

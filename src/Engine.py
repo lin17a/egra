@@ -84,14 +84,25 @@ class GraphicsEngine:
         if keys[pg.K_r]:
             self.scene.new_road()
             self.car.move_to_start()
+            #print(self.car.get_start_rotation(return_vectors = True))
+            
         if keys[pg.K_UP]:
             self.car.move_forward()
+            #print(self.car.position)
         if keys[pg.K_RIGHT]:
             self.car.move_right()
         if keys[pg.K_LEFT]:
             self.car.move_left()
         if keys[pg.K_DOWN]:
             self.car.move_backward()
+            
+        if keys[pg.K_m]:
+            self.car.up()
+            
+        if keys[pg.K_g]:
+            self.car.physics.miu = 5
+        if keys[pg.K_h]:
+            self.car.physics.miu = 1
         
         self.scene.on_init()
         self.car.on_init()

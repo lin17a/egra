@@ -4,7 +4,8 @@ import moderngl as mgl
 import numpy as np
 import pygame as pg
 
-class Grass:
+
+class Skybox:
     def __init__(self,app):
         self.app = app
         self.ctx = app.ctx
@@ -110,19 +111,19 @@ class Grass:
         return program
 
 
-class RaceTrackTexture:
+class Grass:
     def __init__(self,app):
         self.app = app
         self.ctx = app.ctx
         self.vbo = self.get_vbo()
-        self.shader_program = self.get_shader_program()
+        self.shader_program = self.get_shader_program('grass')
         self.vao = self.get_vao()
         self.m_model = self.get_model_matrix()
-        self.texture = self.get_texture('./textures/asphalta.jpg')
+        self.texture = self.get_texture('./textures/grassc.jpg')
         self.on_init()
 
     def get_model_matrix(self):
-        m_model = glm.scale(glm.mat4(1), glm.vec3(100,1,100))
+        m_model = glm.scale(glm.mat4(1), glm.vec3(400,1,400))
         #m_model = glm.rotate(glm.mat4(),glm.radians(0),glm.vec3(0,1,0))
         return m_model
 
@@ -197,32 +198,14 @@ class RaceTrackTexture:
         vbo = self.ctx.buffer(vertex_data)
         return vbo
 
-    def get_shader_program(self):
-        program = self.ctx.program(    
-            vertex_shader='''
-                #version 330
-                layout (location = 0) in vec2 in_texcoord;
-                layout (location = 1) in vec3 in_position;
-                out vec2 uv_0;
-                uniform mat4 m_proj;
-                uniform mat4 m_view;
-                uniform mat4 m_model;
-                void main() 
-                {
-                    uv_0 = in_texcoord;
-                    gl_Position = m_proj * m_view * m_model * vec4(in_position, 1.0);
-                }
-            ''',
-            fragment_shader='''
-                #version 330
-                layout (location = 0) out vec4 fragColor;
-                in vec2 uv_0;
-                uniform sampler2D u;
-                void main() 
-                { 
-                    vec3 color = texture(u, uv_0*5).rgb;
-                    fragColor = vec4(color, 1.0);
-                }
-            ''',
-        )
+    def get_shader_program(self, shader_program_name):
+        with open(f'shaders/{shader_program_name}.vert') as file:
+                    vertex_shader = file.read()
+
+        with open(f'shaders/{shader_program_name}.frag') as file:
+            fragment_shader = file.read()
+
+        program = self.ctx.program(vertex_shader=vertex_shader, 
+                                fragment_shader=fragment_shader)
         return program
+

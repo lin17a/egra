@@ -12,7 +12,6 @@ from car import Car
 from Light import Light
 from texturing import Grass, RaceTrackTexture
 import time
-from UI import menu
 
 
 class GraphicsEngine:
@@ -28,12 +27,11 @@ class GraphicsEngine:
 
     def iniciar_menu(self):
         self.surface = pg.display.set_mode(self.WIN_SIZE)
-        self.menu = pygame_menu.Menu(
-                    height=300,
-                    theme=pygame_menu.themes.THEME_BLUE,
-                    title='Menu',
-                    width=400
-                )
+        self.menu = pygame_menu.Menu(   height = 300, 
+                                        theme = pygame_menu.themes.THEME_BLUE, 
+                                        title = 'Menu', 
+                                        width = 400
+                                    )
         self.menu.add.button('Play One Player', self.play_one_player)
         self.menu.add.button('Quit', pygame_menu.events.EXIT)
         self.menu_activate = True
@@ -85,6 +83,9 @@ class GraphicsEngine:
                 self.change_camera()
             if event.type == pg.MOUSEWHEEL:
                 self.camera.zoom(-event.y*3)
+            if event.type == pg.KEYDOWN and event.key == pg.K_m:
+                self.menu_activate = True
+
 
         keys = pg.key.get_pressed()
 
@@ -134,17 +135,18 @@ class GraphicsEngine:
         pg.display.flip()
 
     def run(self):
-        while self.menu_activate:
-            self.get_time()
-            self.surface = pg.display.set_mode(self.WIN_SIZE)
-            self.menu.mainloop(self.surface, disable_loop=True)
-            self.clock.tick(60)
-
         while True:
-            self.get_time()
-            self.check_events()
-            self.render()
-            self.clock.tick(60)
+            while self.menu_activate:
+                self.get_time()
+                self.surface = pg.display.set_mode(self.WIN_SIZE)
+                self.menu.mainloop(self.surface, disable_loop=True)
+                self.clock.tick(60)
+
+            while not self.menu_activate:
+                self.get_time()
+                self.check_events()
+                self.render()
+                self.clock.tick(60)
 
 
 if __name__ == '__main__':

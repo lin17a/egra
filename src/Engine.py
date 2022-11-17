@@ -92,7 +92,6 @@ class GraphicsEngine:
         if keys[pg.K_DOWN]:
             self.car.move_backward()
         
-        self.scene.on_init()
         self.car.on_init()
         if any(keys):
             self.camera.update()

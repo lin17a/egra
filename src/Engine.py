@@ -96,8 +96,8 @@ class GraphicsEngine:
         if keys[pg.K_DOWN]:
             self.car.move_backward()
             
-        if keys[pg.K_m]:
-            self.car.up()
+        #if keys[pg.K_m]:
+        self.car.up()
             
         if keys[pg.K_g]:
             self.car.physics.miu = 5

@@ -16,7 +16,7 @@ class Car:
         self.velocity = 0 #[x, y]
         self.direction = self.get_start_rotation(return_vectors = True) # [x,y]
         self.m_model = self.get_model_matrix()
-        self.physics = Physics((self.position[0], self.position[2]), dt = 0.1)
+        self.physics = Physics((self.position[0], self.position[2]), dt = 0.05)
         self.velmax = 30
         self.on_init()
 

@@ -1,4 +1,5 @@
 import pygame as pg
+import pygame_menu
 import moderngl as mgl
 import glm
 import sys
@@ -18,19 +19,36 @@ class GraphicsEngine:
     def __init__(self, win_size=(1280, 960)):
         # init pygame modules
         pg.init()
+        # clock
+        self.clock = pg.time.Clock()
+        self.time = 0
         # window sizeq
         self.WIN_SIZE = win_size
+        self.iniciar_menu()
+
+    def iniciar_menu(self):
+        self.surface = pg.display.set_mode(self.WIN_SIZE)
+        self.menu = pygame_menu.Menu(
+                    height=300,
+                    theme=pygame_menu.themes.THEME_BLUE,
+                    title='Menu',
+                    width=400
+                )
+        self.menu.add.button('Play One Player', self.play_one_player)
+        self.menu.add.button('Quit', pygame_menu.events.EXIT)
+        self.menu_activate = True
+
+
+    def play_one_player(self):
+        self.menu_activate = False
         # set opengl attr
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION,3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION,3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE)
         # create opengl context
-        window = pg.display.set_mode(self.WIN_SIZE, flags=pg.OPENGL | pg.DOUBLEBUF)
+        pg.display.set_mode(self.WIN_SIZE, flags=pg.OPENGL | pg.DOUBLEBUF)
         # detect and use exixting opengl context
         self.ctx = mgl.create_context()
-
-        menu(window)
-
         # camera
         self.camera = Camera(self)
         self.camera_mode = "bird"
@@ -38,9 +56,6 @@ class GraphicsEngine:
         self.scene = Circuito(self)
         self.asphalt = RaceTrackTexture(self)
         self.grass = Grass(self)
-        # clock
-        self.clock = pg.time.Clock()
-        self.time = 0
         # Car
         self.light = Light()
         self.car = Car(self)
@@ -94,12 +109,10 @@ class GraphicsEngine:
             self.car.move_left()
         if keys[pg.K_DOWN]:
             self.car.move_backward()
-        
-        self.car.on_init()
 
+        self.car.on_init()
         if any(keys):
             self.camera.update()
-
         self.asphalt.on_init()
         self.grass.on_init()
         self.scene.on_init()
@@ -115,13 +128,18 @@ class GraphicsEngine:
         self.ctx.enable(mgl.DEPTH_TEST | mgl.CULL_FACE)
         self.car.render()
         self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
-
         # render axis
         self.axis.render()
         # swap buffers
         pg.display.flip()
 
     def run(self):
+        while self.menu_activate:
+            self.get_time()
+            self.surface = pg.display.set_mode(self.WIN_SIZE)
+            self.menu.mainloop(self.surface, disable_loop=True)
+            self.clock.tick(60)
+
         while True:
             self.get_time()
             self.check_events()

@@ -85,6 +85,8 @@ class GraphicsEngine:
                 self.camera.zoom(-event.y*3)
             if event.type == pg.KEYDOWN and event.key == pg.K_m:
                 self.menu_activate = True
+                self.surface = pg.display.set_mode(self.WIN_SIZE)
+
 
 
         keys = pg.key.get_pressed()
@@ -138,7 +140,6 @@ class GraphicsEngine:
         while True:
             while self.menu_activate:
                 self.get_time()
-                self.surface = pg.display.set_mode(self.WIN_SIZE)
                 self.menu.mainloop(self.surface, disable_loop=True)
                 self.clock.tick(60)
 

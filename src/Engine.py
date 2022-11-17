@@ -27,7 +27,6 @@ class GraphicsEngine:
         pg.display.set_mode(self.WIN_SIZE, flags=pg.OPENGL | pg.DOUBLEBUF)
         # detect and use exixting opengl context
         self.ctx = mgl.create_context()
-        self.ctx.enable(mgl.DEPTH_TEST | mgl.CULL_FACE)
         # camera
         self.camera = Camera(self)
         self.camera_mode = "bird"
@@ -93,6 +92,7 @@ class GraphicsEngine:
             self.car.move_backward()
         
         self.car.on_init()
+
         if any(keys):
             self.camera.update()
 
@@ -108,7 +108,10 @@ class GraphicsEngine:
         #self.asphalt.render()
         self.scene.render()
         # render car
+        self.ctx.enable(mgl.DEPTH_TEST | mgl.CULL_FACE)
         self.car.render()
+        self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
+
         # render axis
         self.axis.render()
         # swap buffers

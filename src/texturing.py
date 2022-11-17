@@ -1,6 +1,4 @@
-from msilib.schema import Component
 import glm
-import moderngl as mgl
 import numpy as np
 import pygame as pg
 

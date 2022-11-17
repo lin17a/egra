@@ -2,6 +2,7 @@ import glm
 import numpy as np
 import pywavefront
 import math
+from Physics import Physics
 
 
 class Car:
@@ -14,6 +15,12 @@ class Car:
         self.rotation = self.get_start_rotation()
         self.position = self.get_start_position()
         self.m_model = self.get_model_matrix()
+        
+        self.velocity = 0 #[x, y]
+        self.physics = Physics((self.position[0], self.position[2]), dt = 0.05)
+        self.velmax = 30
+        self.velmin = -20
+        
         self.on_init()
 
     def get_start_position(self):
@@ -120,14 +127,48 @@ class Car:
         self.m_model = glm.translate(self.m_model, glm.rotate(old_position, -degree, glm.vec3(0,1,0)))
 
     def move_forward(self):
+        self.velocity += 0.5
+        self.velocity = self.velmax if self.velocity > self.velmax else self.velocity
+        """
         direction_vector = self.direction_vector(self.rotation)
         self.position = self.position + 0.5 * direction_vector
         self.m_model = glm.translate(self.m_model, glm.vec3(0.5, 0, 0))
+        """
     
     def move_backward(self):
+        print(f"vel: {self.velocity}")
+        self.velocity -= 0.5
+        self.velocity = self.velmin if self.velocity < self.velmin else self.velocity
+        
+        
+    def up(self):
+        if self.velocity > 0:
+            self.velocity -= 0.1
+        #self.velocity = 0 if self.velocity < 0 else self.velocity
+        self.physics.Update(self.velocity, [1,0], 1)
+        
+        
+        
         direction_vector = self.direction_vector(self.rotation)
-        self.position = self.position - 0.5 * direction_vector
-        self.m_model = glm.translate(self.m_model, glm.vec3(-0.5, 0, 0))
+        
+        old_position = self.position
+        
+        self.position = self.position + self.physics.Vel[0]/20 * direction_vector
+        
+        self.m_model = glm.translate(self.m_model, glm.vec3(self.physics.Vel[0]/20, 0, 0))#self.position - old_position)
+        
+        
+        #print(f"velocidad de la física: {self.physics.Vel}")
+        #print(f"velocidad que se le da: {self.velocity}")
+        #print(f"miu: {self.physics.miu}")
+        #print(f"position {self.physics.Pos[0]}")
+        
+        #x, y, z = self.position
+        #old_position = self.position
+        #self.position = glm.vec3(x+0.5, y, z)
+        #self.position = glm.vec3(self.physics.Pos[0], y, z)
+        #self.position = glm.vec3(x+0.5, y, z)
+        #self.m_model = glm.translate(self.m_model, self.position - old_position)
         
 
     def direction_vector(self, rotation):

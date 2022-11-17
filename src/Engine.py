@@ -91,13 +91,14 @@ class GraphicsEngine:
         if keys[pg.K_DOWN]:
             self.car.move_backward()
             
-        if keys[pg.K_m]:
-            self.car.up()
+        
+        self.car.up()
+        self.camera.update()
         
         self.car.on_init()
 
-        if any(keys):
-            self.camera.update()
+        #if any(keys):
+            
 
         self.asphalt.on_init()
         self.grass.on_init()

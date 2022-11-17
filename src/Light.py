@@ -1,8 +1,8 @@
 import glm
 
 class Light:
-    def __init__(self, position=(5,5,0), color=(1,1,1)):
-        self.position = glm.vec3(5,-5,5)
+    def __init__(self, position=(0,100,0), color=(1,1,1)):
+        self.position = glm.vec3(position)
         self.color = glm.vec3(color)
         # intensities
         self.Ia = 0.2 * self.color # ambient

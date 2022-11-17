@@ -136,45 +136,65 @@ class Car:
         return direction_vector
 
     def get_shader_program(self):
-        program = self.ctx.program(
+        program = self.ctx.program(    
             vertex_shader='''
                 #version 330
+                #extension GL_ARB_separate_shader_objects: enable
+
                 layout (location = 0) in vec3 in_position;
                 layout (location = 1) in vec3 in_normal;
                 layout (location = 2) in vec3 in_diffuse;
                 layout (location = 3) in vec3 in_ambient;
                 layout (location = 4) in vec3 in_specular;
-                out vec3 color;
-                struct Light {
-                    vec3 position;
-                };
-                uniform Light light;
+                out vec3 normal;
+                out vec3 fragPos;
+                
+                out vec3 Id;
+                out vec3 Ia;
+                out vec3 Is;
+
                 uniform mat4 m_proj;
                 uniform mat4 m_view;
                 uniform mat4 m_model;
-                uniform vec3 view_pos;
+
                 void main() {
+                    Id = in_diffuse;
+                    Ia = in_ambient;
+                    Is = in_specular;
+                    fragPos = vec3(m_model * vec4(in_position, 1.0));
+                    normal = mat3(transpose(inverse(m_model))) * normalize(in_normal);
                     gl_Position = m_proj * m_view * m_model * vec4(in_position, 1.0);
-                    vec3 frag_pos = vec3(m_model * vec4(in_position, 1.0));
-                    vec3 norm = normalize(in_normal);
-                    vec3 light_dir = normalize(light.position - frag_pos);  
-                    mat3 inverse_m_model = mat3(transpose(inverse(m_model)));
-                    vec3 normal = inverse_m_model * normalize(in_normal);
-                    vec3 diffuse = in_diffuse * max(0, dot(normalize(normal), light_dir));
-                    vec3 view_dir =  normalize(view_pos - frag_pos);
-                    vec3 reflect_dir = reflect(-light_dir, normal);  
-                    vec3 specular = in_specular *  pow(max(dot(view_dir, reflect_dir), 0.0), 256);
-                    color = (in_ambient + diffuse + specular * 2) * vec3(1,1,1);
                 }
             ''',
             fragment_shader='''
                 #version 330
-                #extension GL_ARB_separate_shader_objects : require
                 layout (location = 0) out vec4 fragColor;
-                in vec3 color;
-                void main() {
-                    fragColor = vec4(color, 1.0);
+                
+                in vec3 normal;
+                in vec3 fragPos;
+                
+                in vec3 Id;
+                in vec3 Ia;
+                in vec3 Is;
+                
+                struct Light {
+                    vec3 position;
+                };
+                uniform Light light;
+                uniform vec3 view_pos;
+                
+                void main() { 
+                    vec3 Normal = normalize(normal);
+                    vec3 ambient = Ia;
+                    vec3 lightDir = normalize(light.position - fragPos);
+                    vec3 diffuse = max(0, dot(lightDir, Normal)) * Id;
+                    vec3 viewDir = normalize(view_pos - fragPos);
+                    vec3 reflectDir = reflect(-lightDir, Normal);
+                    float spec = pow(max(dot(viewDir, reflectDir), 0), 32);
+                    vec3 specular = spec*Is;
+                    vec3 Color = vec3(1,1,1) * (ambient + diffuse + specular);
+                    fragColor = vec4(Color,1.0);
                 }
             ''',
-        )
+            )
         return program

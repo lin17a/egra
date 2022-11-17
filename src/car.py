@@ -128,6 +128,7 @@ class Car:
         direction_vector = self.direction_vector(self.rotation)
         self.position = self.position - 0.5 * direction_vector
         self.m_model = glm.translate(self.m_model, glm.vec3(-0.5, 0, 0))
+        
 
     def direction_vector(self, rotation):
         # Hotfix: why do we need this formula

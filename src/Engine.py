@@ -90,6 +90,9 @@ class GraphicsEngine:
             self.car.move_left()
         if keys[pg.K_DOWN]:
             self.car.move_backward()
+            
+        if keys[pg.K_m]:
+            self.car.up()
         
         self.scene.on_init()
         self.car.on_init()

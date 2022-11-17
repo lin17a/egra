@@ -3,6 +3,7 @@ import numpy as np
 import pywavefront
 import math
 
+
 class Car:
     def __init__(self, app):
         self.app = app
@@ -59,7 +60,6 @@ class Car:
         self.shader_program['view_pos'].write(self.app.camera.position)
         self.shader_program['m_model'].write(self.m_model)
 
-
     def render(self):
         self.shader_program['view_pos'].write(self.app.camera.position)
         self.vao.render()
@@ -105,32 +105,35 @@ class Car:
 
     def move_right(self):
         degree = -0.05
-        self.rotation += degree
+        self.rotation = (self.rotation + degree) % (2 * np.pi)
         m_model = glm.translate(self.m_model, -self.position)
         m_model = glm.rotate(m_model, degree, glm.vec3(0,1,0))
         self.m_model = glm.translate(m_model,  glm.rotate(self.position, -degree, glm.vec3(0,1,0)))
-
+        print(self.rotation)
 
     def move_left(self):
         degree = 0.05
-        self.rotation += degree
+        self.rotation = (self.rotation + degree) % (2 * np.pi)
         old_position = self.position
         self.m_model = glm.translate(self.m_model, -self.position)
         self.m_model = glm.rotate(self.m_model, degree, glm.vec3(0,1,0))
         self.m_model = glm.translate(self.m_model, glm.rotate(old_position, -degree, glm.vec3(0,1,0)))
 
-
     def move_forward(self):
-        x, y, z = self.position
-        old_position = self.position
-        self.position = glm.vec3(x+0.5, y, z)
-        self.m_model = glm.translate(self.m_model, self.position - old_position)
+        direction_vector = self.direction_vector(self.rotation)
+        self.position = self.position + 0.5 * direction_vector
+        self.m_model = glm.translate(self.m_model, glm.vec3(0.5, 0, 0))
     
     def move_backward(self):
-        x, y, z = self.position
-        old_position = self.position
-        self.position = glm.vec3(x-0.5, y, z)
-        self.m_model = glm.translate(self.m_model, self.position - old_position)
+        direction_vector = self.direction_vector(self.rotation)
+        self.position = self.position - 0.5 * direction_vector
+        self.m_model = glm.translate(self.m_model, glm.vec3(-0.5, 0, 0))
+
+    def direction_vector(self, rotation):
+        # Hotfix: why do we need this formula
+        rotation = 7 * np.pi / 2 - rotation - 2 * ((np.pi / 2 - rotation) % np.pi)  # TODO why is the direction initialised wrong
+        direction_vector = glm.vec3(np.sin(rotation) / 5, 0, np.cos(rotation) / 5)  # TODO why do we need to divide by 5
+        return direction_vector
 
     def get_shader_program(self):
         program = self.ctx.program(

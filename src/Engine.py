@@ -5,7 +5,7 @@ import sys
 import itertools as it
 import numpy as np
 from OpenGL.GL import *
-from Camera import Camera, DriverCamera
+from Camera import Camera, Axis, DriverCamera
 from Circuito import Circuito
 from car import Car
 from Light import Light
@@ -40,6 +40,8 @@ class GraphicsEngine:
         # Car
         self.light = Light()
         self.car = Car(self)
+        # axis
+        self.axis = Axis(self)
 
     def get_time(self):
         self.time = pg.time.get_ticks() * 0.001
@@ -47,7 +49,9 @@ class GraphicsEngine:
     def change_camera(self):
         if self.camera_mode == "bird":
             self.camera_mode = "drive"
-            self.camera = DriverCamera(self, self.scene.all_vertex, self.scene.current_vertex)
+            #self.camera = DriverCamera(self, self.scene.all_vertex, self.car.position)
+            #self.camera = DriverCamera(self, self.scene.all_vertex, self.scene.current_vertex)
+            self.camera = DriverCamera(self)
         else:
             self.camera_mode = "bird"
             self.camera = Camera(self)
@@ -59,27 +63,21 @@ class GraphicsEngine:
                 pg.quit()
                 sys.exit()
             if event.type == pg.KEYDOWN and event.key == pg.K_c:
-                print("change camera")
                 self.change_camera()
             if event.type == pg.MOUSEWHEEL:
                 self.camera.zoom(-event.y*3)
 
         keys = pg.key.get_pressed()
 
-        if self.camera_mode == "bird":
-            if keys[pg.K_w]:
-                self.camera.move_up()
-            if keys[pg.K_a]:
-                self.camera.move_left()
-            if keys[pg.K_s]:
-                self.camera.move_down()
-            if keys[pg.K_d]:
-                self.camera.move_right()
-        elif self.camera_mode == "drive":
-            if keys[pg.K_w]:
-                self.camera.move_up()
-            if keys[pg.K_s]:
-                self.camera.move_down()
+        # if self.camera_mode == "bird":
+        #     if keys[pg.K_w]:
+        #         self.camera.move_up()
+        #     if keys[pg.K_a]:
+        #         self.camera.move_left()
+        #     if keys[pg.K_s]:
+        #         self.camera.move_down()
+        #     if keys[pg.K_d]:
+        #         self.camera.move_right()
 
         if keys[pg.K_r]:
             self.scene.new_road()
@@ -95,11 +93,12 @@ class GraphicsEngine:
         
         self.scene.on_init()
         self.car.on_init()
+        if any(keys):
+            self.camera.update()
 
         self.asphalt.on_init()
         self.grass.on_init()
         self.scene.on_init()
-        
         
     def render(self):
         # clear framebuffer
@@ -110,6 +109,8 @@ class GraphicsEngine:
         self.scene.render()
         # render car
         self.car.render()
+        # render axis
+        self.axis.render()
         # swap buffers
         pg.display.flip()
 

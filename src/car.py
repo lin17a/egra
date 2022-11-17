@@ -147,11 +147,13 @@ class Car:
         print(f"velocidad de la física: {self.physics.Vel}")
         print(f"velocidad que se le da: {self.velocity}")
         print(f"miu: {self.physics.miu}")
+        print(f"position {self.physics.Pos[0]}")
         
         x, y, z = self.position
         old_position = self.position
         #self.position = glm.vec3(x+0.5, y, z)
         self.position = glm.vec3(self.physics.Pos[0], y, z)
+        #self.position = glm.vec3(x+0.5, y, z)
         self.m_model = glm.translate(self.m_model, self.position - old_position)
 
     def get_shader_program(self):

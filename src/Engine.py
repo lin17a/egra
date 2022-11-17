@@ -11,6 +11,7 @@ from car import Car
 from Light import Light
 from texturing import Grass, RaceTrackTexture
 import time
+from UI import menu
 
 
 class GraphicsEngine:
@@ -24,9 +25,12 @@ class GraphicsEngine:
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION,3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE)
         # create opengl context
-        pg.display.set_mode(self.WIN_SIZE, flags=pg.OPENGL | pg.DOUBLEBUF)
+        window = pg.display.set_mode(self.WIN_SIZE, flags=pg.OPENGL | pg.DOUBLEBUF)
         # detect and use exixting opengl context
         self.ctx = mgl.create_context()
+
+        menu(window)
+
         # camera
         self.camera = Camera(self)
         self.camera_mode = "bird"

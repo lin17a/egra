@@ -6,6 +6,9 @@ from scipy.spatial.distance import cdist
 
 import matplotlib.pyplot as plt
 
+from numba import jit, njit
+import numba
+
 
 class Circuito:
     def __init__(self,app):
@@ -20,6 +23,7 @@ class Circuito:
         self.vao = self.get_vao()
         self.m_model = self.get_model_matrix()
         self.curves = self.get_curvyness()
+        self.layout_matrix = self.get_layout_matrix()
         self.on_init()
 
     def get_model_matrix(self):
@@ -193,3 +197,77 @@ class Circuito:
         plt.show()
 
         return curviness
+
+    @staticmethod
+    @jit(nopython=True)
+    def pointinpolygon(x, y, poly):
+        n = len(poly)
+        inside = False
+        p2x = 0.0
+        p2y = 0.0
+        xints = 0.0
+        p1x, p1y = poly[0]
+        for i in numba.prange(n + 1):
+            p2x, p2y = poly[i % n]
+            if y > min(p1y, p2y):
+                if y <= max(p1y, p2y):
+                    if x <= max(p1x, p2x):
+                        if p1y != p2y:
+                            xints = (y - p1y) * (p2x - p1x) / (p2y - p1y) + p1x
+                        if p1x == p2x or x <= xints:
+                            inside = not inside
+            p1x, p1y = p2x, p2y
+
+        return inside
+
+    #@njit(parallel=True)
+    def parallelpointinpolygon(self, points, polygon):
+        D = np.empty(len(points), dtype=np.bool)
+        for i in numba.prange(0, len(D)):
+            D[i] = self.pointinpolygon(points[i, 0], points[i, 1], polygon)
+        return D
+
+
+    def get_layout_matrix(self):
+
+        vertices = self.all_vertex
+
+        # random test points
+        #n_points = 3000
+        #test_points = np.random.rand(n_points, 2) * 100 - 50
+
+        # make regular grid
+        M, N = 50, 50
+        x = np.linspace(-50, 50, M + 1)
+        y = np.linspace(-50, 50, N + 1)
+        X, Y = np.meshgrid(x, y)
+        test_points = np.vstack([Y.ravel(), X.ravel()])
+        test_points = test_points.transpose()
+
+        # test if points are in the inner bounds of the circuit
+        in_out_inner = self.parallelpointinpolygon(test_points, vertices[::2, [0, 2]])
+        # test if points are in the outer bounds of the circuit
+        in_out_outer = self.parallelpointinpolygon(test_points, vertices[1::2, [0, 2]])
+
+        in_list = []
+        out_list = []
+
+        # combine if point is on the circuit
+        # in the outer border, but not inside the inner border
+        on_track = np.logical_and(in_out_outer, np.logical_not(in_out_inner))
+
+        # get points on track and not on track to plot
+        for p, point in enumerate(on_track):
+            if point:
+                in_list.append(p)
+            else:
+                out_list.append(p)
+
+        plt.plot(vertices[::2, 0], vertices[::2, 2])
+        plt.plot(vertices[1::2, 0], vertices[1::2, 2])
+        plt.scatter(test_points[in_list, 0], test_points[in_list, 1], s=2)
+        plt.scatter(test_points[out_list, 0], test_points[out_list, 1], s=2)
+        plt.show()
+
+        return on_track
+

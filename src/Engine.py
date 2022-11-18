@@ -90,11 +90,15 @@ class GraphicsEngine:
             self.car.move_left()
         if keys[pg.K_DOWN]:
             self.car.move_backward()
+            
         
-        self.scene.on_init()
+        self.car.up()
+        self.camera.update()
+        
         self.car.on_init()
-        if any(keys):
-            self.camera.update()
+
+        #if any(keys):
+            
 
         self.asphalt.on_init()
         self.grass.on_init()
@@ -108,7 +112,10 @@ class GraphicsEngine:
         #self.asphalt.render()
         self.scene.render()
         # render car
+        self.ctx.enable(mgl.DEPTH_TEST | mgl.CULL_FACE)
         self.car.render()
+        self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
+
         # render axis
         self.axis.render()
         # swap buffers

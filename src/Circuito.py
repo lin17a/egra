@@ -4,6 +4,8 @@ from generation import generation_track
 import numpy as np
 from scipy.spatial.distance import cdist
 
+import matplotlib.pyplot as plt
+
 
 class Circuito:
     def __init__(self,app):
@@ -17,6 +19,7 @@ class Circuito:
         self.shader_program = self.get_shader_program()
         self.vao = self.get_vao()
         self.m_model = self.get_model_matrix()
+        self.curves = self.get_curvyness()
         self.on_init()
 
     def get_model_matrix(self):
@@ -138,3 +141,55 @@ class Circuito:
             ''',
         )
         return program
+
+
+    def get_curvyness(self):
+        vertices = self.all_vertex
+        # number of nodes to take into account when calculating the curviness
+        # (on each side of the node, so in total 2 * num_neighbours + 1 are taken into account)
+        num_neighbours = 5
+        # curviness at each vertexpair of the circuit
+        curviness = np.zeros(int(len(vertices) / 2))
+        # coordinates of the middle line
+        middle_line = np.zeros((int(len(vertices) / 2), 3))
+
+        for vert in range(0, len(vertices), 2):
+            # define first and last node on each side that are considered for the current point on the circuit
+            first_left = vert - 2 * num_neighbours
+            last_left = (vert + 2 * num_neighbours) % len(vertices)
+            first_right = vert - 2 * num_neighbours - 1
+            last_right = (vert + 2 * num_neighbours - 1) % len(vertices)
+
+            # get a list of nodes, that should be considered on each side
+            if (first_left < 0 and last_left > 0) or first_left > (last_left % len(vertices)):
+                idx_left_border = np.concatenate((np.arange((len(vertices) + first_left) % len(vertices), len(vertices), 2),
+                                                  np.arange(0, last_left + 1 % len(vertices), 2)))
+            else:
+                idx_left_border = np.arange(first_left, last_left + 1, 2)
+
+            if (first_right < 0 and last_right > 0) or first_right > (last_right % len(vertices)):
+                idx_right_border = np.concatenate((np.arange((len(vertices) + first_right) % len(vertices), len(vertices), 2),
+                                                   np.arange(1, last_right + 1 % len(vertices), 2)))
+            else:
+                idx_right_border = np.arange(first_right, last_right + 1, 2)
+
+            # calculate the length of the circuit on both sides
+            length_left = sum([sum(abs(vertices[i] - vertices[j])) for i, j in zip(idx_left_border[0:-1], idx_left_border[1:])])
+            length_right = sum([sum(abs(vertices[i] - vertices[j])) for i, j in zip(idx_right_border[0:-1], idx_right_border[1:])])
+
+            # curviness is the ratio of the two length
+            curviness[int(vert / 2)] = length_left / length_right
+
+            # calculate middle point of the circuit for plotting
+            middle_line[int(vert / 2)] = (vertices[vert] + vertices[vert - 1]) / 2
+
+        # take the logarithm to see the curves better
+        curviness = np.sign(curviness) * np.log(abs(curviness))
+
+        # plot the curviness
+        curviness_colors = [[(vert - curviness.min()) / (curviness.max() - curviness.min()), 0, 0] for vert in curviness]
+        plt.scatter(middle_line[:, 0], middle_line[:, 2], s=10, c=curviness_colors)
+        plt.scatter(vertices[:, 0], vertices[:, 2], s=2)
+        plt.show()
+
+        return curviness

@@ -1,7 +1,0 @@
-matplotlib==3.3.4
-moderngl==5.6.4
-networkx==2.5.1
-numpy==1.19.5
-pygame==2.1.2
-PyGLM==2.5.7
-PyOpenGL==3.1.6

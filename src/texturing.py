@@ -3,7 +3,13 @@ import glm
 import moderngl as mgl
 import numpy as np
 import pygame as pg
+import os
 
+
+sky_textures = './textures/sky/'
+
+# Available maps = field, sunset, desert 
+map = "desert"
 
 class Skybox:
     def __init__(self,app):
@@ -13,7 +19,7 @@ class Skybox:
         self.shader_program = self.get_shader_program("skybox")
         self.vao = self.get_vao()
         self.m_model = self.get_model_matrix()
-        self.texture = self.get_texture_cube(dir_path='./textures/sky/')
+        self.texture = self.get_texture_cube(dir_path=sky_textures + f"{map}/") 
         self.on_init()
         
     def get_model_matrix(self):
@@ -27,7 +33,7 @@ class Skybox:
         size = textures[0].get_size()
         texture_cube = self.ctx.texture_cube(size=size, components=3, data=None)
 
-        for i in range(6):
+        for i in range(len(faces)):
             texture_data = pg.image.tostring(textures[i], 'RGB')
             texture_cube.write(face=i, data=texture_data)
 
@@ -112,7 +118,7 @@ class Grass:
         self.shader_program = self.get_shader_program('grass')
         self.vao = self.get_vao()
         self.m_model = self.get_model_matrix()
-        self.texture = self.get_texture('./textures/grassc.jpg')
+        self.texture = self.get_texture(sky_textures + f'{map}/ground')
         self.on_init()
 
     def get_model_matrix(self):
@@ -121,6 +127,12 @@ class Grass:
         return m_model
 
     def get_texture(self, path):
+
+        available_formats = ['.jpg', '.png']
+        for f in available_formats:
+            if os.path.isfile(path + f):
+                path = path + f
+
         texture = pg.image.load(path).convert()
         texture = pg.transform.flip(texture, flip_x=False, flip_y=True)
         texture = self.ctx.texture(size=texture.get_size(), components=3, 

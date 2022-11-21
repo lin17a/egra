@@ -53,16 +53,9 @@ class Skybox:
         self.obj = x
         return self.obj
 
-    def ax(self, x):
-        self.ax = x
-        return self.ax
-
     def render(self):
         if self.o:
             self.vao.render()
-        #if self.ax:
-            #self.vaoa.render(mgl.LINE_LOOP)
-        #self.vaop.render(mgl.POINTS)
         
     def destroy (self):
         self.vbo.release()
@@ -146,16 +139,9 @@ class Grass:
         self.obj = x
         return self.obj
 
-    def ax(self, x):
-        self.ax = x
-        return self.ax
-
     def render(self):
         if self.o:
             self.vao.render()
-        #if self.ax:
-            #self.vaoa.render(mgl.LINE_LOOP)
-        #self.vaop.render(mgl.POINTS)
 
     def destroy (self):
         self.vbo.release()
@@ -208,4 +194,3 @@ class Grass:
         program = self.ctx.program(vertex_shader=vertex_shader, 
                                 fragment_shader=fragment_shader)
         return program
-

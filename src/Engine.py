@@ -190,7 +190,7 @@ class GraphicsEngine:
             self.car_2.render()
             self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
             # render axis
-            self.axis.render()
+            #self.axis.render()
 
             self.camera_2.update()
             # render scene
@@ -199,8 +199,8 @@ class GraphicsEngine:
             self.scene.render()
             # render car
             self.ctx.enable(mgl.DEPTH_TEST | mgl.CULL_FACE)
-            self.car_2.render()
             self.car.render()
+            self.car_2.render()
             self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
             # render axis
             self.axis.render()

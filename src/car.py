@@ -5,7 +5,8 @@ import math
 
 
 class Car:
-    def __init__(self, app):
+    def __init__(self, app, player = 1):
+        self.player = player
         self.app = app
         self.ctx = app.ctx
         self.vbo = self.get_vbo()
@@ -75,8 +76,11 @@ class Car:
         return vao
 
     def get_vertex_data(self):
-
-        scene = pywavefront.Wavefront('models/car/F1.obj', collect_faces=True)
+        if self.player == 1:
+            scene = pywavefront.Wavefront('models/car/F1.obj', collect_faces=True)
+        
+        elif self.player == 2:
+            scene = pywavefront.Wavefront('models/car/F2.obj', collect_faces=True)
 
         vertex_data = self.get_data(scene)
 
@@ -109,7 +113,7 @@ class Car:
         m_model = glm.translate(self.m_model, -self.position)
         m_model = glm.rotate(m_model, degree, glm.vec3(0,1,0))
         self.m_model = glm.translate(m_model,  glm.rotate(self.position, -degree, glm.vec3(0,1,0)))
-        print(self.rotation)
+        #print(self.rotation)
 
     def move_left(self):
         degree = 0.05

@@ -84,10 +84,10 @@ class GraphicsEngine:
         self.grass = Grass(self)
         # Car
         self.light = Light()
-        self.car = Car(self)
-        self.car_2 = Car(self)
+        self.car = Car(self, player = 1)
+        self.car_2 = Car(self, player = 2)
         # axis
-        self.axis = Axis(self)
+        #self.axis = Axis(self)
 
     def get_time(self):
         self.time = pg.time.get_ticks() * 0.001
@@ -155,8 +155,6 @@ class GraphicsEngine:
         self.car.on_init()
         if any(keys):
             self.camera.update()
-        if any(keys) and self.players == 2:
-            self.camera_2.update()
         self.asphalt.on_init()
         self.grass.on_init()
         self.scene.on_init()

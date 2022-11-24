@@ -19,7 +19,7 @@ class Car:
         self.velocity = 0 #[x, y]
         self.physics = Physics((self.position[0], self.position[2]), dt = 0.05)
         self.velmax = 30
-        self.velmin = -20
+        self.velmin = 0
         
         self.on_init()
 
@@ -111,15 +111,14 @@ class Car:
         return vbo
 
     def move_right(self):
-        degree = -0.05
+        degree = -0.05 * self.velocity / 30
         self.rotation = (self.rotation + degree) % (2 * np.pi)
         m_model = glm.translate(self.m_model, -self.position)
         m_model = glm.rotate(m_model, degree, glm.vec3(0,1,0))
         self.m_model = glm.translate(m_model,  glm.rotate(self.position, -degree, glm.vec3(0,1,0)))
-        print(self.rotation)
 
     def move_left(self):
-        degree = 0.05
+        degree = 0.05 * self.velocity / 30
         self.rotation = (self.rotation + degree) % (2 * np.pi)
         old_position = self.position
         self.m_model = glm.translate(self.m_model, -self.position)
@@ -139,7 +138,7 @@ class Car:
         print(f"vel: {self.velocity}")
         self.velocity -= 0.5
         self.velocity = self.velmin if self.velocity < self.velmin else self.velocity
-        
+
         
     def up(self):
         if self.velocity > 0:

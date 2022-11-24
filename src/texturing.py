@@ -1,16 +1,23 @@
 import glm
 import numpy as np
 import pygame as pg
+import os
 
-class Grass:
+
+sky_textures = './textures/sky/'
+
+# Available maps = field, sunset, desert 
+map = "sunset"
+
+class Skybox:
     def __init__(self,app):
         self.app = app
         self.ctx = app.ctx
         self.vbo = self.get_vbo()
-        self.shader_program = self.get_shader_program()
+        self.shader_program = self.get_shader_program("skybox")
         self.vao = self.get_vao()
         self.m_model = self.get_model_matrix()
-        self.texture = self.get_texture_cube(dir_path='./textures/sky/')
+        self.texture = self.get_texture_cube(dir_path=sky_textures + f"{map}/") 
         self.on_init()
         
     def get_model_matrix(self):
@@ -24,7 +31,7 @@ class Grass:
         size = textures[0].get_size()
         texture_cube = self.ctx.texture_cube(size=size, components=3, data=None)
 
-        for i in range(6):
+        for i in range(len(faces)):
             texture_data = pg.image.tostring(textures[i], 'RGB')
             texture_cube.write(face=i, data=texture_data)
 
@@ -50,16 +57,9 @@ class Grass:
         self.obj = x
         return self.obj
 
-    def ax(self, x):
-        self.ax = x
-        return self.ax
-
     def render(self):
         if self.o:
             self.vao.render()
-        #if self.ax:
-            #self.vaoa.render(mgl.LINE_LOOP)
-        #self.vaop.render(mgl.POINTS)
         
     def destroy (self):
         self.vbo.release()
@@ -95,58 +95,42 @@ class Grass:
         vertex_data = self.get_vertex_data()
         vbo = self.ctx.buffer(vertex_data)
         return vbo
-    
-    def get_shader_program(self):
-        program = self.ctx.program(    
-            vertex_shader='''
-                #version 330
-                layout (location = 0) in vec3 in_position;
-                out vec3 texCubeCoords;
-                uniform mat4 m_proj;
-                uniform mat4 m_view;
-                //uniform mat4 m_model;
-                void main() 
-                {
-                    texCubeCoords = in_position;
-                    vec4 pos =  m_proj * m_view * vec4(in_position, 1.0);
-                    gl_Position = pos.xyww;
-                    gl_Position.z -= 0.0001;
-                    //gl_Position = m_proj * m_view * m_model * vec4(in_position, 1.0);
-                }
-            ''',
-            fragment_shader='''
-                #version 330
-                layout (location = 0) out vec4 fragColor;
-                in vec3 texCubeCoords;
-                uniform samplerCube u_texture_skybox;
-                void main() 
-                { 
-                    fragColor = texture(u_texture_skybox, texCubeCoords);
-                }
-            ''',
-        )
+
+    def get_shader_program(self, shader_program_name):
+        with open(f'shaders/{shader_program_name}.vert') as file:
+                    vertex_shader = file.read()
+
+        with open(f'shaders/{shader_program_name}.frag') as file:
+            fragment_shader = file.read()
+
+        program = self.ctx.program(vertex_shader=vertex_shader, 
+                                fragment_shader=fragment_shader)
         return program
 
 
-
-
-class RaceTrackTexture:
+class Grass:
     def __init__(self,app):
         self.app = app
         self.ctx = app.ctx
         self.vbo = self.get_vbo()
-        self.shader_program = self.get_shader_program()
+        self.shader_program = self.get_shader_program('grass')
         self.vao = self.get_vao()
         self.m_model = self.get_model_matrix()
-        self.texture = self.get_texture('./textures/asphalta.jpg')
+        self.texture = self.get_texture(sky_textures + f'{map}/ground')
         self.on_init()
 
     def get_model_matrix(self):
-        m_model = glm.scale(glm.mat4(1), glm.vec3(100,1,100))
+        m_model = glm.scale(glm.mat4(1), glm.vec3(400,1,400))
         #m_model = glm.rotate(glm.mat4(),glm.radians(0),glm.vec3(0,1,0))
         return m_model
 
     def get_texture(self, path):
+
+        available_formats = ['.jpg', '.png']
+        for f in available_formats:
+            if os.path.isfile(path + f):
+                path = path + f
+
         texture = pg.image.load(path).convert()
         texture = pg.transform.flip(texture, flip_x=False, flip_y=True)
         texture = self.ctx.texture(size=texture.get_size(), components=3, 
@@ -165,16 +149,9 @@ class RaceTrackTexture:
         self.obj = x
         return self.obj
 
-    def ax(self, x):
-        self.ax = x
-        return self.ax
-
     def render(self):
         if self.o:
             self.vao.render()
-        #if self.ax:
-            #self.vaoa.render(mgl.LINE_LOOP)
-        #self.vaop.render(mgl.POINTS)
 
     def destroy (self):
         self.vbo.release()
@@ -217,32 +194,13 @@ class RaceTrackTexture:
         vbo = self.ctx.buffer(vertex_data)
         return vbo
 
-    def get_shader_program(self):
-        program = self.ctx.program(    
-            vertex_shader='''
-                #version 330
-                layout (location = 0) in vec2 in_texcoord;
-                layout (location = 1) in vec3 in_position;
-                out vec2 uv_0;
-                uniform mat4 m_proj;
-                uniform mat4 m_view;
-                uniform mat4 m_model;
-                void main() 
-                {
-                    uv_0 = in_texcoord;
-                    gl_Position = m_proj * m_view * m_model * vec4(in_position, 1.0);
-                }
-            ''',
-            fragment_shader='''
-                #version 330
-                layout (location = 0) out vec4 fragColor;
-                in vec2 uv_0;
-                uniform sampler2D u;
-                void main() 
-                { 
-                    vec3 color = texture(u, uv_0*5).rgb;
-                    fragColor = vec4(color, 1.0);
-                }
-            ''',
-        )
+    def get_shader_program(self, shader_program_name):
+        with open(f'shaders/{shader_program_name}.vert') as file:
+                    vertex_shader = file.read()
+
+        with open(f'shaders/{shader_program_name}.frag') as file:
+            fragment_shader = file.read()
+
+        program = self.ctx.program(vertex_shader=vertex_shader, 
+                                fragment_shader=fragment_shader)
         return program

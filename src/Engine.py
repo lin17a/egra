@@ -9,7 +9,7 @@ from Camera import Camera, Axis, DriverCamera
 from Circuito import Circuito
 from car import Car
 from Light import Light
-from texturing import Grass, RaceTrackTexture
+from texturing import *
 import time
 
 
@@ -32,7 +32,7 @@ class GraphicsEngine:
         self.camera_mode = "bird"
         # scene
         self.scene = Circuito(self)
-        self.asphalt = RaceTrackTexture(self)
+        self.skybox = Skybox(self)
         self.grass = Grass(self)
         # clock
         self.clock = pg.time.Clock()
@@ -96,20 +96,16 @@ class GraphicsEngine:
         self.camera.update()
         
         self.car.on_init()
-
-        #if any(keys):
-            
-
-        self.asphalt.on_init()
         self.grass.on_init()
+        self.skybox.on_init()
         self.scene.on_init()
         
     def render(self):
         # clear framebuffer
         self.ctx.clear(color=(0, 0, 0))
         # render scene
+        self.skybox.render()
         self.grass.render()
-        #self.asphalt.render()
         self.scene.render()
         # render car
         self.ctx.enable(mgl.DEPTH_TEST | mgl.CULL_FACE)

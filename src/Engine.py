@@ -201,7 +201,7 @@ class GraphicsEngine:
             self.car_2.render()
             self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
             # render axis
-            self.axis.render()
+            #self.axis.render()
             # swap buffers
             pg.display.flip()
 

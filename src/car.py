@@ -240,3 +240,19 @@ class Car:
             ''',
             )
         return program
+
+
+class MinimapCar(Car):
+
+    def on_init(self):
+        self.shader_program['light.position'].write(self.app.light.position)
+        # self.shader_program['light.Ia'].write(self.app.light.Ia)
+        # self.shader_program['light.Id'].write(self.app.light.Id)
+        self.shader_program['m_proj'].write(self.app.minimap.m_proj)
+        self.shader_program['m_view'].write(self.app.minimap.m_view)
+        self.shader_program['view_pos'].write(self.app.minimap.position)
+        self.shader_program['m_model'].write(self.m_model)
+
+    def render(self):
+        self.shader_program['view_pos'].write(self.app.minimap.position)
+        self.vao.render()

@@ -22,8 +22,8 @@ class Circuito:
         self.shader_program = self.get_shader_program()
         self.vao = self.get_vao()
         self.m_model = self.get_model_matrix()
-        self.curves = self.get_curvyness()
-        self.layout_matrix = self.get_layout_matrix()
+        #self.curves = self.get_curvyness()
+        self.layout_points, self.layout_matrix = self.get_layout_matrix()
         self.on_init()
 
     def get_model_matrix(self):
@@ -237,7 +237,7 @@ class Circuito:
         #test_points = np.random.rand(n_points, 2) * 100 - 50
 
         # make regular grid
-        M, N = 50, 50
+        M, N = 200, 200
         x = np.linspace(-50, 50, M + 1)
         y = np.linspace(-50, 50, N + 1)
         X, Y = np.meshgrid(x, y)
@@ -269,5 +269,5 @@ class Circuito:
         plt.scatter(test_points[out_list, 0], test_points[out_list, 1], s=2)
         plt.show()
 
-        return on_track
+        return test_points.reshape(201, 201, 2), on_track.reshape(201, 201)
 

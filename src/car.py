@@ -47,22 +47,39 @@ class Car:
         self.shader_program['light.position'].write(self.app.light.position)
         # self.shader_program['light.Ia'].write(self.app.light.Ia)
         # self.shader_program['light.Id'].write(self.app.light.Id)
-        self.shader_program['m_proj'].write(self.app.camera.m_proj)
-        self.shader_program['m_view'].write(self.app.camera.m_view)
-        self.shader_program['view_pos'].write(self.app.camera.position)
+        self.shader_program['m_proj'].write(self.app.camera_2.m_proj)
+        self.shader_program['view_pos'].write(self.app.camera_2.position)
+        self.shader_program['m_view'].write(self.app.camera_2.m_view)
+        if self.player == 1:
+            self.shader_program['m_proj'].write(self.app.camera.m_proj)
+            self.shader_program['view_pos'].write(self.app.camera.position)
+            self.shader_program['m_view'].write(self.app.camera.m_view)
+
+        elif self.player == 2:
+            self.shader_program['m_proj'].write(self.app.camera_2.m_proj)
+            self.shader_program['view_pos'].write(self.app.camera_2.position)
+            self.shader_program['m_view'].write(self.app.camera_2.m_view)
         self.shader_program['m_model'].write(self.m_model)
 
     def update(self):
         self.shader_program['light.position'].write(self.app.light.position)
         # self.shader_program['light.Ia'].write(self.app.light.Ia)
         # self.shader_program['light.Id'].write(self.app.light.Id)
-        self.shader_program['m_proj'].write(self.app.camera.m_proj)
-        self.shader_program['m_view'].write(self.app.camera.m_view)
-        self.shader_program['view_pos'].write(self.app.camera.position)
+        if self.player == 1:
+            self.shader_program['m_proj'].write(self.app.camera.m_proj)
+            self.shader_program['view_pos'].write(self.app.camera.position)
+            self.shader_program['m_view'].write(self.app.camera.m_view)
+        elif self.player == 2:
+            self.shader_program['m_proj'].write(self.app.camera_2.m_proj)
+            self.shader_program['view_pos'].write(self.app.camera_2.position)
+            self.shader_program['m_view'].write(self.app.camera_2.m_view)
         self.shader_program['m_model'].write(self.m_model)
 
     def render(self):
-        self.shader_program['view_pos'].write(self.app.camera.position)
+        if self.player == 1:
+            self.shader_program['view_pos'].write(self.app.camera.position)
+        elif self.player == 2:
+            self.shader_program['view_pos'].write(self.app.camera_2.position)
         self.vao.render()
 
     def destroy(self):

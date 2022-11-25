@@ -11,6 +11,7 @@ from car import Car
 from Light import Light
 from texturing import *
 import time
+from UI import menu
 
 
 class GraphicsEngine:
@@ -19,12 +20,23 @@ class GraphicsEngine:
         pg.init()
         # window sizeq
         self.WIN_SIZE = win_size
+        # clock
+        self.clock = pg.time.Clock()
+        self.time = 0
+        self.start_menu()
+
+    def start_menu(self):
+        self.surface = pg.display.set_mode(self.WIN_SIZE)
+        self.menu = menu(self)
+        self.menu_active = True
+        
+    def one_player(self):
         # set opengl attr
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION,3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION,3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE)
         # create opengl context
-        pg.display.set_mode(self.WIN_SIZE, flags=pg.OPENGL | pg.DOUBLEBUF)
+        self.surface = pg.display.set_mode(self.WIN_SIZE, flags=pg.OPENGL | pg.DOUBLEBUF)
         # detect and use exixting opengl context
         self.ctx = mgl.create_context()
         # camera
@@ -34,9 +46,6 @@ class GraphicsEngine:
         self.scene = Circuito(self)
         self.skybox = Skybox(self)
         self.grass = Grass(self)
-        # clock
-        self.clock = pg.time.Clock()
-        self.time = 0
         # Car
         self.light = Light()
         self.car = Car(self)
@@ -57,6 +66,8 @@ class GraphicsEngine:
             self.camera = Camera(self)
 
     def check_events(self):
+        if self.menu_active:
+            return
         for event in pg.event.get():
             if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
                 self.scene.destroy()
@@ -64,6 +75,8 @@ class GraphicsEngine:
                 sys.exit()
             if event.type == pg.KEYDOWN and event.key == pg.K_c:
                 self.change_camera()
+            if event.type == pg.KEYDOWN and event.key == pg.K_m:
+                self.start_menu()
             if event.type == pg.MOUSEWHEEL:
                 self.camera.zoom(-event.y*3)
 
@@ -89,33 +102,38 @@ class GraphicsEngine:
         if keys[pg.K_LEFT]:
             self.car.move_left()
         if keys[pg.K_DOWN]:
-            self.car.move_backward()
-            
+            self.car.move_backward()            
         
         self.car.up()
         self.camera.update()
-        
         self.car.on_init()
         self.grass.on_init()
         self.skybox.on_init()
         self.scene.on_init()
         
     def render(self):
-        # clear framebuffer
-        self.ctx.clear(color=(0, 0, 0))
-        # render scene
-        self.skybox.render()
-        self.grass.render()
-        self.scene.render()
-        # render car
-        self.ctx.enable(mgl.DEPTH_TEST | mgl.CULL_FACE)
-        self.car.render()
-        self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
+        if self.menu_active:
+            self.players = self.menu.render()
+            if self.players != None:
+                self.menu_active = False
+                if self.players == 1 or self.players == 2:
+                    self.one_player()
+        else:
+            # clear framebuffer
+            self.ctx.clear(color=(0, 0, 0))
+            # render scene
+            self.skybox.render()
+            self.grass.render()
+            self.scene.render()
+            # render car
+            self.ctx.enable(mgl.DEPTH_TEST | mgl.CULL_FACE)
+            self.car.render()
+            self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
 
-        # render axis
-        self.axis.render()
-        # swap buffers
-        pg.display.flip()
+            # render axis
+            self.axis.render()
+            # swap buffers
+            pg.display.flip()
 
     def run(self):
         while True:

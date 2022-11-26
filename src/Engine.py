@@ -24,6 +24,7 @@ class GraphicsEngine:
         self.clock = pg.time.Clock()
         self.time = 0
         self.start_menu()
+        self.map = None
 
     def start_menu(self):
         self.surface = pg.display.set_mode(self.WIN_SIZE)
@@ -44,8 +45,8 @@ class GraphicsEngine:
         self.camera_mode = "bird"
         # scene
         self.scene = Circuito(self)
-        self.skybox = Skybox(self)
-        self.grass = Grass(self)
+        self.skybox = Skybox(self, self.map)
+        self.grass = Grass(self, self.map)
         # Car
         self.light = Light()
         self.car = Car(self)
@@ -113,8 +114,8 @@ class GraphicsEngine:
         
     def render(self):
         if self.menu_active:
-            self.players = self.menu.render()
-            if self.players != None:
+            self.players, play, self.map = self.menu.render()
+            if play:
                 self.menu_active = False
                 if self.players == 1 or self.players == 2:
                     self.one_player()

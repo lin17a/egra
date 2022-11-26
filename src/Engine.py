@@ -48,7 +48,7 @@ class GraphicsEngine:
         self.skybox = Skybox(self, self.map)
         self.grass = Grass(self, self.map)
         # Car
-        self.light = Light()
+        self.light = Light(self.map)
         self.car = Car(self)
         # axis
         self.axis = Axis(self)
@@ -132,7 +132,7 @@ class GraphicsEngine:
             self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
 
             # render axis
-            self.axis.render()
+            #self.axis.render()
             # swap buffers
             pg.display.flip()
 

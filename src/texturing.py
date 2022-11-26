@@ -7,10 +7,10 @@ import os
 sky_textures = './textures/sky/'
 
 # Available maps = field, sunset, desert 
-map = "sunset"
+#map = "sunset"
 
 class Skybox:
-    def __init__(self,app):
+    def __init__(self, app, map):
         self.app = app
         self.ctx = app.ctx
         self.vbo = self.get_vbo()
@@ -109,7 +109,7 @@ class Skybox:
 
 
 class Grass:
-    def __init__(self,app):
+    def __init__(self, app, map):
         self.app = app
         self.ctx = app.ctx
         self.vbo = self.get_vbo()

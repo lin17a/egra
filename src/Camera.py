@@ -50,11 +50,7 @@ class Camera:
         self.m_view = self.get_view_matrix()
 
     def update(self):
-        if self.app.players == 2:
-            if self.player == 1:
-                self.app.ctx.viewport = (0,self.app.WIN_SIZE[1]//2,self.app.WIN_SIZE[0],self.app.WIN_SIZE[1]//2)
-            elif self.player == 2:
-                self.app.ctx.viewport = (0,0,self.app.WIN_SIZE[0],self.app.WIN_SIZE[1]//2)
+        pass
 
 
 class DriverCamera(Camera):
@@ -76,14 +72,13 @@ class DriverCamera(Camera):
         self.m_proj = self.get_projection_matrix()
 
     def update(self):
-        super().update()
         self.position = self.get_position()
         self.lookat = self.get_look_at()
         self.m_view = self.get_view_matrix()
         self.m_proj = self.get_projection_matrix()
 
     def get_position(self):
-        if self.player == 1:
+        if self.player == 1 or self.player == None:
             car_x, car_z, car_y = self.app.car.position
             view_dir = self.app.car.direction_vector(self.app.car.rotation)
         elif self.player == 2:
@@ -99,7 +94,7 @@ class DriverCamera(Camera):
         return position
 
     def get_look_at(self):
-        if self.player == 1:
+        if self.player == 1 or self.player == None:
             return self.app.car.position
         elif self.player == 2:
             return self.app.car_2.position

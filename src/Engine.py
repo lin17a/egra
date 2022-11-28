@@ -178,6 +178,7 @@ class GraphicsEngine:
             # clear framebuffer
             self.ctx.clear(color=(0, 0, 0))
             if self.players == 1:
+                self.skybox.render()
                 # render scene
                 self.grass.render()
                 #self.asphalt.render()
@@ -192,8 +193,10 @@ class GraphicsEngine:
                 pg.display.flip()
 
             if self.players == 2:
+                self.ctx.viewport = (0, self.WIN_SIZE[1]//2, self.WIN_SIZE[0], self.WIN_SIZE[1]//2)
                 self.camera.update()
                 # render scene
+                self.skybox.render()
                 self.grass.render()
                 #self.asphalt.render()
                 self.scene.render()
@@ -205,8 +208,10 @@ class GraphicsEngine:
                 # render axis
                 #self.axis.render()
 
+                self.ctx.viewport = (0, 0, self.WIN_SIZE[0], self.WIN_SIZE[1]//2)
                 self.camera_2.update()
                 # render scene
+                self.skybox.render()
                 self.grass.render()
                 #self.asphalt.render()
                 self.scene.render()

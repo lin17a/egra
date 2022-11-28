@@ -112,14 +112,16 @@ class Car:
             vertices[name] = material.vertices  # contains normals and vertices
             for i in range(0, len(vertices[name]), 6):
                 data.extend(vertices[name][i:i + 6])
-                data.extend(material.diffuse[0:3])
                 if name == "default7":
                     if self.player == 1:
+                        data.extend(material.diffuse[0:3])
                         data.extend(material.ambient[0:3])
                     elif self.player == 2:
                         #Color del coche 2
                         data.extend([0, 0, 0.5])
+                        data.extend([0, 0, 0.5])
                 else:
+                    data.extend(material.diffuse[0:3])
                     data.extend(material.ambient[0:3])
                 data.extend(material.specular[0:3])
 

@@ -159,7 +159,6 @@ class GraphicsEngine:
             self.car.move_backward()            
         
         self.car.up()
-        self.camera.update()
         self.car.on_init()
         self.grass.on_init()
         self.skybox.on_init()
@@ -178,6 +177,7 @@ class GraphicsEngine:
             # clear framebuffer
             self.ctx.clear(color=(0, 0, 0))
             if self.players == 1:
+                self.camera.update()
                 self.skybox.render()
                 # render scene
                 self.grass.render()

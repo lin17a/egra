@@ -62,7 +62,6 @@ class Car:
             self.shader_program['m_proj'].write(self.app.camera_2.m_proj)
             self.shader_program['m_view'].write(self.app.camera_2.m_view)
             self.shader_program['view_pos'].write(self.app.camera_2.position)
-
         self.shader_program['m_model'].write(self.m_model)
 
     def update(self):
@@ -136,17 +135,16 @@ class Car:
     def move_right(self):
         degree = -0.05 * self.velocity / 30
         self.rotation = (self.rotation + degree) % (2 * np.pi)
-        m_model = glm.translate(self.m_model, -self.position)
-        m_model = glm.rotate(m_model, degree, glm.vec3(0,1,0))
-        self.m_model = glm.translate(m_model,  glm.rotate(self.position, -degree, glm.vec3(0,1,0)))
+        self.m_model = glm.translate(self.m_model, -self.position)
+        self.m_model = glm.rotate(self.m_model, degree, glm.vec3(0,1,0))
+        self.m_model = glm.translate(self.m_model,  glm.rotate(self.position, -degree, glm.vec3(0,1,0)))
 
     def move_left(self):
         degree = 0.05 * self.velocity / 30
         self.rotation = (self.rotation + degree) % (2 * np.pi)
-        old_position = self.position
         self.m_model = glm.translate(self.m_model, -self.position)
         self.m_model = glm.rotate(self.m_model, degree, glm.vec3(0,1,0))
-        self.m_model = glm.translate(self.m_model, glm.rotate(old_position, -degree, glm.vec3(0,1,0)))
+        self.m_model = glm.translate(self.m_model, glm.rotate(self.position, -degree, glm.vec3(0,1,0)))
 
     def move_forward(self):
         self.velocity += 0.5

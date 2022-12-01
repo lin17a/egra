@@ -19,7 +19,7 @@ class Car:
         self.velocity = 0 #[x, y]
         self.friction = 1
         self.physics = Physics((self.position[0], self.position[2]), dt = 0.05)
-        self.velmax = 30
+        self.velmax = 15
         self.velmin = 0
         
         self.on_init()
@@ -129,6 +129,7 @@ class Car:
     def move_forward(self):
         self.velocity += 0.5
         self.velocity = self.velmax if self.velocity > self.velmax else self.velocity
+        print(f"vel: {self.physics.Vel}")
         """
         direction_vector = self.direction_vector(self.rotation)
         self.position = self.position + 0.5 * direction_vector
@@ -144,17 +145,24 @@ class Car:
     def up(self):
         if self.velocity > 0:
             self.velocity -= 0.1
+        if self.velocity == 0:
+            self.physics.aant = [0, 0]
+            self.physics.Fant = [0, 0]
+            
+            
         #self.velocity = 0 if self.velocity < 0 else self.velocity
 
         self.friction = self.get_friction()
-
+        self.physics.miu = self.get_friction()
         self.physics.Update(self.velocity, [1,0], self.friction)
+        
         
         direction_vector = self.direction_vector(self.rotation)
         
         old_position = self.position
         
         self.position = self.position + self.physics.Vel[0]/20 * direction_vector
+        
         
         self.m_model = glm.translate(self.m_model, glm.vec3(self.physics.Vel[0]/20, 0, 0))#self.position - old_position)
         
@@ -175,7 +183,7 @@ class Car:
         if self.on_circuit():
             return 1
         else:
-            return 5
+            return 20
 
     def on_circuit(self):
         points = self.app.scene.layout_points

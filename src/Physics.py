@@ -3,11 +3,12 @@ import numpy as np
 
 class Physics:
     
-    def __init__(self, PosInicial, dt = 0.1, k = 3, m = 800, miu = 2):
+    def __init__(self, PosInicial, dt = 0.1, k = 3, m = 800, miu = 2, maxVel = 15):
         self.Pos = PosInicial
         self.PastPos = None
         self.PastDer = None
         self.PastVel = [0, 0]
+        self.maxVel = maxVel
         
         self.TimeStep = 1
         self.long = np.arange(-10, 10, 0.2)
@@ -120,6 +121,8 @@ class Physics:
         
         
         self.Vel[ind] = self.Vel[ind] if self.Vel[ind] > 0 else 0
+        self.Vel[ind] = self.maxVel if self.Vel[ind] > self.maxVel else self.Vel[ind]
+        
 
         self.Fant[ind] = self.m*self.aant[ind] + Fr + Drag
         self.PastVel[ind] = (v + self.Vel[ind])/2

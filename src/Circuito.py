@@ -25,7 +25,7 @@ class Circuito:
     def on_init(self):
         self.shader_program['m_model'].write(self.m_model)
 
-    def render(self, player):
+    def render(self, player=1):
         if player == 1:
             self.shader_program['m_proj'].write(self.app.camera.m_proj)
             self.shader_program['m_view'].write(self.app.camera.m_view)

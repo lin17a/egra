@@ -55,7 +55,7 @@ class Skybox:
         self.obj = x
         return self.obj
 
-    def render(self, player):
+    def render(self, player=1):
         if self.o:
             self.vao.render()
         if player == 1:
@@ -151,14 +151,14 @@ class Grass:
         self.obj = x
         return self.obj
 
-    def render(self, player):
+    def render(self, player=1):
         if self.o:
             self.vao.render()
         if player == 1:
-            self.shader_program['m_proj'].write(self.app.camera_2.m_proj)
+            self.shader_program['m_proj'].write(self.app.camera.m_proj)
             self.shader_program['m_view'].write(self.app.camera.m_view)
         elif player == 2:
-            self.shader_program['m_proj'].write(self.app.camera.m_proj)
+            self.shader_program['m_proj'].write(self.app.camera_2.m_proj)
             self.shader_program['m_view'].write(self.app.camera_2.m_view)
 
     def destroy (self):

@@ -48,8 +48,6 @@ class Skybox:
     def on_init(self):
         self.shader_program['u_texture_skybox'] = 0
         self.texture.use(location=0)
-        self.shader_program['m_proj'].write(self.app.camera.m_proj)
-        self.shader_program['m_view'].write(glm.mat4(glm.mat3(self.app.camera.m_view)))
         #self.shader_program['m_model'].write(self.m_model)
         #self.shader_program["skybox"] = self.get_texture_cube(dir_path='./textures/sky/')
 
@@ -57,9 +55,15 @@ class Skybox:
         self.obj = x
         return self.obj
 
-    def render(self):
+    def render(self, player):
         if self.o:
             self.vao.render()
+        if player == 1:
+            self.shader_program['m_proj'].write(self.app.camera.m_proj)
+            self.shader_program['m_view'].write(glm.mat4(glm.mat3(self.app.camera.m_view)))
+        elif player == 2:
+            self.shader_program['m_proj'].write(self.app.camera_2.m_proj)
+            self.shader_program['m_view'].write(glm.mat4(glm.mat3(self.app.camera_2.m_view)))
         
     def destroy (self):
         self.vbo.release()
@@ -141,17 +145,21 @@ class Grass:
     def on_init(self):
         self.shader_program['u'] = 0
         self.texture.use()
-        self.shader_program['m_proj'].write(self.app.camera.m_proj)
-        self.shader_program['m_view'].write(self.app.camera.m_view)
         self.shader_program['m_model'].write(self.m_model)
 
     def o(self, x):
         self.obj = x
         return self.obj
 
-    def render(self):
+    def render(self, player):
         if self.o:
             self.vao.render()
+        if player == 1:
+            self.shader_program['m_proj'].write(self.app.camera_2.m_proj)
+            self.shader_program['m_view'].write(self.app.camera.m_view)
+        elif player == 2:
+            self.shader_program['m_proj'].write(self.app.camera.m_proj)
+            self.shader_program['m_view'].write(self.app.camera_2.m_view)
 
     def destroy (self):
         self.vbo.release()

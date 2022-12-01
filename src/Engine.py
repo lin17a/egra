@@ -117,6 +117,7 @@ class GraphicsEngine:
                 self.start_menu()
             if event.type == pg.MOUSEWHEEL:
                 self.camera.zoom(-event.y*3)
+                self.camera_2.zoom(-event.y*3)
 
         keys = pg.key.get_pressed()
 
@@ -139,8 +140,8 @@ class GraphicsEngine:
                 self.car_2.move_left()
             if keys[pg.K_s]:
                 self.car_2.move_backward()
-            self.car_2.on_init()
             self.car_2.up()
+            self.car_2.on_init()
 
 
         if keys[pg.K_r]:
@@ -192,18 +193,18 @@ class GraphicsEngine:
                 # swap buffers
                 pg.display.flip()
 
-            if self.players == 2:
+            if self.players == 2:                
                 self.ctx.viewport = (0, self.WIN_SIZE[1]//2, self.WIN_SIZE[0], self.WIN_SIZE[1]//2)
                 self.camera.update()
                 # render scene
-                self.skybox.render()
-                self.grass.render()
+                self.skybox.render(player = 2)
+                self.grass.render(player = 2)
                 #self.asphalt.render()
-                self.scene.render()
+                self.scene.render(player = 1)
                 # render car
                 self.ctx.enable(mgl.DEPTH_TEST | mgl.CULL_FACE)
                 self.car.render()
-                self.car_2.render()
+                #self.car_2.render()
                 self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
                 # render axis
                 #self.axis.render()
@@ -211,17 +212,18 @@ class GraphicsEngine:
                 self.ctx.viewport = (0, 0, self.WIN_SIZE[0], self.WIN_SIZE[1]//2)
                 self.camera_2.update()
                 # render scene
-                self.skybox.render()
-                self.grass.render()
+                self.skybox.render(player = 1)
+                self.grass.render(player = 1)
                 #self.asphalt.render()
-                self.scene.render()
+                self.scene.render(player = 2)
                 # render car
                 self.ctx.enable(mgl.DEPTH_TEST | mgl.CULL_FACE)
-                self.car.render()
+                #self.car.render()
                 self.car_2.render()
                 self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
                 # render axis
                 #self.axis.render()
+
                 # swap buffers
                 pg.display.flip()
 

@@ -6,12 +6,15 @@ import moderngl as mgl
 class Camera:
     def __init__(self, app, player = 1):
         self.app = app
-        self.aspect_ratio = app.WIN_SIZE[0]/app.WIN_SIZE[1]
+        self.player = player
+        if self.player ==1 or self.player == 2:
+            self.aspect_ratio = app.WIN_SIZE[0]/(app.WIN_SIZE[1]/2)
+        else:
+            self.aspect_ratio = app.WIN_SIZE[0]/app.WIN_SIZE[1]          
         self.position = glm.vec3(0,60,0)
         self.up = glm.vec3(1,0,0)
         self.lookat = glm.vec3(0)
         self.radians = 100
-        self.player = player
         # view_matrix
         self.m_view = self.get_view_matrix()
         # projection matrix
@@ -53,6 +56,7 @@ class Camera:
         pass
 
 
+
 class DriverCamera(Camera):
     def __init__(self, app, player = None):
         self.app = app
@@ -73,6 +77,7 @@ class DriverCamera(Camera):
 
     def update(self):
         self.position = self.get_position()
+        print(self.player, self.position)
         self.lookat = self.get_look_at()
         self.m_view = self.get_view_matrix()
         self.m_proj = self.get_projection_matrix()

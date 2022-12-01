@@ -79,6 +79,7 @@ class Car:
         self.shader_program['m_model'].write(self.m_model)
 
     def render(self):
+        self.shader_program['light.position'].write(self.app.light.position)
         if self.player == 1:
             self.shader_program['m_proj'].write(self.app.camera.m_proj)
             self.shader_program['m_view'].write(self.app.camera.m_view)
@@ -87,6 +88,7 @@ class Car:
             self.shader_program['m_proj'].write(self.app.camera_2.m_proj)
             self.shader_program['m_view'].write(self.app.camera_2.m_view)
             self.shader_program['view_pos'].write(self.app.camera_2.position)
+
         self.shader_program['m_model'].write(self.m_model)
         #print(self.player, self.position)
         self.vao.render()

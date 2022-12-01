@@ -89,6 +89,7 @@ class Circuito:
         self.vbo, self.vboc = self.get_vbo()
         self.vao = self.get_vao()
         self.render()
+        self.layout_points, self.layout_matrix = self.get_layout_matrix()
 
     @staticmethod
     def get_data(vertices, indices): 
@@ -232,14 +233,16 @@ class Circuito:
 
         vertices = self.all_vertex
 
-        # random test points
-        #n_points = 3000
-        #test_points = np.random.rand(n_points, 2) * 100 - 50
+        # get the bounds of the circuit
+        x_max = vertices[:, 2].max()
+        x_min = vertices[:, 2].min()
+        y_max = vertices[:, 0].max()
+        y_min = vertices[:, 0].min()
 
         # make regular grid
         M, N = 200, 200
-        x = np.linspace(-50, 50, M + 1)
-        y = np.linspace(-50, 50, N + 1)
+        x = np.linspace(x_min - 2, x_max + 2, M + 1)
+        y = np.linspace(y_min - 2, y_max + 2, N + 1)
         X, Y = np.meshgrid(x, y)
         test_points = np.vstack([Y.ravel(), X.ravel()])
         test_points = test_points.transpose()

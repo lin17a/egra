@@ -203,8 +203,8 @@ class GraphicsEngine:
                 self.scene.render(player = 1)
                 # render car
                 self.ctx.enable(mgl.DEPTH_TEST | mgl.CULL_FACE)
-                self.car.render()
-                #self.car_2.render()
+                self.car.render(player=1)
+                self.car_2.render(player=1)
                 self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
                 # render axis
                 #self.axis.render()
@@ -218,8 +218,8 @@ class GraphicsEngine:
                 self.scene.render(player = 2)
                 # render car
                 self.ctx.enable(mgl.DEPTH_TEST | mgl.CULL_FACE)
-                #self.car.render()
-                self.car_2.render()
+                self.car.render(player=2)
+                self.car_2.render(player=2)
                 self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
                 # render axis
                 #self.axis.render()

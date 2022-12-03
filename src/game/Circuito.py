@@ -1,8 +1,9 @@
 import glm
 import moderngl as mgl
-from generation import generation_track
+from .generation import generation_track
 import numpy as np
 from scipy.spatial.distance import cdist
+
 
 class Circuito:
     def __init__(self,app):

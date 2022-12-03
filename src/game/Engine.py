@@ -5,13 +5,13 @@ import sys
 import itertools as it
 import numpy as np
 from OpenGL.GL import *
-from Camera import Camera, Axis, DriverCamera
-from Circuito import Circuito
-from car import Car
-from Light import Light
-from texturing import *
-import time
-from UI import menu
+
+from .Camera import Camera, Axis, DriverCamera
+from .Circuito import Circuito
+from .car import Car
+from .Light import Light
+from .texturing import *
+from .UI import menu
 
 
 class GraphicsEngine:
@@ -142,8 +142,3 @@ class GraphicsEngine:
             self.check_events()
             self.render()
             self.clock.tick(60)
-
-
-if __name__ == '__main__':
-    app = GraphicsEngine()
-    app.run()

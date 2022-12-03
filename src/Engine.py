@@ -179,14 +179,14 @@ class GraphicsEngine:
             self.ctx.clear(color=(0, 0, 0))
             if self.players == 1:
                 self.camera.update()
-                self.skybox.render()
+                self.skybox.render(player = 1)
                 # render scene
-                self.grass.render()
+                self.grass.render(player = 1)
                 #self.asphalt.render()
-                self.scene.render()
+                self.scene.render(player = 1)
                 # render car
                 self.ctx.enable(mgl.DEPTH_TEST | mgl.CULL_FACE)
-                self.car.render()
+                self.car.render(player = 1)
                 self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
                 # render axis
                 self.axis.render()

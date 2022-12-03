@@ -6,7 +6,8 @@ from Physics import Physics
 
 
 class Car:
-    def __init__(self, app):
+    def __init__(self, app, player = 1):
+        self.player = player
         self.app = app
         self.ctx = app.ctx
         self.vbo = self.get_vbo()
@@ -53,22 +54,43 @@ class Car:
         self.shader_program['light.position'].write(self.app.light.position)
         # self.shader_program['light.Ia'].write(self.app.light.Ia)
         # self.shader_program['light.Id'].write(self.app.light.Id)
-        self.shader_program['m_proj'].write(self.app.camera.m_proj)
-        self.shader_program['m_view'].write(self.app.camera.m_view)
-        self.shader_program['view_pos'].write(self.app.camera.position)
+        if self.player == 1:
+            self.shader_program['m_proj'].write(self.app.camera.m_proj)
+            self.shader_program['m_view'].write(self.app.camera.m_view)
+            self.shader_program['view_pos'].write(self.app.camera.position)
+        elif self.player == 2:
+            self.shader_program['m_proj'].write(self.app.camera_2.m_proj)
+            self.shader_program['m_view'].write(self.app.camera_2.m_view)
+            self.shader_program['view_pos'].write(self.app.camera_2.position)
         self.shader_program['m_model'].write(self.m_model)
 
     def update(self):
         self.shader_program['light.position'].write(self.app.light.position)
         # self.shader_program['light.Ia'].write(self.app.light.Ia)
         # self.shader_program['light.Id'].write(self.app.light.Id)
-        self.shader_program['m_proj'].write(self.app.camera.m_proj)
-        self.shader_program['m_view'].write(self.app.camera.m_view)
-        self.shader_program['view_pos'].write(self.app.camera.position)
+        if self.player == 1:
+            self.shader_program['m_proj'].write(self.app.camera.m_proj)
+            self.shader_program['m_view'].write(self.app.camera.m_view)
+            self.shader_program['view_pos'].write(self.app.camera.position)
+        elif self.player == 2:
+            self.shader_program['m_proj'].write(self.app.camera_2.m_proj)
+            self.shader_program['m_view'].write(self.app.camera_2.m_view)
+            self.shader_program['view_pos'].write(self.app.camera_2.position)
         self.shader_program['m_model'].write(self.m_model)
 
-    def render(self):
-        self.shader_program['view_pos'].write(self.app.camera.position)
+    def render(self, player):
+        self.shader_program['light.position'].write(self.app.light.position)
+        if player == 1:
+            self.shader_program['m_proj'].write(self.app.camera.m_proj)
+            self.shader_program['m_view'].write(self.app.camera.m_view)
+            self.shader_program['view_pos'].write(self.app.camera.position)
+        if player == 2:
+            self.shader_program['m_proj'].write(self.app.camera_2.m_proj)
+            self.shader_program['m_view'].write(self.app.camera_2.m_view)
+            self.shader_program['view_pos'].write(self.app.camera_2.position)
+
+        self.shader_program['m_model'].write(self.m_model)
+        #print(self.player, self.position)
         self.vao.render()
 
     def destroy(self):
@@ -95,11 +117,19 @@ class Car:
 
         for name, material in scene.materials.items():
             vertices[name] = material.vertices  # contains normals and vertices
-
             for i in range(0, len(vertices[name]), 6):
                 data.extend(vertices[name][i:i + 6])
-                data.extend(material.diffuse[0:3])
-                data.extend(material.ambient[0:3])
+                if name == "default7":
+                    if self.player == 1:
+                        data.extend(material.diffuse[0:3])
+                        data.extend(material.ambient[0:3])
+                    elif self.player == 2:
+                        #Color del coche 2
+                        data.extend([0, 0, 0.5])
+                        data.extend([0, 0, 0.5])
+                else:
+                    data.extend(material.diffuse[0:3])
+                    data.extend(material.ambient[0:3])
                 data.extend(material.specular[0:3])
 
         data_np = np.array(data, dtype='f4')
@@ -113,17 +143,16 @@ class Car:
     def move_right(self):
         degree = -0.05 * self.velocity / 30
         self.rotation = (self.rotation + degree) % (2 * np.pi)
-        m_model = glm.translate(self.m_model, -self.position)
-        m_model = glm.rotate(m_model, degree, glm.vec3(0,1,0))
-        self.m_model = glm.translate(m_model,  glm.rotate(self.position, -degree, glm.vec3(0,1,0)))
+        self.m_model = glm.translate(self.m_model, -self.position)
+        self.m_model = glm.rotate(self.m_model, degree, glm.vec3(0,1,0))
+        self.m_model = glm.translate(self.m_model,  glm.rotate(self.position, -degree, glm.vec3(0,1,0)))
 
     def move_left(self):
         degree = 0.05 * self.velocity / 30
         self.rotation = (self.rotation + degree) % (2 * np.pi)
-        old_position = self.position
         self.m_model = glm.translate(self.m_model, -self.position)
         self.m_model = glm.rotate(self.m_model, degree, glm.vec3(0,1,0))
-        self.m_model = glm.translate(self.m_model, glm.rotate(old_position, -degree, glm.vec3(0,1,0)))
+        self.m_model = glm.translate(self.m_model, glm.rotate(self.position, -degree, glm.vec3(0,1,0)))
 
     def move_forward(self):
         self.velocity += 0.5

@@ -23,12 +23,17 @@ class Circuito:
         return m_model
         
     def on_init(self):
-        self.shader_program['m_proj'].write(self.app.camera.m_proj)
-        self.shader_program['m_view'].write(self.app.camera.m_view)
         self.shader_program['m_model'].write(self.m_model)
 
-    def render(self):
+    def render(self, player=1):
+        if player == 1:
+            self.shader_program['m_proj'].write(self.app.camera.m_proj)
+            self.shader_program['m_view'].write(self.app.camera.m_view)
+        elif player == 2:
+            self.shader_program['m_proj'].write(self.app.camera_2.m_proj)
+            self.shader_program['m_view'].write(self.app.camera_2.m_view)
         self.vao.render(mgl.TRIANGLE_STRIP)
+        
         
     def destroy (self):
         self.vbo.release()

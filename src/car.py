@@ -164,7 +164,7 @@ class Car:
         """
     
     def move_backward(self):
-        print(f"vel: {self.velocity}")
+        #print(f"vel: {self.velocity}")
         self.velocity -= 0.5
         self.velocity = self.velmin if self.velocity < self.velmin else self.velocity
 

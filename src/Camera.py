@@ -77,7 +77,6 @@ class DriverCamera(Camera):
 
     def update(self):
         self.position = self.get_position()
-        print(self.player, self.position)
         self.lookat = self.get_look_at()
         self.m_view = self.get_view_matrix()
         self.m_proj = self.get_projection_matrix()

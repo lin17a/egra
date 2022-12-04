@@ -25,6 +25,7 @@ class GraphicsEngine:
         self.time = 0
         self.start_menu()
         self.map = None
+        self.players = None
 
     def start_menu(self):
         self.surface = pg.display.set_mode(self.WIN_SIZE)
@@ -53,18 +54,54 @@ class GraphicsEngine:
         # axis
         self.axis = Axis(self)
 
+        self.change_camera()
+
+    def two_players(self):
+        # set opengl attr
+        pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION,3)
+        pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION,3)
+        pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE)
+        # create opengl context
+        self.surface = pg.display.set_mode(self.WIN_SIZE, flags=pg.OPENGL | pg.DOUBLEBUF)
+        # detect and use exixting opengl context
+        self.ctx = mgl.create_context()
+        # camera
+        self.camera = Camera(self, player = 1)
+        self.camera_2 = Camera(self, player = 2)
+        self.camera_mode = "bird"
+        # scene
+        self.scene = Circuito(self)
+        self.skybox = Skybox(self, self.map)
+        self.grass = Grass(self, self.map)
+        # Car
+        self.light = Light(self.map)
+        self.car = Car(self, player = 1)
+        self.car_2 = Car(self, player = 2)
+        # axis
+        self.axis = Axis(self)
+
+        self.change_camera()
+
     def get_time(self):
         self.time = pg.time.get_ticks() * 0.001
 
     def change_camera(self):
-        if self.camera_mode == "bird":
-            self.camera_mode = "drive"
-            #self.camera = DriverCamera(self, self.scene.all_vertex, self.car.position)
-            #self.camera = DriverCamera(self, self.scene.all_vertex, self.scene.current_vertex)
-            self.camera = DriverCamera(self)
-        else:
-            self.camera_mode = "bird"
-            self.camera = Camera(self)
+        if self.players == 1:
+            if self.camera_mode == "bird":
+                self.camera_mode = "drive"
+                self.camera = DriverCamera(self)
+            else:
+                self.camera_mode = "bird"
+                self.camera = Camera(self)
+        if self.players == 2:
+            if self.camera_mode == "bird":
+                self.camera_mode = "drive"
+                self.camera = DriverCamera(self, player = 1)
+                self.camera_2 = DriverCamera(self, player = 2)
+            else:
+                self.camera_mode = "bird"
+                self.camera = Camera(self, player = 1)
+                self.camera_2 = Camera(self, player = 2)
 
     def check_events(self):
         if self.menu_active:
@@ -80,6 +117,7 @@ class GraphicsEngine:
                 self.start_menu()
             if event.type == pg.MOUSEWHEEL:
                 self.camera.zoom(-event.y*3)
+                self.camera_2.zoom(-event.y*3)
 
         keys = pg.key.get_pressed()
 
@@ -93,9 +131,25 @@ class GraphicsEngine:
         #     if keys[pg.K_d]:
         #         self.camera.move_right()
 
+        if self.players == 2:
+            if keys[pg.K_w]:
+                self.car_2.move_forward()
+            if keys[pg.K_d]:
+                self.car_2.move_right()
+            if keys[pg.K_a]:
+                self.car_2.move_left()
+            if keys[pg.K_s]:
+                self.car_2.move_backward()
+            self.car_2.up()
+            self.car_2.on_init()
+
+
         if keys[pg.K_r]:
             self.scene.new_road()
             self.car.move_to_start()
+            if self.players == 2:
+                self.car_2.move_to_start()
+
         if keys[pg.K_UP]:
             self.car.move_forward()
         if keys[pg.K_RIGHT]:
@@ -106,7 +160,6 @@ class GraphicsEngine:
             self.car.move_backward()            
         
         self.car.up()
-        self.camera.update()
         self.car.on_init()
         self.grass.on_init()
         self.skybox.on_init()
@@ -117,24 +170,62 @@ class GraphicsEngine:
             self.players, play, self.map = self.menu.render()
             if play:
                 self.menu_active = False
-                if self.players == 1 or self.players == 2:
+                if self.players == 1:
                     self.one_player()
+                elif self.players == 2:
+                    self.two_players()
         else:
             # clear framebuffer
             self.ctx.clear(color=(0, 0, 0))
-            # render scene
-            self.skybox.render()
-            self.grass.render()
-            self.scene.render()
-            # render car
-            self.ctx.enable(mgl.DEPTH_TEST | mgl.CULL_FACE)
-            self.car.render()
-            self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
+            if self.players == 1:
+                self.camera.update()
+                self.skybox.render(player = 1)
+                # render scene
+                self.grass.render(player = 1)
+                #self.asphalt.render()
+                self.scene.render(player = 1)
+                # render car
+                self.ctx.enable(mgl.DEPTH_TEST | mgl.CULL_FACE)
+                self.car.render(player = 1)
+                self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
+                # render axis
+                self.axis.render()
+                # swap buffers
+                pg.display.flip()
 
-            # render axis
-            #self.axis.render()
-            # swap buffers
-            pg.display.flip()
+            if self.players == 2:                
+                self.ctx.viewport = (0, self.WIN_SIZE[1]//2, self.WIN_SIZE[0], self.WIN_SIZE[1]//2)
+                self.camera.update()
+                # render scene
+                self.skybox.render(player = 2)
+                self.grass.render(player = 2)
+                #self.asphalt.render()
+                self.scene.render(player = 1)
+                # render car
+                self.ctx.enable(mgl.DEPTH_TEST | mgl.CULL_FACE)
+                self.car.render(player=1)
+                self.car_2.render(player=1)
+                self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
+                # render axis
+                #self.axis.render()
+
+                self.ctx.viewport = (0, 0, self.WIN_SIZE[0], self.WIN_SIZE[1]//2)
+                self.camera_2.update()
+                # render scene
+                self.skybox.render(player = 1)
+                self.grass.render(player = 1)
+                #self.asphalt.render()
+                self.scene.render(player = 2)
+                # render car
+                self.ctx.enable(mgl.DEPTH_TEST | mgl.CULL_FACE)
+                self.car.render(player=2)
+                self.car_2.render(player=2)
+                self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
+                # render axis
+                #self.axis.render()
+
+                # swap buffers
+                pg.display.flip()
 
     def run(self):
         while True:

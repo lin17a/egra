@@ -4,9 +4,13 @@ import moderngl as mgl
 
 
 class Camera:
-    def __init__(self, app):
+    def __init__(self, app, player = 1):
         self.app = app
-        self.aspect_ratio = app.WIN_SIZE[0]/app.WIN_SIZE[1]
+        self.player = player
+        if self.player ==1 or self.player == 2:
+            self.aspect_ratio = app.WIN_SIZE[0]/(app.WIN_SIZE[1]/2)
+        else:
+            self.aspect_ratio = app.WIN_SIZE[0]/app.WIN_SIZE[1]          
         self.position = glm.vec3(0,60,0)
         self.up = glm.vec3(1,0,0)
         self.lookat = glm.vec3(0)
@@ -52,10 +56,15 @@ class Camera:
         pass
 
 
+
 class DriverCamera(Camera):
-    def __init__(self, app):
+    def __init__(self, app, player = None):
         self.app = app
-        self.aspect_ratio = app.WIN_SIZE[0] / app.WIN_SIZE[1]
+        self.player = player
+        if self.player ==1 or self.player == 2:
+            self.aspect_ratio = app.WIN_SIZE[0]/(app.WIN_SIZE[1]/2)
+        else:
+            self.aspect_ratio = app.WIN_SIZE[0]/app.WIN_SIZE[1]        
         self.cam_dist = 5
         self.position = self.get_position()
         self.up = glm.vec3(0, 1, 0)
@@ -73,8 +82,12 @@ class DriverCamera(Camera):
         self.m_proj = self.get_projection_matrix()
 
     def get_position(self):
-        car_x, car_z, car_y = self.app.car.position
-        view_dir = self.app.car.direction_vector(self.app.car.rotation)
+        if self.player == 1 or self.player == None:
+            car_x, car_z, car_y = self.app.car.position
+            view_dir = self.app.car.direction_vector(self.app.car.rotation)
+        elif self.player == 2:
+            car_x, car_z, car_y = self.app.car_2.position
+            view_dir = self.app.car_2.direction_vector(self.app.car_2.rotation)
         # TODO the cam dist needs to match the direction_vector dividing factor
         position = glm.vec3(car_x - self.cam_dist * view_dir[0], 1, car_y - self.cam_dist * view_dir[2])
         #print("--> get camera position")
@@ -85,8 +98,10 @@ class DriverCamera(Camera):
         return position
 
     def get_look_at(self):
-        return self.app.car.position
-
+        if self.player == 1 or self.player == None:
+            return self.app.car.position
+        elif self.player == 2:
+            return self.app.car_2.position
 
 class Axis:
     def __init__(self, app):

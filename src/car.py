@@ -29,7 +29,12 @@ class Car:
         next_vertex = self.app.scene.all_vertex[self.app.scene.current_vertex - 19]
         y_mid_point = (next_vertex[0].max() + vertex[0].min()) / 2
         x_mid_point = (next_vertex[2].max() + vertex[2].min()) / 2
-        return glm.vec3((y_mid_point, 0, x_mid_point))
+        dir_vec = next_vertex - vertex
+        Movement = 0.2
+        if self.player == 1:
+            return glm.vec3((y_mid_point, 0, x_mid_point)) - dir_vec * glm.vec3((Movement, 0, Movement))
+        elif self.player == 2:
+            return glm.vec3((y_mid_point, 0, x_mid_point)) + dir_vec * glm.vec3((Movement, 0, Movement))
 
     def get_start_rotation(self):
         vertex = self.app.scene.all_vertex[self.app.scene.current_vertex - 20] # coordinate order: y, z, x

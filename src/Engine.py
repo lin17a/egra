@@ -52,7 +52,7 @@ class GraphicsEngine:
         self.light = Light(self.map)
         self.car = Car(self)
         # axis
-        self.axis = Axis(self)
+        #self.axis = Axis(self)
 
         self.change_camera()
 
@@ -78,7 +78,7 @@ class GraphicsEngine:
         self.car = Car(self, player = 1)
         self.car_2 = Car(self, player = 2)
         # axis
-        self.axis = Axis(self)
+        #self.axis = Axis(self)
 
         self.change_camera()
 
@@ -189,7 +189,7 @@ class GraphicsEngine:
                 self.car.render(player = 1)
                 self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
                 # render axis
-                self.axis.render()
+                #self.axis.render()
                 # swap buffers
                 pg.display.flip()
 

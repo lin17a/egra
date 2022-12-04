@@ -89,7 +89,7 @@ class DriverCamera(Camera):
             car_x, car_z, car_y = self.app.car_2.position
             view_dir = self.app.car_2.direction_vector(self.app.car_2.rotation)
         # TODO the cam dist needs to match the direction_vector dividing factor
-        position = glm.vec3(car_x - self.cam_dist * view_dir[0], 1, car_y - self.cam_dist * view_dir[2])
+        position = glm.vec3(car_x - self.cam_dist * view_dir[0], 0.6, car_y - self.cam_dist * view_dir[2])
         #print("--> get camera position")
         #print("rotation:", self.app.car.rotation)
         #print("car position:", self.app.car.position)

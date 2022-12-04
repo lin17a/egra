@@ -17,10 +17,10 @@ class menu:
                     drawing_mode=pygame_menu.baseimage.IMAGE_MODE_REPEAT_XY
                 )
         mytheme.background_color = myimage
-        self.menu = pygame_menu.Menu(   height = 960, 
+        self.menu = pygame_menu.Menu(   height = self.app.WIN_SIZE[1], 
                                         theme = mytheme, 
                                         title = 'Race Driving Simulator', 
-                                        width = 1280, 
+                                        width = self.app.WIN_SIZE[0], 
                                         center_content=False
                                     )
         X = 0

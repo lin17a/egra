@@ -1,6 +1,6 @@
 import pygame as pg
 import pygame_menu
-
+from pygame_menu import Theme
 
 class menu:
     def __init__(self, app):
@@ -8,10 +8,18 @@ class menu:
         self.players = 1
         self.play = False
         self.map = "field"
-        self.menu = pygame_menu.Menu(   height = 300, 
-                                        theme = pygame_menu.themes.THEME_BLUE, 
-                                        title = 'Menu', 
-                                        width = 400
+        font = pygame_menu.font.FONT_MUNRO
+        mytheme = Theme(background_color=(0, 0, 0, 0), 
+                        widget_font=font)
+        myimage = pygame_menu.baseimage.BaseImage(
+                    image_path=r"./textures/sb.jpg",
+                    drawing_mode=pygame_menu.baseimage.IMAGE_MODE_REPEAT_XY
+                )
+        mytheme.background_color = myimage
+        self.menu = pygame_menu.Menu(   height = 960, 
+                                        theme = mytheme, 
+                                        title = 'Race Driving Simulator', 
+                                        width = 1280
                                     )
         self.menu.add.selector('Players:', ["1", "2"], onchange=self.set_player)
         self.menu.add.selector('Maps:', [("Field", 1), ("Sunset", 2), ("Desert", 3)], onchange=self.set_map)

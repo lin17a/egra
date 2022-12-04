@@ -4,12 +4,12 @@ import moderngl as mgl
 
 
 class Camera:
-    def __init__(self, app, player = 1):
+    def __init__(self, app, player = None):
         self.app = app
         self.player = player
-        if self.player ==1 or self.player == 2:
+        if self.player == 1 or self.player == 2:
             self.aspect_ratio = app.WIN_SIZE[0]/(app.WIN_SIZE[1]/2)
-        else:
+        elif self.player == None:
             self.aspect_ratio = app.WIN_SIZE[0]/app.WIN_SIZE[1]          
         self.position = glm.vec3(0,60,0)
         self.up = glm.vec3(1,0,0)
@@ -61,10 +61,10 @@ class DriverCamera(Camera):
     def __init__(self, app, player = None):
         self.app = app
         self.player = player
-        if self.player ==1 or self.player == 2:
+        if self.player == 1 or self.player == 2:
             self.aspect_ratio = app.WIN_SIZE[0]/(app.WIN_SIZE[1]/2)
-        else:
-            self.aspect_ratio = app.WIN_SIZE[0]/app.WIN_SIZE[1]        
+        elif self.player == None:
+            self.aspect_ratio = app.WIN_SIZE[0]/app.WIN_SIZE[1]          
         self.cam_dist = 5
         self.position = self.get_position()
         self.up = glm.vec3(0, 1, 0)

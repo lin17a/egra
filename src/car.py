@@ -6,7 +6,7 @@ from Physics import Physics
 
 
 class Car:
-    def __init__(self, app, player = 1):
+    def __init__(self, app, player = None):
         self.player = player
         self.app = app
         self.ctx = app.ctx
@@ -29,6 +29,9 @@ class Car:
         next_vertex = self.app.scene.all_vertex[self.app.scene.current_vertex - 19]
         y_mid_point = (next_vertex[0].max() + vertex[0].min()) / 2
         x_mid_point = (next_vertex[2].max() + vertex[2].min()) / 2
+        if self.player == None:
+            return glm.vec3((y_mid_point, 0, x_mid_point))
+
         dir_vec = next_vertex - vertex
         Movement = 0.2
         if self.player == 1:
@@ -59,7 +62,7 @@ class Car:
         self.shader_program['light.position'].write(self.app.light.position)
         # self.shader_program['light.Ia'].write(self.app.light.Ia)
         # self.shader_program['light.Id'].write(self.app.light.Id)
-        if self.player == 1:
+        if self.player == 1 or self.player == None:
             self.shader_program['m_proj'].write(self.app.camera.m_proj)
             self.shader_program['m_view'].write(self.app.camera.m_view)
             self.shader_program['view_pos'].write(self.app.camera.position)
@@ -73,7 +76,7 @@ class Car:
         self.shader_program['light.position'].write(self.app.light.position)
         # self.shader_program['light.Ia'].write(self.app.light.Ia)
         # self.shader_program['light.Id'].write(self.app.light.Id)
-        if self.player == 1:
+        if self.player == 1 or self.player == None:
             self.shader_program['m_proj'].write(self.app.camera.m_proj)
             self.shader_program['m_view'].write(self.app.camera.m_view)
             self.shader_program['view_pos'].write(self.app.camera.position)
@@ -85,7 +88,7 @@ class Car:
 
     def render(self, player):
         self.shader_program['light.position'].write(self.app.light.position)
-        if player == 1:
+        if player == 1 or self.player == None:
             self.shader_program['m_proj'].write(self.app.camera.m_proj)
             self.shader_program['m_view'].write(self.app.camera.m_view)
             self.shader_program['view_pos'].write(self.app.camera.position)
@@ -125,7 +128,7 @@ class Car:
             for i in range(0, len(vertices[name]), 6):
                 data.extend(vertices[name][i:i + 6])
                 if name == "default7":
-                    if self.player == 1:
+                    if self.player == 1 or self.player == None:
                         data.extend(material.diffuse[0:3])
                         data.extend(material.ambient[0:3])
                     elif self.player == 2:

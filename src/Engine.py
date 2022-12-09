@@ -179,7 +179,6 @@ class GraphicsEngine:
                 self.menu_music.stop()
                 self.ingame_music.load("musica1")
                 self.ingame_music.play()
-                #self.ingame_music.play()
                 if self.players == 1:
                     self.one_player()
                 elif self.players == 2:

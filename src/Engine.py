@@ -12,6 +12,7 @@ from Light import Light
 from texturing import *
 import time
 from UI import menu
+from Music import MusicPlayer
 
 
 class GraphicsEngine:
@@ -26,6 +27,11 @@ class GraphicsEngine:
         self.start_menu()
         self.map = None
         self.players = None
+
+        # Sounds
+        self.ingame_music = MusicPlayer("musica1", volume=0.5)
+        self.menu_music = MusicPlayer("menu", volume=0.3)
+        self.menu_music.play()
 
     def start_menu(self):
         self.surface = pg.display.set_mode(self.WIN_SIZE)
@@ -170,6 +176,9 @@ class GraphicsEngine:
             self.players, play, self.map = self.menu.render()
             if play:
                 self.menu_active = False
+                self.menu_music.stop()
+                self.ingame_music.load("musica1")
+                self.ingame_music.play()
                 if self.players == 1:
                     self.one_player()
                 elif self.players == 2:

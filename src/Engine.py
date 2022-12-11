@@ -11,7 +11,7 @@ from car import Car
 from Light import Light
 from texturing import *
 import time
-from UI import menu
+from UI import menu, InGameText
 
 
 class GraphicsEngine:
@@ -26,6 +26,7 @@ class GraphicsEngine:
         self.start_menu()
         self.map = None
         self.players = None
+        self.in_game_text = InGameText(self)
 
     def start_menu(self):
         self.surface = pg.display.set_mode(self.WIN_SIZE)
@@ -142,7 +143,7 @@ class GraphicsEngine:
                 self.car_2.move_backward()
             self.car_2.up()
             self.car_2.on_init()
-
+            self.car_2.check_if_on_checkpoint()
 
         if keys[pg.K_r]:
             self.scene.new_road()
@@ -160,6 +161,7 @@ class GraphicsEngine:
             self.car.move_backward()            
         
         self.car.up()
+        self.car.check_if_on_checkpoint()
         self.car.on_init()
         self.grass.on_init()
         self.skybox.on_init()
@@ -174,9 +176,12 @@ class GraphicsEngine:
                     self.one_player()
                 elif self.players == 2:
                     self.two_players()
+                #self.in_game_text.draw_text()
         else:
             # clear framebuffer
             self.ctx.clear(color=(0, 0, 0))
+            self.ctx.enable(mgl.BLEND)
+            self.in_game_text.draw_text()
             if self.players == 1:
                 self.camera.update()
                 self.skybox.render(player = 1)
@@ -188,6 +193,8 @@ class GraphicsEngine:
                 self.ctx.enable(mgl.DEPTH_TEST | mgl.CULL_FACE)
                 self.car.render(player = 1)
                 self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
+
+                self.in_game_text.draw_text()
                 # render axis
                 #self.axis.render()
                 # swap buffers

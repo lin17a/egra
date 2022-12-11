@@ -4,11 +4,8 @@ from generation import generation_track
 import numpy as np
 from scipy.spatial.distance import cdist
 
-import matplotlib.pyplot as plt
-
 from numba import jit, njit
 import numba
-
 
 class Circuito:
     def __init__(self,app):
@@ -19,10 +16,9 @@ class Circuito:
         self.current_vertex = None
         self.all_vertex = np.empty(0,  dtype='f4')
         self.vbo, self.vboc = self.get_vbo()
-        self.shader_program = self.get_shader_program()
+        self.shader_program = self.get_shader_program('circuito')
         self.vao = self.get_vao()
         self.m_model = self.get_model_matrix()
-        #self.curves = self.get_curvyness()
         self.layout_points, self.layout_matrix = self.get_layout_matrix()
         self.on_init()
 
@@ -31,12 +27,17 @@ class Circuito:
         return m_model
         
     def on_init(self):
-        self.shader_program['m_proj'].write(self.app.camera.m_proj)
-        self.shader_program['m_view'].write(self.app.camera.m_view)
         self.shader_program['m_model'].write(self.m_model)
 
-    def render(self):
+    def render(self, player=1):
+        if player == 1:
+            self.shader_program['m_proj'].write(self.app.camera.m_proj)
+            self.shader_program['m_view'].write(self.app.camera.m_view)
+        elif player == 2:
+            self.shader_program['m_proj'].write(self.app.camera_2.m_proj)
+            self.shader_program['m_view'].write(self.app.camera_2.m_view)
         self.vao.render(mgl.TRIANGLE_STRIP)
+        
         
     def destroy (self):
         self.vbo.release()
@@ -102,102 +103,16 @@ class Circuito:
         vboc = self.ctx.buffer(color_data)
         return vbo, vboc
     
-    def get_shader_program(self):
-        program = self.ctx.program(    
-            vertex_shader='''
-                #version 330
-                layout (location = 0) in vec3 in_position;
-                layout (location = 1) in vec3 in_color;
-                out vec3 color;
-                out vec2 xy;
-                uniform mat4 m_proj;
-                uniform mat4 m_view;
-                uniform mat4 m_model;
+    def get_shader_program(self, shader_program_name):
+        with open(f'shaders/{shader_program_name}.vert') as file:
+                    vertex_shader = file.read()
 
-                float random2d(vec2 coord){
-                    return fract(sin(dot(coord.xy, vec2(12.9898, 78.233))) * 43758.5453);
-                }
+        with open(f'shaders/{shader_program_name}.frag') as file:
+            fragment_shader = file.read()
 
-                void main() {
-                    color = in_color - random2d(floor(in_position.xy + 0.5)) * 0.06;
-                    xy = in_position.xy;
-                    gl_Position = m_proj * m_view * m_model * vec4(in_position, 1.0);
-                }
-            ''',
-            fragment_shader='''
-                #version 330
-                layout (location = 0) out vec4 fragColor;
-                in vec3 color;
-                in vec2 xy;
-
-                
-
-                float round(float x){
-                    return floor(x + 0.5);
-                }
-
-                void main() { 
-                    //float x = round(100*xy.x) / 100;
-                    //float y = xy.y;
-                    //vec2 coord = vec2(xy.x, xy.y);
-                    //float r = random2d(coord);
-                    fragColor = vec4(color, 1.0);
-                }
-            ''',
-        )
+        program = self.ctx.program(vertex_shader=vertex_shader,
+                                   fragment_shader=fragment_shader)
         return program
-
-
-    def get_curvyness(self):
-        vertices = self.all_vertex
-        # number of nodes to take into account when calculating the curviness
-        # (on each side of the node, so in total 2 * num_neighbours + 1 are taken into account)
-        num_neighbours = 5
-        # curviness at each vertexpair of the circuit
-        curviness = np.zeros(int(len(vertices) / 2))
-        # coordinates of the middle line
-        middle_line = np.zeros((int(len(vertices) / 2), 3))
-
-        for vert in range(0, len(vertices), 2):
-            # define first and last node on each side that are considered for the current point on the circuit
-            first_left = vert - 2 * num_neighbours
-            last_left = (vert + 2 * num_neighbours) % len(vertices)
-            first_right = vert - 2 * num_neighbours - 1
-            last_right = (vert + 2 * num_neighbours - 1) % len(vertices)
-
-            # get a list of nodes, that should be considered on each side
-            if (first_left < 0 and last_left > 0) or first_left > (last_left % len(vertices)):
-                idx_left_border = np.concatenate((np.arange((len(vertices) + first_left) % len(vertices), len(vertices), 2),
-                                                  np.arange(0, last_left + 1 % len(vertices), 2)))
-            else:
-                idx_left_border = np.arange(first_left, last_left + 1, 2)
-
-            if (first_right < 0 and last_right > 0) or first_right > (last_right % len(vertices)):
-                idx_right_border = np.concatenate((np.arange((len(vertices) + first_right) % len(vertices), len(vertices), 2),
-                                                   np.arange(1, last_right + 1 % len(vertices), 2)))
-            else:
-                idx_right_border = np.arange(first_right, last_right + 1, 2)
-
-            # calculate the length of the circuit on both sides
-            length_left = sum([sum(abs(vertices[i] - vertices[j])) for i, j in zip(idx_left_border[0:-1], idx_left_border[1:])])
-            length_right = sum([sum(abs(vertices[i] - vertices[j])) for i, j in zip(idx_right_border[0:-1], idx_right_border[1:])])
-
-            # curviness is the ratio of the two length
-            curviness[int(vert / 2)] = length_left / length_right
-
-            # calculate middle point of the circuit for plotting
-            middle_line[int(vert / 2)] = (vertices[vert] + vertices[vert - 1]) / 2
-
-        # take the logarithm to see the curves better
-        curviness = np.sign(curviness) * np.log(abs(curviness))
-
-        # plot the curviness
-        curviness_colors = [[(vert - curviness.min()) / (curviness.max() - curviness.min()), 0, 0] for vert in curviness]
-        plt.scatter(middle_line[:, 0], middle_line[:, 2], s=10, c=curviness_colors)
-        plt.scatter(vertices[:, 0], vertices[:, 2], s=2)
-        plt.show()
-
-        return curviness
 
     @staticmethod
     @jit(nopython=True)
@@ -228,7 +143,6 @@ class Circuito:
             D[i] = self.pointinpolygon(points[i, 0], points[i, 1], polygon)
         return D
 
-
     def get_layout_matrix(self):
 
         vertices = self.all_vertex
@@ -252,25 +166,8 @@ class Circuito:
         # test if points are in the outer bounds of the circuit
         in_out_outer = self.parallelpointinpolygon(test_points, vertices[1::2, [0, 2]])
 
-        in_list = []
-        out_list = []
-
         # combine if point is on the circuit
         # in the outer border, but not inside the inner border
         on_track = np.logical_and(in_out_outer, np.logical_not(in_out_inner))
 
-        # get points on track and not on track to plot
-        for p, point in enumerate(on_track):
-            if point:
-                in_list.append(p)
-            else:
-                out_list.append(p)
-
-        plt.plot(vertices[::2, 0], vertices[::2, 2])
-        plt.plot(vertices[1::2, 0], vertices[1::2, 2])
-        plt.scatter(test_points[in_list, 0], test_points[in_list, 1], s=2)
-        plt.scatter(test_points[out_list, 0], test_points[out_list, 1], s=2)
-        plt.show()
-
         return test_points.reshape(201, 201, 2), on_track.reshape(201, 201)
-

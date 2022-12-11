@@ -13,6 +13,7 @@ from texturing import *
 import time
 from UI import menu
 from Music import MusicPlayer
+import glcontext
 
 
 class GraphicsEngine:

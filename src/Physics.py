@@ -3,7 +3,7 @@ import numpy as np
 
 class Physics:
     
-    def __init__(self, PosInicial, dt = 0.1, k = 3, m = 800, miu = 2, maxVel = 15):
+    def __init__(self, PosInicial, dt = 0.1, k = 3, m = 800, miu = 1, maxVel = 15):
         self.Pos = PosInicial
         self.PastPos = None
         self.PastDer = None
@@ -15,8 +15,11 @@ class Physics:
         
         self.dt = dt
         self.k = k
-
+        
         self.miu = miu
+        
+        self.miu_hist = [miu] * 100
+        
         self.m = m
         self.N = m * 9.8
         self.Fr = self.N*miu
@@ -24,6 +27,21 @@ class Physics:
         self.Fant = [0, 0]
         self.corr = 4.4 
         
+        
+    def update_miu(self, miu, inside = True):
+        
+        self.miu_hist.append(miu)
+        if inside:
+            self.miu = np.mean(self.miu_hist[-60:])
+        else:
+            self.miu = np.mean(self.miu_hist[-60:])
+        
+    def accelerate(self, x):
+        vel = self.maxVel / (1 + 3.8*np.exp(-0.08 * x + 3.3) ) - 0.2
+        vel = vel if vel > 0 else 0
+        return vel
+        
+    
     def getFirstDerivate(self, Pos):
         """
         y' = ( f(x) - f(x - h) ) / h
@@ -38,6 +56,7 @@ class Physics:
         h = (Pos[0] - self.PastPos[0])
         
         return (Pos[1] - self.PastPos[1]) / h
+    
     
     def getSecondDerivate(self, Pos):
         """
@@ -118,7 +137,7 @@ class Physics:
         a = (self.Fant[ind] - Drag - Fr ) / self.m
         
         self.Vel[ind] = self.PastVel[ind] + self.dt*(a + self.aant[ind])/2 - self.corr
-        
+        self.Vel[ind] -= self.miu
         
         self.Vel[ind] = self.Vel[ind] if self.Vel[ind] > 0 else 0
         self.Vel[ind] = self.maxVel if self.Vel[ind] > self.maxVel else self.Vel[ind]

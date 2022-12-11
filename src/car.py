@@ -18,8 +18,10 @@ class Car:
         
         self.velocity = 0 #[x, y]
         self.friction = 1
-        self.physics = Physics((self.position[0], self.position[2]), dt = 0.05)
-        self.velmax = 15
+        self.velmax = 25
+        self.physics = Physics((self.position[0], self.position[2]), dt = 0.05, 
+                               maxVel = self.velmax)
+
         self.velmin = 0
         
         self.on_init()
@@ -130,6 +132,8 @@ class Car:
         self.velocity += 0.5
         self.velocity = self.velmax if self.velocity > self.velmax else self.velocity
         print(f"vel: {self.physics.Vel}")
+        print(f"miu: {self.physics.miu}")
+        
         """
         direction_vector = self.direction_vector(self.rotation)
         self.position = self.position + 0.5 * direction_vector
@@ -153,8 +157,9 @@ class Car:
         #self.velocity = 0 if self.velocity < 0 else self.velocity
 
         self.friction = self.get_friction()
-        self.physics.miu = self.get_friction()
-        self.physics.Update(self.velocity, [1,0], self.friction)
+        self.physics.update_miu(self.get_friction(), self.on_circuit())
+        
+        self.physics.Update(self.velocity, [1,0], self.physics.miu)
         
         
         direction_vector = self.direction_vector(self.rotation)
@@ -181,9 +186,9 @@ class Car:
 
     def get_friction(self):
         if self.on_circuit():
-            return 1
+            return 0
         else:
-            return 20
+            return 5.5
 
     def on_circuit(self):
         points = self.app.scene.layout_points

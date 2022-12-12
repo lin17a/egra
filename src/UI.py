@@ -53,7 +53,6 @@ class menu:
     
     def set_color(self, color, player):
         self.players_color[player] = color[0][0].lower()
-        print(self.players_color)
 
     def set_player(self, players):
         self.players = int(players[0])

@@ -36,10 +36,14 @@ class Physics:
         else:
             self.miu = np.mean(self.miu_hist[-60:])
         
-    def accelerate(self, x):
-        vel = self.maxVel / (1 + 3.8*np.exp(-0.08 * x + 3.3) ) - 0.2
-        vel = vel if vel > 0 else 0
-        return vel
+    def accelerate(self, x, on_circuit):
+        if x > 0:
+            corr = 3 if on_circuit else 6
+            vel = self.maxVel / (1 + 0.9*np.exp(-0.005 * x + 1.72) ) + corr
+            vel = vel if vel > 0 else 0
+            return vel
+        else:
+            return x
         
     
     def getFirstDerivate(self, Pos):

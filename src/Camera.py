@@ -10,8 +10,11 @@ class Camera:
         if self.player == 1 or self.player == 2:
             self.aspect_ratio = app.WIN_SIZE[0]/(app.WIN_SIZE[1]/2)
         elif self.player == None:
-            self.aspect_ratio = app.WIN_SIZE[0]/app.WIN_SIZE[1]          
-        self.position = glm.vec3(0,60,0)
+            self.aspect_ratio = app.WIN_SIZE[0]/app.WIN_SIZE[1]
+        if self.player == None:
+            self.position = glm.vec3(0,60,0)
+        else:
+            self.position = glm.vec3(0,30,0)
         self.up = glm.vec3(1,0,0)
         self.lookat = glm.vec3(0)
         self.radians = 100
@@ -27,33 +30,50 @@ class Camera:
         return glm.perspective(glm.radians(self.radians), self.aspect_ratio, 0.1, 100)
 
     def zoom(self, scroll):
-        if 99 >= self.position[1]+scroll*0.5 >= 0:
-            self.lookat = self.lookat + glm.vec3((0, scroll, 0))
-            self.position = self.position + glm.vec3((0, scroll, 0))
-            self.m_view = self.get_view_matrix()
+        if self.player == None:
+            if 99 >= self.position[1]+scroll > 0:
+                self.lookat = self.lookat + glm.vec3((0, scroll, 0))
+                self.position = self.position + glm.vec3((0, scroll, 0))
+        else:
+            if 60 >= self.position[1]+scroll > 0:
+                self.lookat = self.lookat + glm.vec3((0, scroll, 0))
+                self.position = self.position + glm.vec3((0, scroll, 0))
     
     def move_right(self):
         self.lookat = self.lookat + glm.vec3((0, 0, 0.01*self.radians))
         self.position = self.position + glm.vec3((0, 0, 0.01*self.radians))
-        self.m_view = self.get_view_matrix()
 
     def move_left(self):
         self.lookat = self.lookat + glm.vec3((0, 0, -0.01*self.radians))
         self.position = self.position + glm.vec3((0, 0, -0.01*self.radians))
-        self.m_view = self.get_view_matrix()
 
     def move_up(self):
         self.lookat = self.lookat + glm.vec3((0.01*self.radians, 0, 0))
         self.position = self.position + glm.vec3((0.01*self.radians, 0, 0))
-        self.m_view = self.get_view_matrix()
     
     def move_down(self):
         self.lookat = self.lookat + glm.vec3((-0.01*self.radians, 0, 0))
         self.position = self.position + glm.vec3((-0.01*self.radians, 0, 0))
-        self.m_view = self.get_view_matrix()
 
     def update(self):
-        pass
+        self.position = self.get_position()
+        self.lookat = self.get_look_at()
+        self.m_view = self.get_view_matrix()
+        self.m_proj = self.get_projection_matrix()
+
+    def get_position(self):
+        if self.player == 1 or self.player == None:
+            car_x, car_z, car_y = self.app.car.position
+        elif self.player == 2:
+            car_x, car_z, car_y = self.app.car_2.position
+        position = glm.vec3(car_x, self.position[1], car_y)
+        return position
+
+    def get_look_at(self):
+        if self.player == 1 or self.player == None:
+            return self.app.car.position
+        elif self.player == 2:
+            return self.app.car_2.position
 
 
 

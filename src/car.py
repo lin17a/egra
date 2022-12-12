@@ -18,8 +18,11 @@ class Car:
         self.m_model = self.get_model_matrix()
         
         self.velocity = 0 #[x, y]
-        self.physics = Physics((self.position[0], self.position[2]), dt = 0.05)
-        self.velmax = 30
+        self.friction = 1
+        self.velmax = 25
+        self.physics = Physics((self.position[0], self.position[2]), dt = 0.05, 
+                               maxVel = self.velmax)
+
         self.velmin = 0
         
         self.on_init()
@@ -165,6 +168,9 @@ class Car:
     def move_forward(self):
         self.velocity += 0.5
         self.velocity = self.velmax if self.velocity > self.velmax else self.velocity
+        print(f"vel: {self.physics.Vel}")
+        print(f"miu: {self.physics.miu}")
+        
         """
         direction_vector = self.direction_vector(self.rotation)
         self.position = self.position + 0.5 * direction_vector
@@ -180,9 +186,17 @@ class Car:
     def up(self):
         if self.velocity > 0:
             self.velocity -= 0.1
+        if self.velocity == 0:
+            self.physics.aant = [0, 0]
+            self.physics.Fant = [0, 0]
+            
+            
         #self.velocity = 0 if self.velocity < 0 else self.velocity
-        self.physics.Update(self.velocity, [1,0], 1)
+
+        self.friction = self.get_friction()
+        self.physics.update_miu(self.get_friction(), self.on_circuit())
         
+        self.physics.Update(self.velocity, [1,0], self.physics.miu)
         
         
         direction_vector = self.direction_vector(self.rotation)
@@ -190,6 +204,7 @@ class Car:
         old_position = self.position
         
         self.position = self.position + self.physics.Vel[0]/20 * direction_vector
+        
         
         self.m_model = glm.translate(self.m_model, glm.vec3(self.physics.Vel[0]/20, 0, 0))#self.position - old_position)
         
@@ -205,7 +220,21 @@ class Car:
         #self.position = glm.vec3(self.physics.Pos[0], y, z)
         #self.position = glm.vec3(x+0.5, y, z)
         #self.m_model = glm.translate(self.m_model, self.position - old_position)
-        
+
+    def get_friction(self):
+        if self.on_circuit():
+            return 0
+        else:
+            return 5.5
+
+    def on_circuit(self):
+        points = self.app.scene.layout_points
+        x, y = self.position[0], self.position[2]
+        distances = np.sqrt((points[:, :, 0] - x)**2 + (points[:, :, 1] - y)**2)
+        closest_point = np.unravel_index(distances.argmin(), distances.shape)
+        layout = self.app.scene.layout_matrix
+        return layout[closest_point]
+
 
     def direction_vector(self, rotation):
         # Hotfix: why do we need this formula

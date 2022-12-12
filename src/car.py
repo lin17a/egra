@@ -17,10 +17,11 @@ class Car:
         self.rotation = self.get_start_rotation()
         self.position = self.get_start_position()
         self.m_model = self.get_model_matrix()
+        self.increase = 0
         
         self.velocity = 0 #[x, y]
         self.friction = 1
-        self.velmax = 25
+        self.velmax = 30
         self.physics = Physics((self.position[0], self.position[2]), dt = 0.05, 
                                maxVel = self.velmax)
 
@@ -178,29 +179,40 @@ class Car:
         self.m_model = glm.translate(self.m_model, glm.rotate(self.position, -degree, glm.vec3(0,1,0)))
 
     def move_forward(self):
-        self.velocity += 0.5
-        self.velocity = self.velmax if self.velocity > self.velmax else self.velocity
+
         
-        """
-        direction_vector = self.direction_vector(self.rotation)
-        self.position = self.position + 0.5 * direction_vector
-        self.m_model = glm.translate(self.m_model, glm.vec3(0.5, 0, 0))
-        """
+        self.increase += 5
+        
+        self.velocity = self.physics.accelerate(self.increase, self.on_circuit())
+        
+        self.increase = 780 if self.increase > 780 else self.increase
+        
+        print(f"vel: {self.physics.Vel}")
+        print(f"miu: {self.physics.miu}")
+        
     
     def move_backward(self):
         #print(f"vel: {self.velocity}")
-        self.velocity -= 0.5
-        self.velocity = self.velmin if self.velocity < self.velmin else self.velocity
+        self.increase -= 5
+        self.increase = -30 if self.increase < -30 else self.increase
+        self.velocity = self.physics.accelerate(self.increase, self.on_circuit())
+        print(f"vel: {self.physics.Vel}")
+        print(f"increase: {self.increase}")
 
         
     def up(self):
-        if self.velocity > 0:
-            self.velocity -= 0.1
-        if self.velocity == 0:
+        
+         
+        if self.increase > 0:
+            self.increase -= 2.5
+        if self.increase == 0:
             self.physics.aant = [0, 0]
             self.physics.Fant = [0, 0]
             
-            
+        #self.increase = 0 if self.increase < 0 else self.increase
+        
+        self.velocity = self.physics.accelerate(self.increase, self.on_circuit())
+        
         #self.velocity = 0 if self.velocity < 0 else self.velocity
 
         self.friction = self.get_friction()
@@ -235,7 +247,8 @@ class Car:
         if self.on_circuit():
             return 0
         else:
-            return 6.5
+            return 10.5
+
 
     def on_circuit(self):
         points = self.app.scene.layout_points

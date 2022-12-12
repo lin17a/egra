@@ -280,15 +280,45 @@ class Car:
 
 class MinimapCar(Car):
 
-    def on_init(self):
+    def on_init(self, player = 1):
         self.shader_program['light.position'].write(self.app.light.position)
         # self.shader_program['light.Ia'].write(self.app.light.Ia)
         # self.shader_program['light.Id'].write(self.app.light.Id)
-        self.shader_program['m_proj'].write(self.app.minimap.m_proj)
-        self.shader_program['m_view'].write(self.app.minimap.m_view)
-        self.shader_program['view_pos'].write(self.app.minimap.position)
+        if self.player == 1 or self.player == None:
+            self.shader_program['m_proj'].write(self.app.minimap.m_proj)
+            self.shader_program['m_view'].write(self.app.minimap.m_view)
+            self.shader_program['view_pos'].write(self.app.minimap.position)
+        elif self.player == 2:
+            self.shader_program['m_proj'].write(self.app.minimap_2.m_proj)
+            self.shader_program['m_view'].write(self.app.minimap_2.m_view)
+            self.shader_program['view_pos'].write(self.app.minimap_2.position)
         self.shader_program['m_model'].write(self.m_model)
 
-    def render(self):
-        self.shader_program['view_pos'].write(self.app.minimap.position)
+    def update(self, player = 1):
+        self.shader_program['light.position'].write(self.app.light.position)
+        # self.shader_program['light.Ia'].write(self.app.light.Ia)
+        # self.shader_program['light.Id'].write(self.app.light.Id)
+        if self.player == 1 or self.player == None:
+            self.shader_program['m_proj'].write(self.app.minimap.m_proj)
+            self.shader_program['m_view'].write(self.app.minimap.m_view)
+            self.shader_program['view_pos'].write(self.app.minimap.position)
+        elif self.player == 2:
+            self.shader_program['m_proj'].write(self.app.minimap_2.m_proj)
+            self.shader_program['m_view'].write(self.app.minimap_2.m_view)
+            self.shader_program['view_pos'].write(self.app.minimap_2.position)
+        self.shader_program['m_model'].write(self.m_model)
+
+    def render(self, player = 1):
+        self.shader_program['light.position'].write(self.app.light.position)
+        if player == 1 or self.player == None:
+            self.shader_program['m_proj'].write(self.app.minimap.m_proj)
+            self.shader_program['m_view'].write(self.app.minimap.m_view)
+            self.shader_program['view_pos'].write(self.app.minimap.position)
+        if player == 2:
+            self.shader_program['m_proj'].write(self.app.minimap_2.m_proj)
+            self.shader_program['m_view'].write(self.app.minimap_2.m_view)
+            self.shader_program['view_pos'].write(self.app.minimap_2.position)
+
+        self.shader_program['m_model'].write(self.m_model)
+        #print(self.player, self.position)
         self.vao.render()

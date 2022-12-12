@@ -4,6 +4,7 @@ from generation import generation_track
 import numpy as np
 from scipy.spatial.distance import cdist
 
+
 class Circuito:
     def __init__(self,app):
         self.app = app
@@ -11,6 +12,7 @@ class Circuito:
         self.edgy = 0.1
         self.rad = 0.1
         self.current_vertex = None
+        self.color_vertex = None
         self.all_vertex = np.empty(0,  dtype='f4')
         self.vbo, self.vboc = self.get_vbo()
         self.shader_program = self.get_shader_program('circuito')
@@ -78,6 +80,8 @@ class Circuito:
         idx_inicio = np.argmin(d)*2
         color = np.array([(0.2,0.2,0.2) for _ in range(vertex_2d.shape[0])], dtype='f4')
         color[idx_inicio-2:idx_inicio+2] = (1,1,1)
+
+        self.color_vertex = color
         self.current_vertex = idx_inicio
 
         return vertex_2d, color
@@ -108,3 +112,39 @@ class Circuito:
         program = self.ctx.program(vertex_shader=vertex_shader, 
                                 fragment_shader=fragment_shader)
         return program
+
+
+class MinimapCircuito(Circuito):
+    def __init__(self, app, all_vertex, color_vertex):
+        self.app = app
+        self.ctx = app.ctx
+        self.edgy = 0.1
+        self.rad = 0.1
+        self.current_vertex = None
+        self.color_vertex = color_vertex
+        self.all_vertex = all_vertex
+        self.vbo, self.vboc = self.get_vbo(all_vertex, color_vertex)
+        self.shader_program = self.get_shader_program('circuito')
+        self.vao = self.get_vao()
+        self.m_model = self.get_model_matrix()
+        self.on_init()
+
+    def new_road(self, all_vertex, color_vertex):
+        self.vbo, self.vboc = self.get_vbo(all_vertex, color_vertex)
+        self.vao = self.get_vao()
+        self.render()
+
+    def get_vbo(self, all_vertex, color_vertex):
+        vbo = self.ctx.buffer(all_vertex)
+        vboc = self.ctx.buffer(color_vertex)
+        return vbo, vboc
+
+    def render(self, player=1):
+        if player == 1:
+            self.shader_program['m_proj'].write(self.app.minimap.m_proj)
+            self.shader_program['m_view'].write(self.app.minimap.m_view)
+        elif player == 2:
+            self.shader_program['m_proj'].write(self.app.minimap_2.m_proj)
+            self.shader_program['m_view'].write(self.app.minimap_2.m_view)
+        self.vao.render(mgl.TRIANGLE_STRIP)
+

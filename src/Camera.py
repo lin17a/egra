@@ -10,7 +10,7 @@ class Camera:
         if self.player == 1 or self.player == 2:
             self.aspect_ratio = app.WIN_SIZE[0]/(app.WIN_SIZE[1]/2)
         elif self.player == None:
-            self.aspect_ratio = app.WIN_SIZE[0]/app.WIN_SIZE[1]          
+            self.aspect_ratio = app.WIN_SIZE[0]/app.WIN_SIZE[1]
         self.position = glm.vec3(0,60,0)
         self.up = glm.vec3(1,0,0)
         self.lookat = glm.vec3(0)
@@ -54,7 +54,6 @@ class Camera:
 
     def update(self):
         pass
-
 
 
 class DriverCamera(Camera):
@@ -102,6 +101,26 @@ class DriverCamera(Camera):
             return self.app.car.position
         elif self.player == 2:
             return self.app.car_2.position
+
+
+class Minimap(Camera):
+
+    def __init__(self, app, player=None):
+        self.app = app
+        self.player = player
+        if self.player == 1 or self.player == 2:
+            self.aspect_ratio = app.WIN_SIZE[0] / (app.WIN_SIZE[1] / 2)
+        elif self.player == None:
+            self.aspect_ratio = app.WIN_SIZE[0] / app.WIN_SIZE[1]
+        self.position = glm.vec3(0, 60, 0)
+        self.up = glm.vec3(1, 0, 0)
+        self.lookat = glm.vec3(0)
+        self.radians = 100
+        # view_matrix
+        self.m_view = self.get_view_matrix()
+        # projection matrix
+        self.m_proj = self.get_projection_matrix()
+
 
 class Axis:
     def __init__(self, app):

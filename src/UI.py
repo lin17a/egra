@@ -40,7 +40,7 @@ class menu:
         elif select == 1:
             self.menu.add.selector('Select Color Car:', [(color, 1) for color in self.colors_avaibles], onchange=self.set_color).translate(X, Y)
             self.menu.add.button('Start', self.start).translate(X, Y)
-            self.menu.add.button('Quit', pygame_menu.events.EXIT).translate(X, Y)
+            self.menu.add.button('Back', self.back).translate(X, Y)
         
         elif select == 2:
             self.menu.add.selector('Select Color Player 1:', [(color, 1) for color in self.colors_avaibles], onchange=self.set_color).translate(X, Y)
@@ -48,7 +48,7 @@ class menu:
             colors.append(colors.pop(0))
             self.menu.add.selector('Select Color Player 2:', colors, onchange=self.set_color).translate(X, Y)    
             self.menu.add.button('Start', self.start).translate(X, Y)
-            self.menu.add.button('Quit', pygame_menu.events.EXIT).translate(X, Y)
+            self.menu.add.button('Back', self.back).translate(X, Y)
 
     
     def set_color(self, color, player):
@@ -68,6 +68,9 @@ class menu:
 
     def start(self):
         self.play = True
+    
+    def back(self):
+        self.set_menu(0)
 
     def render(self):
         self.menu.mainloop(self.app.surface, disable_loop = True)

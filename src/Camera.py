@@ -31,13 +31,12 @@ class Camera:
 
     def zoom(self, scroll):
         if self.player == None:
-            if 99 >= self.position[1]+scroll > 0:
-                self.lookat = self.lookat + glm.vec3((0, scroll, 0))
-                self.position = self.position + glm.vec3((0, scroll, 0))
+            max_zoom = 99
         else:
-            if 60 >= self.position[1]+scroll > 0:
-                self.lookat = self.lookat + glm.vec3((0, scroll, 0))
-                self.position = self.position + glm.vec3((0, scroll, 0))
+            max_zoom = 60
+        if max_zoom >= self.position[1]+scroll > 0:
+            self.lookat = self.lookat + glm.vec3((0, scroll, 0))
+            self.position = self.position + glm.vec3((0, scroll, 0))
     
     def move_right(self):
         self.lookat = self.lookat + glm.vec3((0, 0, 0.01*self.radians))

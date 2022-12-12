@@ -24,12 +24,13 @@ class menu:
                 )
         mytheme.background_color = myimage
         X = 0
-        Y = 85
+        Y = 60
         self.menu = pygame_menu.Menu(   height = self.app.WIN_SIZE[1], 
                                             theme = mytheme, 
                                             title = 'Race Driving Simulator', 
                                             width = self.app.WIN_SIZE[0], 
-                                            center_content=False
+                                            center_content=False,
+                                            mouse_motion_selection=True
                                         )
         if select == 0:
             self.menu.add.selector('Players:', ["1", "2"], onchange=self.set_player).translate(X, Y)

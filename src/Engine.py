@@ -181,7 +181,7 @@ class GraphicsEngine:
             # clear framebuffer
             self.ctx.clear(color=(0, 0, 0))
             self.ctx.enable(mgl.BLEND)
-            self.in_game_text.draw_text()
+            #self.in_game_text.draw_text()
             if self.players == 1:
                 self.camera.update()
                 self.skybox.render(player = 1)
@@ -194,7 +194,7 @@ class GraphicsEngine:
                 self.car.render(player = 1)
                 self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
 
-                self.in_game_text.draw_text()
+                #self.in_game_text.draw_text()
                 # render axis
                 #self.axis.render()
                 # swap buffers

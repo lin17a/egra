@@ -83,9 +83,13 @@ class Circuito:
         color = np.array([(0.2,0.2,0.2) for _ in range(vertex_2d.shape[0])], dtype='f4')
         color[idx_inicio-2:idx_inicio+2] = (1,1,1)
         self.curves = self.get_curvyness()
+        checkpoint_thickness = 32
         for curve_idx in self.curves:
-            color[curve_idx - 2:curve_idx + 2] = (0, 1, 0)
-            self.checkpoints.append(vertex_2d[curve_idx - 2:curve_idx + 2])
+            idx_start = curve_idx - checkpoint_thickness
+            if idx_start > 0:
+                idx_end = curve_idx + checkpoint_thickness % len(color)
+                color[idx_start:idx_end] = (0.4, 0.4, 0.4)
+                self.checkpoints.append(vertex_2d[idx_start:idx_end])
         self.current_vertex = idx_inicio
         return vertex_2d, color
 

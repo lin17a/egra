@@ -6,8 +6,9 @@ from Physics import Physics
 
 
 class Car:
-    def __init__(self, app, player = None):
+    def __init__(self, app, player = None, color = "red"):
         self.player = player
+        self.color = color
         self.app = app
         self.ctx = app.ctx
         self.vbo = self.get_vbo()
@@ -131,13 +132,24 @@ class Car:
             for i in range(0, len(vertices[name]), 6):
                 data.extend(vertices[name][i:i + 6])
                 if name == "default7":
-                    if self.player == 1 or self.player == None:
-                        data.extend(material.diffuse[0:3])
-                        data.extend(material.ambient[0:3])
-                    elif self.player == 2:
-                        #Color del coche 2
+                    if self.color == "red":
+                        data.extend([0.5, 0, 0])
+                        data.extend([0.5, 0, 0])
+                    elif self.color == "blue":
                         data.extend([0, 0, 0.5])
                         data.extend([0, 0, 0.5])
+                    elif self.color == "green":
+                        data.extend([0, 0.5, 0])
+                        data.extend([0, 0.5, 0])
+                    elif self.color == "purple":
+                        data.extend([0.5, 0, 0.5])
+                        data.extend([0.5, 0, 0.5])
+                    elif self.color == "turquoise":
+                        data.extend([0, 0.5, 0.5])
+                        data.extend([0, 0.5, 0.5])
+                    elif self.color == "white":
+                        data.extend([0.5, 0.5, 0.5])
+                        data.extend([0.5, 0.5, 0.5])
                 else:
                     data.extend(material.diffuse[0:3])
                     data.extend(material.ambient[0:3])

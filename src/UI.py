@@ -14,9 +14,10 @@ class menu:
     
     def set_menu(self, select):
         font = pygame_menu.font.FONT_MUNRO
-        mytheme = Theme(background_color=(0, 0, 0, 0), 
-                        widget_font=font, 
-                        widget_font_size=50)
+        mytheme = Theme(background_color = (0, 0, 0, 0), 
+                        widget_font = font, 
+                        title_font = font,
+                        widget_font_size = 50)
         myimage = pygame_menu.baseimage.BaseImage(
                     image_path=r"./textures/sb.jpg",
                     drawing_mode=pygame_menu.baseimage.IMAGE_MODE_REPEAT_XY

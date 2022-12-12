@@ -60,7 +60,8 @@ class GraphicsEngine:
         self.car = Car(self, color = players_color[1])
         # axis
         #self.axis = Axis(self)
-
+        self.ingame_music.load("musica1")
+        self.ingame_music.play()
         self.change_camera()
 
     def two_players(self, players_color):
@@ -86,6 +87,9 @@ class GraphicsEngine:
         self.car_2 = Car(self, player = 2, color = players_color[2])
         # axis
         #self.axis = Axis(self)
+
+        self.ingame_music.load("musica1")
+        self.ingame_music.play()
 
         self.change_camera()
 
@@ -180,8 +184,6 @@ class GraphicsEngine:
             if play:
                 self.menu_active = False
                 self.menu_music.stop()
-                self.ingame_music.load("musica1")
-                self.ingame_music.play()
                 if self.players == 1:
                     self.one_player(players_color)
                 elif self.players == 2:

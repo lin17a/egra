@@ -168,8 +168,6 @@ class Car:
     def move_forward(self):
         self.velocity += 0.5
         self.velocity = self.velmax if self.velocity > self.velmax else self.velocity
-        print(f"vel: {self.physics.Vel}")
-        print(f"miu: {self.physics.miu}")
         
         """
         direction_vector = self.direction_vector(self.rotation)

@@ -130,7 +130,8 @@ class GraphicsEngine:
                 self.start_menu()
             if event.type == pg.MOUSEWHEEL:
                 self.camera.zoom(-event.y*3)
-                self.camera_2.zoom(-event.y*3)
+                if self.players == 2:
+                    self.camera_2.zoom(-event.y*3)
 
         keys = pg.key.get_pressed()
 

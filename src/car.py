@@ -6,8 +6,9 @@ from Physics import Physics
 
 
 class Car:
-    def __init__(self, app, player = None):
+    def __init__(self, app, player = None, color = "red"):
         self.player = player
+        self.color = color
         self.app = app
         self.ctx = app.ctx
         self.vbo = self.get_vbo()
@@ -132,13 +133,24 @@ class Car:
             for i in range(0, len(vertices[name]), 6):
                 data.extend(vertices[name][i:i + 6])
                 if name == "default7":
-                    if self.player == 1 or self.player == None:
-                        data.extend(material.diffuse[0:3])
-                        data.extend(material.ambient[0:3])
-                    elif self.player == 2:
-                        #Color del coche 2
+                    if self.color == "red":
+                        data.extend([0.5, 0, 0])
+                        data.extend([0.5, 0, 0])
+                    elif self.color == "blue":
                         data.extend([0, 0, 0.5])
                         data.extend([0, 0, 0.5])
+                    elif self.color == "green":
+                        data.extend([0, 0.5, 0])
+                        data.extend([0, 0.5, 0])
+                    elif self.color == "purple":
+                        data.extend([0.5, 0, 0.5])
+                        data.extend([0.5, 0, 0.5])
+                    elif self.color == "turquoise":
+                        data.extend([0, 0.5, 0.5])
+                        data.extend([0, 0.5, 0.5])
+                    elif self.color == "white":
+                        data.extend([0.5, 0.5, 0.5])
+                        data.extend([0.5, 0.5, 0.5])
                 else:
                     data.extend(material.diffuse[0:3])
                     data.extend(material.ambient[0:3])
@@ -167,6 +179,7 @@ class Car:
         self.m_model = glm.translate(self.m_model, glm.rotate(self.position, -degree, glm.vec3(0,1,0)))
 
     def move_forward(self):
+
         
         self.increase += 5
         
@@ -177,11 +190,6 @@ class Car:
         print(f"vel: {self.physics.Vel}")
         print(f"miu: {self.physics.miu}")
         
-        """
-        direction_vector = self.direction_vector(self.rotation)
-        self.position = self.position + 0.5 * direction_vector
-        self.m_model = glm.translate(self.m_model, glm.vec3(0.5, 0, 0))
-        """
     
     def move_backward(self):
         #print(f"vel: {self.velocity}")
@@ -240,6 +248,7 @@ class Car:
             return 0
         else:
             return 10.5
+
 
     def on_circuit(self):
         points = self.app.scene.layout_points

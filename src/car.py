@@ -225,7 +225,7 @@ class Car:
         if self.on_circuit():
             return 0
         else:
-            return 5.5
+            return 6.5
 
     def on_circuit(self):
         points = self.app.scene.layout_points

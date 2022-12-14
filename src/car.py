@@ -260,17 +260,26 @@ class Car:
         return layout[closest_point]
 
     def distance_to_off_circuit(self):
+        # these points are registered in the layout map, we know if they are on the circuit or not
         points = self.app.scene.layout_points
         x, y = self.position[0], self.position[2]
         distances = np.sqrt((points[:, :, 0] - x) ** 2 + (points[:, :, 1] - y) ** 2)
+        # get closest point, that is registered in the layout map
         closest_point = np.unravel_index(distances.argmin(), distances.shape)
+        # layout is a table of true and false values, that indicate whether the point (see points) is on the circuit or not
         layout = self.app.scene.layout_matrix
 
+        # direcions, in a matrix (neighbour fields of the field [0, 0])
+        # up, up left, left, down left, down, down right, right, up right
         dirs = [(0, 1), (-1, 1), (0, -1), (-1, -1), (0, -1), (1, -1), (1, 0), (1, 1)]
+        # get the index for (rounded) direction in dirs
         dir_idx = int((self.rotation + np.pi/8) / (2 * np.pi) * 8) % 8
         #print(dirs[dir_idx])
+        # array that will contain the number of fields until the circuit ends for the directions:
+        # left, up left, up, up right, right
         steps = [0, 0, 0, 0, 0]
         directions = [dirs[(dir_idx + 2 + 8) % 8], dirs[(dir_idx + 1 + 8) % 8], dirs[dir_idx], dirs[(dir_idx - 1) % 8], dirs[(dir_idx - 2) % 8]]
+        # find the first non-circuit field in each direction
         for i, (x, y) in enumerate(directions):
             next_border = closest_point
             while (next_border[0] < layout.shape[0] and next_border[1] < layout.shape[1]) and layout[next_border]:

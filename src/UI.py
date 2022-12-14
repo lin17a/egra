@@ -49,7 +49,7 @@ class InGameText:
     def __init__(self, app):
         self.app = app
         self.window_size = app.WIN_SIZE
-        self.display_surface = pg.display.set_mode(self.window_size)
+        self.display_surface = pg.display.set_mode(self.window_size, pg.DOUBLEBUF | pg.OPENGL)
         # create a font object.
         # 1st parameter is the font file
         # which is present in pygame.
@@ -75,7 +75,7 @@ class InGameText:
     def drawText(self, text):
         textSurface = self.font.render(text, True, (255, 255, 66, 255), (0, 66, 0, 255))
         textData = pg.image.tostring(textSurface, "RGBA", True)
-        mgl.glWindowPos2d(self.window_size[0] // 2, self.window_size[1] // 2)
+        mgl.glWindowPos2d(self.window_size[0] // (4/3), self.window_size[1] // 2)
         mgl.glDrawPixels(textSurface.get_width(), textSurface.get_height(), mgl.GL_RGBA, mgl.GL_UNSIGNED_BYTE, textData)
 
     def draw_text(self):

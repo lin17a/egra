@@ -12,7 +12,7 @@ from Light import Light
 from texturing import *
 import time
 from UI import menu, InGameText
-
+from pygame2_simple import Pygame2
 
 class GraphicsEngine:
     def __init__(self, win_size=(1280, 960)):
@@ -26,7 +26,7 @@ class GraphicsEngine:
         self.start_menu()
         self.map = None
         self.players = None
-        self.in_game_text = InGameText(self)
+        #self.in_game_text = InGameText(self)
 
     def start_menu(self):
         self.surface = pg.display.set_mode(self.WIN_SIZE)
@@ -42,6 +42,7 @@ class GraphicsEngine:
         self.surface = pg.display.set_mode(self.WIN_SIZE, flags=pg.OPENGL | pg.DOUBLEBUF)
         # detect and use exixting opengl context
         self.ctx = mgl.create_context()
+        self.pygame2 = Pygame2(self.surface)
         # camera
         self.camera = Camera(self)
         self.camera_mode = "bird"
@@ -66,6 +67,7 @@ class GraphicsEngine:
         self.surface = pg.display.set_mode(self.WIN_SIZE, flags=pg.OPENGL | pg.DOUBLEBUF)
         # detect and use exixting opengl context
         self.ctx = mgl.create_context()
+        self.pygame2 = Pygame2()
         # camera
         self.camera = Camera(self, player = 1)
         self.camera_2 = Camera(self, player = 2)

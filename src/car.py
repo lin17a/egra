@@ -229,7 +229,8 @@ class Car:
         
         
         self.m_model = glm.translate(self.m_model, glm.vec3(self.physics.Vel[0]/20, 0, 0))#self.position - old_position)
-        
+
+        self.distance_to_off_circuit()
         
         #print(f"velocidad de la física: {self.physics.Vel}")
         #print(f"velocidad que se le da: {self.velocity}")
@@ -258,6 +259,25 @@ class Car:
         layout = self.app.scene.layout_matrix
         return layout[closest_point]
 
+    def distance_to_off_circuit(self):
+        points = self.app.scene.layout_points
+        x, y = self.position[0], self.position[2]
+        distances = np.sqrt((points[:, :, 0] - x) ** 2 + (points[:, :, 1] - y) ** 2)
+        closest_point = np.unravel_index(distances.argmin(), distances.shape)
+        layout = self.app.scene.layout_matrix
+
+        dirs = [(0, 1), (-1, 1), (0, -1), (-1, -1), (0, -1), (1, -1), (1, 0), (1, 1)]
+        dir_idx = int((self.rotation + np.pi/8) / (2 * np.pi) * 8) % 8
+        #print(dirs[dir_idx])
+        steps = [0, 0, 0, 0, 0]
+        directions = [dirs[(dir_idx + 2 + 8) % 8], dirs[(dir_idx + 1 + 8) % 8], dirs[dir_idx], dirs[(dir_idx - 1) % 8], dirs[(dir_idx - 2) % 8]]
+        for i, (x, y) in enumerate(directions):
+            next_border = closest_point
+            while (next_border[0] < layout.shape[0] and next_border[1] < layout.shape[1]) and layout[next_border]:
+                next_border = (next_border[0] + y, next_border[1] + x)
+                steps[i] = steps[i] + 1
+        #print(steps)
+        return steps
 
     def direction_vector(self, rotation):
         # Hotfix: why do we need this formula

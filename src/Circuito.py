@@ -3,7 +3,6 @@ import moderngl as mgl
 from generation import generation_track
 import numpy as np
 from scipy.spatial.distance import cdist
-import matplotlib.pyplot as plt
 
 from numba import jit, njit
 import numba
@@ -15,6 +14,7 @@ class Circuito:
         self.edgy = 0.1
         self.rad = 0.1
         self.current_vertex = None
+        self.color_vertex = None
         self.all_vertex = np.empty(0,  dtype='f4')
         self.curves = []
         self.checkpoints = []
@@ -84,7 +84,6 @@ class Circuito:
         d = cdist(start_vertex, vertex_data)
         idx_inicio = np.argmin(d)*2
         color = np.array([(0.2,0.2,0.2) for _ in range(vertex_2d.shape[0])], dtype='f4')
-        color[idx_inicio-2:idx_inicio+2] = (1,1,1)
         self.curves = self.get_curvyness()
         checkpoint_thickness = 32
         for curve_idx in self.curves:
@@ -93,7 +92,10 @@ class Circuito:
                 idx_end = curve_idx + checkpoint_thickness % len(color)
                 color[idx_start:idx_end] = (0.4, 0.4, 0.4)
                 self.checkpoints.append(vertex_2d[idx_start:idx_end])
+        color[idx_inicio-2:idx_inicio+2] = (1,1,1)
+        self.color_vertex = color
         self.current_vertex = idx_inicio
+
         return vertex_2d, color
 
     def new_road(self):
@@ -121,7 +123,7 @@ class Circuito:
             fragment_shader = file.read()
 
         program = self.ctx.program(vertex_shader=vertex_shader,
-                                fragment_shader=fragment_shader)
+                                   fragment_shader=fragment_shader)
         return program
 
     def get_curvyness(self):
@@ -196,20 +198,10 @@ class Circuito:
                     end = True
                 i = i + 1
 
-        # plot the curviness
-        curviness_colors = [[(vert - curviness.min()) / (curviness.max() - curviness.min()), 0, 0] for vert in
-                            curviness]
-        plt.scatter(middle_line[:, 0], middle_line[:, 2], s=5, c=curviness_colors)
-        # plt.scatter(middle_line[:, 0], middle_line[:, 2], s=10, c=curves_mids)
-        plt.scatter(vertices[:, 0], vertices[:, 2], s=2)
         curve_idx = []
         for i, curve in enumerate(curves_mids):
             if curve:
-                plt.plot(vertices[2 * i: 2 * i + 2, 0], vertices[2 * i: 2 * i + 2, 2], color='green')
                 curve_idx.append(2 * i)
-
-        plt.show()
-
         return curve_idx
 
     @staticmethod
@@ -269,3 +261,37 @@ class Circuito:
         on_track = np.logical_and(in_out_outer, np.logical_not(in_out_inner))
 
         return test_points.reshape(201, 201, 2), on_track.reshape(201, 201)
+
+class MinimapCircuito(Circuito):
+    def __init__(self, app, all_vertex, color_vertex):
+        self.app = app
+        self.ctx = app.ctx
+        self.edgy = 0.1
+        self.rad = 0.1
+        self.current_vertex = None
+        self.color_vertex = color_vertex
+        self.all_vertex = all_vertex
+        self.vbo, self.vboc = self.get_vbo(all_vertex, color_vertex)
+        self.shader_program = self.get_shader_program('circuito')
+        self.vao = self.get_vao()
+        self.m_model = self.get_model_matrix()
+        self.on_init()
+
+    def new_road(self, all_vertex, color_vertex):
+        self.vbo, self.vboc = self.get_vbo(all_vertex, color_vertex)
+        self.vao = self.get_vao()
+        self.render()
+
+    def get_vbo(self, all_vertex, color_vertex):
+        vbo = self.ctx.buffer(all_vertex)
+        vboc = self.ctx.buffer(color_vertex)
+        return vbo, vboc
+
+    def render(self, player=1):
+        if player == 1:
+            self.shader_program['m_proj'].write(self.app.minimap.m_proj)
+            self.shader_program['m_view'].write(self.app.minimap.m_view)
+        elif player == 2:
+            self.shader_program['m_proj'].write(self.app.minimap_2.m_proj)
+            self.shader_program['m_view'].write(self.app.minimap_2.m_view)
+        self.vao.render(mgl.TRIANGLE_STRIP)

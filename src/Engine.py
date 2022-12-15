@@ -59,14 +59,14 @@ class GraphicsEngine:
         # Car
         self.light = Light(self.map)
         self.car = Car(self, color = players_color[1])
-        # axis
-        #self.axis = Axis(self)
         # Minimap
         self.minimap = Minimap(self)
         self.minimap_car = MinimapCar(self, player=1)
         self.minimap_scene = MinimapCircuito(self, self.scene.all_vertex, self.scene.color_vertex)
+        # Music
         self.ingame_music.load("musica1")
         self.ingame_music.play()
+
         self.change_camera()
 
     def two_players(self, players_color):
@@ -90,15 +90,13 @@ class GraphicsEngine:
         self.light = Light(self.map)
         self.car = Car(self, player = 1, color = players_color[1])
         self.car_2 = Car(self, player = 2, color = players_color[2])
-        # axis
-        #self.axis = Axis(self)
         # Minimap
         self.minimap = Minimap(self)
         self.minimap_2 = Minimap(self, player = 2)
         self.minimap_car = MinimapCar(self, color = players_color[1])
         self.minimap_car_2 = MinimapCar(self, player = 2, color = players_color[2])
         self.minimap_scene = MinimapCircuito(self, self.scene.all_vertex, self.scene.color_vertex)
-
+        # Music
         self.ingame_music.load("musica1")
         self.ingame_music.play()
 
@@ -146,16 +144,6 @@ class GraphicsEngine:
 
         keys = pg.key.get_pressed()
 
-        # if self.camera_mode == "bird":
-        #     if keys[pg.K_w]:
-        #         self.camera.move_up()
-        #     if keys[pg.K_a]:
-        #         self.camera.move_left()
-        #     if keys[pg.K_s]:
-        #         self.camera.move_down()
-        #     if keys[pg.K_d]:
-        #         self.camera.move_right()
-
         if self.players == 2:
             if keys[pg.K_w]:
                 self.car_2.move_forward()
@@ -171,10 +159,11 @@ class GraphicsEngine:
                 self.minimap_car_2.move_backward()
             self.car_2.up()
             self.car_2.on_init()
-            self.minimap_car_2.up()
-            self.minimap_car_2.on_init(player = 2)
-            self.minimap_scene.render(player = 2)
             self.car_2.check_if_on_checkpoint()
+            if self.camera_mode == "drive":
+                self.minimap_car_2.up()
+                self.minimap_car_2.on_init(player = 2)
+                self.minimap_scene.render(player = 2)
 
         if keys[pg.K_r]:
             self.scene.new_road()
@@ -198,15 +187,17 @@ class GraphicsEngine:
             self.car.move_backward()
             self.minimap_car.move_backward()
         
+        if self.camera_mode == "drive":
+            self.minimap_car.up()
+            self.minimap_car.on_init()
+            self.minimap_scene.render()
+
         self.car.up()
-        self.minimap_car.up()
         self.car.check_if_on_checkpoint()
         self.car.on_init()
-        self.minimap_car.on_init()
         self.grass.on_init()
         self.skybox.on_init()
         self.scene.on_init()
-        self.minimap_scene.render()
 
     def render(self):
         if self.menu_active:
@@ -235,13 +226,14 @@ class GraphicsEngine:
                 self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
                 # render axis
                 #self.axis.render()
-                # render minimap
-                self.ctx.viewport = (int(self.WIN_SIZE[0] * 0.65), int(self.WIN_SIZE[1] * 0.6), int(self.WIN_SIZE[0] * 0.4), int(self.WIN_SIZE[1] * 0.4))
-                self.minimap.update()
-                self.minimap_scene.render(player = 1)
-                self.ctx.enable(mgl.DEPTH_TEST | mgl.CULL_FACE)
-                self.minimap_car.render()
-                self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
+                if self.camera_mode == "drive":
+                    # render minimap
+                    self.ctx.viewport = (int(self.WIN_SIZE[0] * 0.65), int(self.WIN_SIZE[1] * 0.6), int(self.WIN_SIZE[0] * 0.4), int(self.WIN_SIZE[1] * 0.4))
+                    self.minimap.update()
+                    self.minimap_scene.render(player = 1)
+                    self.ctx.enable(mgl.DEPTH_TEST | mgl.CULL_FACE)
+                    self.minimap_car.render()
+                    self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
                 # swap buffers
                 pg.display.flip()
 
@@ -258,16 +250,15 @@ class GraphicsEngine:
                 self.car.render(player=1)
                 self.car_2.render(player=1)
                 self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
-                # render axis
-                #self.axis.render()
-                self.ctx.viewport = (int(self.WIN_SIZE[0] * 0.65), int(self.WIN_SIZE[1] * 0.6), int(self.WIN_SIZE[0] * 0.4),
-                                     int(self.WIN_SIZE[1]* 0.4))
-                self.minimap.update()
-                self.minimap_scene.render(player=1)
-                self.ctx.enable(mgl.DEPTH_TEST | mgl.CULL_FACE)
-                self.minimap_car.render()
-                self.minimap_car_2.render()
-                self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
+                if self.camera_mode == "drive":
+                    self.ctx.viewport = (int(self.WIN_SIZE[0] * 0.65), int(self.WIN_SIZE[1] * 0.6), int(self.WIN_SIZE[0] * 0.4),
+                                        int(self.WIN_SIZE[1]* 0.4))
+                    self.minimap.update()
+                    self.minimap_scene.render(player=1)
+                    self.ctx.enable(mgl.DEPTH_TEST | mgl.CULL_FACE)
+                    self.minimap_car.render()
+                    self.minimap_car_2.render()
+                    self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
 
                 self.ctx.viewport = (0, 0, self.WIN_SIZE[0], int(self.WIN_SIZE[1]//2))
                 self.camera_2.update()
@@ -283,15 +274,16 @@ class GraphicsEngine:
                 self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
                 # render axis
                 #self.axis.render()
-                # render minimap
-                self.ctx.viewport = (int(self.WIN_SIZE[0] * 0.65), int(self.WIN_SIZE[1] * 0.1), int(self.WIN_SIZE[0] * 0.4),
-                                     int(self.WIN_SIZE[1] * 0.4))
-                self.minimap_2.update()
-                self.minimap_scene.render(player=1)
-                self.ctx.enable(mgl.DEPTH_TEST | mgl.CULL_FACE)
-                self.minimap_car.render()
-                self.minimap_car_2.render()
-                self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
+                if self.camera_mode == "drive":
+                    # render minimap
+                    self.ctx.viewport = (int(self.WIN_SIZE[0] * 0.65), int(self.WIN_SIZE[1] * 0.1), int(self.WIN_SIZE[0] * 0.4),
+                                        int(self.WIN_SIZE[1] * 0.4))
+                    self.minimap_2.update()
+                    self.minimap_scene.render(player=1)
+                    self.ctx.enable(mgl.DEPTH_TEST | mgl.CULL_FACE)
+                    self.minimap_car.render()
+                    self.minimap_car_2.render()
+                    self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
 
                 # swap buffers
                 pg.display.flip()

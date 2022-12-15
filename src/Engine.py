@@ -192,7 +192,6 @@ class GraphicsEngine:
         else:
             # clear framebuffer
             self.ctx.clear(color=(0, 0, 0))
-            self.ctx.enable(mgl.BLEND)
             if self.players == 1:
                 self.camera.update()
                 self.skybox.render(player = 1)

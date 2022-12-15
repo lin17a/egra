@@ -11,8 +11,9 @@ from car import Car
 from Light import Light
 from texturing import *
 import time
-from UI import menu, InGameText
-from pygame2_simple import Pygame2
+from UI import menu
+from Music import MusicPlayer
+import glcontext
 
 class GraphicsEngine:
     def __init__(self, win_size=(1280, 960)):
@@ -26,14 +27,18 @@ class GraphicsEngine:
         self.start_menu()
         self.map = None
         self.players = None
-        #self.in_game_text = InGameText(self)
+
+        # Sounds
+        self.ingame_music = MusicPlayer("musica1", volume=0.5)
+        self.menu_music = MusicPlayer("menu", volume=0.3)
+        self.menu_music.play()
 
     def start_menu(self):
         self.surface = pg.display.set_mode(self.WIN_SIZE)
         self.menu = menu(self)
         self.menu_active = True
         
-    def one_player(self):
+    def one_player(self, players_color):
         # set opengl attr
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION,3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION,3)
@@ -42,7 +47,6 @@ class GraphicsEngine:
         self.surface = pg.display.set_mode(self.WIN_SIZE, flags=pg.OPENGL | pg.DOUBLEBUF)
         # detect and use exixting opengl context
         self.ctx = mgl.create_context()
-        self.pygame2 = Pygame2(self.surface)
         # camera
         self.camera = Camera(self)
         self.camera_mode = "bird"
@@ -52,13 +56,14 @@ class GraphicsEngine:
         self.grass = Grass(self, self.map)
         # Car
         self.light = Light(self.map)
-        self.car = Car(self)
+        self.car = Car(self, color = players_color[1])
         # axis
         #self.axis = Axis(self)
-
+        self.ingame_music.load("musica1")
+        self.ingame_music.play()
         self.change_camera()
 
-    def two_players(self):
+    def two_players(self, players_color):
         # set opengl attr
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION,3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION,3)
@@ -67,7 +72,6 @@ class GraphicsEngine:
         self.surface = pg.display.set_mode(self.WIN_SIZE, flags=pg.OPENGL | pg.DOUBLEBUF)
         # detect and use exixting opengl context
         self.ctx = mgl.create_context()
-        self.pygame2 = Pygame2()
         # camera
         self.camera = Camera(self, player = 1)
         self.camera_2 = Camera(self, player = 2)
@@ -78,10 +82,13 @@ class GraphicsEngine:
         self.grass = Grass(self, self.map)
         # Car
         self.light = Light(self.map)
-        self.car = Car(self, player = 1)
-        self.car_2 = Car(self, player = 2)
+        self.car = Car(self, player = 1, color = players_color[1])
+        self.car_2 = Car(self, player = 2, color = players_color[2])
         # axis
         #self.axis = Axis(self)
+
+        self.ingame_music.load("musica1")
+        self.ingame_music.play()
 
         self.change_camera()
 
@@ -110,17 +117,20 @@ class GraphicsEngine:
         if self.menu_active:
             return
         for event in pg.event.get():
-            if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
+            if event.type == pg.QUIT:
                 self.scene.destroy()
                 pg.quit()
                 sys.exit()
             if event.type == pg.KEYDOWN and event.key == pg.K_c:
                 self.change_camera()
-            if event.type == pg.KEYDOWN and event.key == pg.K_m:
+            if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
+                self.menu_music.load("menu")
+                self.menu_music.play()
                 self.start_menu()
             if event.type == pg.MOUSEWHEEL:
                 self.camera.zoom(-event.y*3)
-                self.camera_2.zoom(-event.y*3)
+                if self.players == 2:
+                    self.camera_2.zoom(-event.y*3)
 
         keys = pg.key.get_pressed()
 
@@ -171,19 +181,18 @@ class GraphicsEngine:
         
     def render(self):
         if self.menu_active:
-            self.players, play, self.map = self.menu.render()
+            self.players, play, self.map, players_color = self.menu.render()
             if play:
                 self.menu_active = False
+                self.menu_music.stop()
                 if self.players == 1:
-                    self.one_player()
+                    self.one_player(players_color)
                 elif self.players == 2:
-                    self.two_players()
-                #self.in_game_text.draw_text()
+                    self.two_players(players_color)
         else:
             # clear framebuffer
             self.ctx.clear(color=(0, 0, 0))
             self.ctx.enable(mgl.BLEND)
-            #self.in_game_text.draw_text()
             if self.players == 1:
                 self.camera.update()
                 self.skybox.render(player = 1)
@@ -196,7 +205,6 @@ class GraphicsEngine:
                 self.car.render(player = 1)
                 self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
 
-                #self.in_game_text.draw_text()
                 # render axis
                 #self.axis.render()
                 # swap buffers

@@ -124,7 +124,7 @@ class Grass:
         self.on_init()
 
     def get_model_matrix(self):
-        m_model = glm.scale(glm.mat4(1), glm.vec3(400,1,400))
+        m_model = glm.scale(glm.mat4(1), glm.vec3(500,1,500))
         #m_model = glm.rotate(glm.mat4(),glm.radians(0),glm.vec3(0,1,0))
         return m_model
 

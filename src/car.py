@@ -6,8 +6,9 @@ from Physics import Physics
 
 
 class Car:
-    def __init__(self, app, player = None):
+    def __init__(self, app, player = None, color = "red"):
         self.player = player
+        self.color = color
         self.app = app
         self.ctx = app.ctx
         self.vbo = self.get_vbo()
@@ -16,10 +17,14 @@ class Car:
         self.rotation = self.get_start_rotation()
         self.position = self.get_start_position()
         self.m_model = self.get_model_matrix()
+        self.increase = 0
         
         self.velocity = 0 #[x, y]
-        self.physics = Physics((self.position[0], self.position[2]), dt = 0.05)
+        self.friction = 1
         self.velmax = 30
+        self.physics = Physics((self.position[0], self.position[2]), dt = 0.05, 
+                               maxVel = self.velmax)
+
         self.velmin = 0
 
         self.completed_checkpoints = [False] * len(self.app.scene.checkpoints)
@@ -131,13 +136,24 @@ class Car:
             for i in range(0, len(vertices[name]), 6):
                 data.extend(vertices[name][i:i + 6])
                 if name == "default7":
-                    if self.player == 1 or self.player == None:
-                        data.extend(material.diffuse[0:3])
-                        data.extend(material.ambient[0:3])
-                    elif self.player == 2:
-                        #Color del coche 2
+                    if self.color == "red":
+                        data.extend([0.5, 0, 0])
+                        data.extend([0.5, 0, 0])
+                    elif self.color == "blue":
                         data.extend([0, 0, 0.5])
                         data.extend([0, 0, 0.5])
+                    elif self.color == "green":
+                        data.extend([0, 0.5, 0])
+                        data.extend([0, 0.5, 0])
+                    elif self.color == "purple":
+                        data.extend([0.5, 0, 0.5])
+                        data.extend([0.5, 0, 0.5])
+                    elif self.color == "turquoise":
+                        data.extend([0, 0.5, 0.5])
+                        data.extend([0, 0.5, 0.5])
+                    elif self.color == "white":
+                        data.extend([0.5, 0.5, 0.5])
+                        data.extend([0.5, 0.5, 0.5])
                 else:
                     data.extend(material.diffuse[0:3])
                     data.extend(material.ambient[0:3])
@@ -166,26 +182,46 @@ class Car:
         self.m_model = glm.translate(self.m_model, glm.rotate(self.position, -degree, glm.vec3(0,1,0)))
 
     def move_forward(self):
-        self.velocity += 0.5
-        self.velocity = self.velmax if self.velocity > self.velmax else self.velocity
-        """
-        direction_vector = self.direction_vector(self.rotation)
-        self.position = self.position + 0.5 * direction_vector
-        self.m_model = glm.translate(self.m_model, glm.vec3(0.5, 0, 0))
-        """
+
+        
+        self.increase += 5
+        
+        self.velocity = self.physics.accelerate(self.increase, self.on_circuit())
+        
+        self.increase = 780 if self.increase > 780 else self.increase
+        
+        print(f"vel: {self.physics.Vel}")
+        print(f"miu: {self.physics.miu}")
+        
     
     def move_backward(self):
         #print(f"vel: {self.velocity}")
-        self.velocity -= 0.5
-        self.velocity = self.velmin if self.velocity < self.velmin else self.velocity
+        self.increase -= 5
+        self.increase = -30 if self.increase < -30 else self.increase
+        self.velocity = self.physics.accelerate(self.increase, self.on_circuit())
+        print(f"vel: {self.physics.Vel}")
+        print(f"increase: {self.increase}")
 
         
     def up(self):
-        if self.velocity > 0:
-            self.velocity -= 0.1
-        #self.velocity = 0 if self.velocity < 0 else self.velocity
-        self.physics.Update(self.velocity, [1,0], 1)
         
+         
+        if self.increase > 0:
+            self.increase -= 2.5
+        if self.increase == 0:
+            self.physics.aant = [0, 0]
+            self.physics.Fant = [0, 0]
+            
+        #self.increase = 0 if self.increase < 0 else self.increase
+        
+        self.velocity = self.physics.accelerate(self.increase, self.on_circuit())
+        
+        #self.velocity = 0 if self.velocity < 0 else self.velocity
+
+        self.friction = self.get_friction()
+        self.physics.update_miu(self.get_friction(), self.on_circuit())
+        
+        self.physics.Update(self.velocity, [1,0], self.physics.miu)
         
         
         direction_vector = self.direction_vector(self.rotation)
@@ -193,6 +229,7 @@ class Car:
         old_position = self.position
         
         self.position = self.position + self.physics.Vel[0]/20 * direction_vector
+        
         
         self.m_model = glm.translate(self.m_model, glm.vec3(self.physics.Vel[0]/20, 0, 0))#self.position - old_position)
         
@@ -208,7 +245,22 @@ class Car:
         #self.position = glm.vec3(self.physics.Pos[0], y, z)
         #self.position = glm.vec3(x+0.5, y, z)
         #self.m_model = glm.translate(self.m_model, self.position - old_position)
-        
+
+    def get_friction(self):
+        if self.on_circuit():
+            return 0
+        else:
+            return 10.5
+
+
+    def on_circuit(self):
+        points = self.app.scene.layout_points
+        x, y = self.position[0], self.position[2]
+        distances = np.sqrt((points[:, :, 0] - x)**2 + (points[:, :, 1] - y)**2)
+        closest_point = np.unravel_index(distances.argmin(), distances.shape)
+        layout = self.app.scene.layout_matrix
+        return layout[closest_point]
+
 
     def direction_vector(self, rotation):
         # Hotfix: why do we need this formula

@@ -5,6 +5,9 @@ import numpy as np
 from scipy.spatial.distance import cdist
 import matplotlib.pyplot as plt
 
+from numba import jit, njit
+import numba
+
 class Circuito:
     def __init__(self,app):
         self.app = app
@@ -19,7 +22,7 @@ class Circuito:
         self.shader_program = self.get_shader_program('circuito')
         self.vao = self.get_vao()
         self.m_model = self.get_model_matrix()
-        #self.layout_points, self.layout_matrix = self.get_layout_matrix()
+        self.layout_points, self.layout_matrix = self.get_layout_matrix()
         self.on_init()
 
     def get_model_matrix(self):
@@ -97,6 +100,7 @@ class Circuito:
         self.vbo, self.vboc = self.get_vbo()
         self.vao = self.get_vao()
         self.render()
+        self.layout_points, self.layout_matrix = self.get_layout_matrix()
 
     @staticmethod
     def get_data(vertices, indices): 
@@ -116,7 +120,7 @@ class Circuito:
         with open(f'shaders/{shader_program_name}.frag') as file:
             fragment_shader = file.read()
 
-        program = self.ctx.program(vertex_shader=vertex_shader, 
+        program = self.ctx.program(vertex_shader=vertex_shader,
                                 fragment_shader=fragment_shader)
         return program
 
@@ -207,3 +211,61 @@ class Circuito:
         plt.show()
 
         return curve_idx
+
+    @staticmethod
+    @jit(nopython=True)
+    def pointinpolygon(x, y, poly):
+        n = len(poly)
+        inside = False
+        p2x = 0.0
+        p2y = 0.0
+        xints = 0.0
+        p1x, p1y = poly[0]
+        for i in numba.prange(n + 1):
+            p2x, p2y = poly[i % n]
+            if y > min(p1y, p2y):
+                if y <= max(p1y, p2y):
+                    if x <= max(p1x, p2x):
+                        if p1y != p2y:
+                            xints = (y - p1y) * (p2x - p1x) / (p2y - p1y) + p1x
+                        if p1x == p2x or x <= xints:
+                            inside = not inside
+            p1x, p1y = p2x, p2y
+
+        return inside
+
+    #@njit(parallel=True)
+    def parallelpointinpolygon(self, points, polygon):
+        D = np.empty(len(points), dtype=np.bool)
+        for i in numba.prange(0, len(D)):
+            D[i] = self.pointinpolygon(points[i, 0], points[i, 1], polygon)
+        return D
+
+    def get_layout_matrix(self):
+
+        vertices = self.all_vertex
+
+        # get the bounds of the circuit
+        x_max = vertices[:, 2].max()
+        x_min = vertices[:, 2].min()
+        y_max = vertices[:, 0].max()
+        y_min = vertices[:, 0].min()
+
+        # make regular grid
+        M, N = 200, 200
+        x = np.linspace(x_min - 2, x_max + 2, M + 1)
+        y = np.linspace(y_min - 2, y_max + 2, N + 1)
+        X, Y = np.meshgrid(x, y)
+        test_points = np.vstack([Y.ravel(), X.ravel()])
+        test_points = test_points.transpose()
+
+        # test if points are in the inner bounds of the circuit
+        in_out_inner = self.parallelpointinpolygon(test_points, vertices[::2, [0, 2]])
+        # test if points are in the outer bounds of the circuit
+        in_out_outer = self.parallelpointinpolygon(test_points, vertices[1::2, [0, 2]])
+
+        # combine if point is on the circuit
+        # in the outer border, but not inside the inner border
+        on_track = np.logical_and(in_out_outer, np.logical_not(in_out_inner))
+
+        return test_points.reshape(201, 201, 2), on_track.reshape(201, 201)

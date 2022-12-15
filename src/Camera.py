@@ -123,7 +123,6 @@ class DriverCamera(Camera):
 
 
 class Minimap(Camera):
-
     def __init__(self, app, player=None):
         self.app = app
         self.player = player
@@ -139,6 +138,9 @@ class Minimap(Camera):
         self.m_view = self.get_view_matrix()
         # projection matrix
         self.m_proj = self.get_projection_matrix()
+    
+    def update(self):
+        pass
 
 
 class Axis:

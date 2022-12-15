@@ -234,7 +234,7 @@ class Car:
         self.m_model = glm.translate(self.m_model, glm.vec3(self.physics.Vel[0]/20, 0, 0))#self.position - old_position)
 
         self.distance_to_off_circuit()
-        
+
         #print(f"velocidad de la física: {self.physics.Vel}")
         #print(f"velocidad que se le da: {self.velocity}")
         #print(f"miu: {self.physics.miu}")
@@ -261,6 +261,15 @@ class Car:
         closest_point = np.unravel_index(distances.argmin(), distances.shape)
         layout = self.app.scene.layout_matrix
         return layout[closest_point]
+
+    def get_curviness(self):
+        points = self.app.scene.layout_points
+        x, y = self.position[0], self.position[2]
+        distances = np.sqrt((points[:, :, 0] - x) ** 2 + (points[:, :, 1] - y) ** 2)
+        closest_point = np.unravel_index(distances.argmin(), distances.shape)
+        curve_matrix = self.app.scene.curve_matrix
+        curviness = curve_matrix[closest_point]
+        return curviness
 
     def distance_to_off_circuit(self):
         # these points are registered in the layout map, we know if they are on the circuit or not

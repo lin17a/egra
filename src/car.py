@@ -26,7 +26,9 @@ class Car:
                                maxVel = self.velmax)
 
         self.velmin = 0
-        
+
+        self.completed_checkpoints = [False] * len(self.app.scene.checkpoints)
+
         self.on_init()
 
     def get_start_position(self):
@@ -61,6 +63,7 @@ class Car:
         self.position = self.get_start_position()
         self.rotation = self.get_start_rotation()
         self.m_model = self.get_model_matrix()
+        self.completed_checkpoints = [False] * len(self.app.scene.checkpoints)
         self.on_init()
 
     def on_init(self):
@@ -264,6 +267,40 @@ class Car:
         rotation = 7 * np.pi / 2 - rotation - 2 * ((np.pi / 2 - rotation) % np.pi)  # TODO why is the direction initialised wrong
         direction_vector = glm.vec3(np.sin(rotation) / 5, 0, np.cos(rotation) / 5)  # TODO why do we need to divide by 5
         return direction_vector
+
+    @staticmethod
+    def area(p1, p2, p3):
+        return abs((p1[0] * (p2[1] - p3[1]) + p2[0] * (p3[1] - p1[1]) + p3[0] * (p1[1] - p2[1])) / 2.0)
+
+    # A function to check whether point P(x, y)
+    # lies inside the triangle formed by
+    # A(x1, y1), B(x2, y2) and C(x3, y3)
+    def is_in_triangle(self, p1, p2, p3, p):
+        # Calculate area of triangle ABC
+        whole_area = self.area(p1, p2, p3)
+        # Calculate area of triangle PBC
+        area_1 = self.area(p, p2, p3)
+        # Calculate area of triangle PAC
+        area_2 = self.area(p1, p, p3)
+        # Calculate area of triangle PAB
+        area_3 = self.area(p1, p2, p)
+        # Check if sum of A1, A2 and A3
+        # is same as A
+        if (abs(whole_area - (area_1 + area_2 + area_3)) < 1):
+            return True
+        else:
+            return False
+
+    def check_if_on_checkpoint(self):
+        checkpoints = self.app.scene.checkpoints
+        for i, checkpoint in enumerate(checkpoints):
+            if (self.is_in_triangle(checkpoint[0][[2,0]], checkpoint[1][[2,0]], checkpoint[2][[2,0]], [self.position[2], self.position[0]]) or
+                self.is_in_triangle(checkpoint[1][[2,0]], checkpoint[2][[2,0]], checkpoint[3][[2,0]], [self.position[2], self.position[0]])):
+                self.completed_checkpoints[i] = True
+                print("checkpoint ", i, " reached")
+            #print(self.position)
+            #print(checkpoint)
+
 
     def get_shader_program(self):
         program = self.ctx.program(    

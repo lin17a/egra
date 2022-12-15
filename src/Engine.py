@@ -236,7 +236,7 @@ class GraphicsEngine:
                 # render axis
                 #self.axis.render()
                 # render minimap
-                self.ctx.viewport = (self.WIN_SIZE[0] * 0.65, self.WIN_SIZE[1] * 0.6, self.WIN_SIZE[0] * 0.4, self.WIN_SIZE[1] * 0.4)
+                self.ctx.viewport = (int(self.WIN_SIZE[0] * 0.65), int(self.WIN_SIZE[1] * 0.6), int(self.WIN_SIZE[0] * 0.4), int(self.WIN_SIZE[1] * 0.4))
                 self.minimap.update()
                 self.minimap_scene.render(player = 1)
                 self.ctx.enable(mgl.DEPTH_TEST | mgl.CULL_FACE)
@@ -246,7 +246,7 @@ class GraphicsEngine:
                 pg.display.flip()
 
             if self.players == 2:                
-                self.ctx.viewport = (0, self.WIN_SIZE[1]//2, self.WIN_SIZE[0], self.WIN_SIZE[1]//2)
+                self.ctx.viewport = (0, int(self.WIN_SIZE[1]//2), self.WIN_SIZE[0], int(self.WIN_SIZE[1]//2))
                 self.camera.update()
                 # render scene
                 self.skybox.render(player = 2)
@@ -260,8 +260,8 @@ class GraphicsEngine:
                 self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
                 # render axis
                 #self.axis.render()
-                self.ctx.viewport = (self.WIN_SIZE[0] * 0.65, self.WIN_SIZE[1] * 0.6, self.WIN_SIZE[0] * 0.4,
-                                     self.WIN_SIZE[1]* 0.4)
+                self.ctx.viewport = (int(self.WIN_SIZE[0] * 0.65), int(self.WIN_SIZE[1] * 0.6), int(self.WIN_SIZE[0] * 0.4),
+                                     int(self.WIN_SIZE[1]* 0.4))
                 self.minimap.update()
                 self.minimap_scene.render(player=1)
                 self.ctx.enable(mgl.DEPTH_TEST | mgl.CULL_FACE)
@@ -269,7 +269,7 @@ class GraphicsEngine:
                 self.minimap_car_2.render()
                 self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
 
-                self.ctx.viewport = (0, 0, self.WIN_SIZE[0], self.WIN_SIZE[1]//2)
+                self.ctx.viewport = (0, 0, self.WIN_SIZE[0], int(self.WIN_SIZE[1]//2))
                 self.camera_2.update()
                 # render scene
                 self.skybox.render(player = 1)
@@ -284,8 +284,8 @@ class GraphicsEngine:
                 # render axis
                 #self.axis.render()
                 # render minimap
-                self.ctx.viewport = (self.WIN_SIZE[0] * 0.65, self.WIN_SIZE[1] * 0.1, self.WIN_SIZE[0] * 0.4,
-                                     self.WIN_SIZE[1] * 0.4)
+                self.ctx.viewport = (int(self.WIN_SIZE[0] * 0.65), int(self.WIN_SIZE[1] * 0.1), int(self.WIN_SIZE[0] * 0.4),
+                                     int(self.WIN_SIZE[1] * 0.4))
                 self.minimap_2.update()
                 self.minimap_scene.render(player=1)
                 self.ctx.enable(mgl.DEPTH_TEST | mgl.CULL_FACE)

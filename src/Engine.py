@@ -39,7 +39,7 @@ class GraphicsEngine:
         self.menu = menu(self)
         self.menu_active = True
         
-    def one_player(self):
+    def one_player(self, players_color):
         # set opengl attr
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION,3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION,3)
@@ -58,15 +58,18 @@ class GraphicsEngine:
         self.grass = Grass(self, self.map)
         # Car
         self.light = Light(self.map)
-        self.car = Car(self)
+        self.car = Car(self, color = players_color[1])
         # axis
         #self.axis = Axis(self)
         # Minimap
         self.minimap = Minimap(self)
         self.minimap_car = MinimapCar(self, player=1)
         self.minimap_scene = MinimapCircuito(self, self.scene.all_vertex, self.scene.color_vertex)
+        self.ingame_music.load("musica1")
+        self.ingame_music.play()
+        self.change_camera()
 
-    def two_players(self):
+    def two_players(self, players_color):
         # set opengl attr
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION,3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION,3)
@@ -85,8 +88,8 @@ class GraphicsEngine:
         self.grass = Grass(self, self.map)
         # Car
         self.light = Light(self.map)
-        self.car = Car(self, player = 1)
-        self.car_2 = Car(self, player = 2)
+        self.car = Car(self, player = 1, color = players_color[1])
+        self.car_2 = Car(self, player = 2, color = players_color[2])
         # axis
         #self.axis = Axis(self)
         # Minimap
@@ -95,6 +98,9 @@ class GraphicsEngine:
         self.minimap_car = MinimapCar(self)
         self.minimap_car_2 = MinimapCar(self, player = 2)
         self.minimap_scene = MinimapCircuito(self, self.scene.all_vertex, self.scene.color_vertex)
+
+        self.ingame_music.load("musica1")
+        self.ingame_music.play()
 
         self.change_camera()
 
@@ -123,17 +129,19 @@ class GraphicsEngine:
         if self.menu_active:
             return
         for event in pg.event.get():
-            if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
+            if event.type == pg.QUIT:
                 self.scene.destroy()
                 pg.quit()
                 sys.exit()
             if event.type == pg.KEYDOWN and event.key == pg.K_c:
                 self.change_camera()
-            if event.type == pg.KEYDOWN and event.key == pg.K_m:
+            if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
+                self.menu_music.load("menu")
+                self.menu_music.play()
                 self.start_menu()
             if event.type == pg.MOUSEWHEEL:
                 self.camera.zoom(-event.y*3)
-                if self.camera_2:
+                if self.players == 2:
                     self.camera_2.zoom(-event.y*3)
 
         keys = pg.key.get_pressed()
@@ -199,16 +207,14 @@ class GraphicsEngine:
         
     def render(self):
         if self.menu_active:
-            self.players, play, self.map = self.menu.render()
+            self.players, play, self.map, players_color = self.menu.render()
             if play:
                 self.menu_active = False
                 self.menu_music.stop()
-                self.ingame_music.load("musica1")
-                self.ingame_music.play()
                 if self.players == 1:
-                    self.one_player()
+                    self.one_player(players_color)
                 elif self.players == 2:
-                    self.two_players()
+                    self.two_players(players_color)
         else:
             # clear framebuffer
             self.ctx.clear(color=(0, 0, 0))

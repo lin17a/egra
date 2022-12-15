@@ -182,6 +182,7 @@ class GraphicsEngine:
             self.car.move_to_start()
             self.minimap_car.move_to_start()
             if self.players == 2:
+                self.car_2.move_to_start()
                 self.minimap_car_2.move_to_start()
 
         if keys[pg.K_UP]:

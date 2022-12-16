@@ -2,6 +2,8 @@ import glm
 import numpy as np
 import pygame as pg
 import os
+import time
+
 
 
 sky_textures = './textures/sky/'
@@ -212,3 +214,15 @@ class Grass:
         program = self.ctx.program(vertex_shader=vertex_shader, 
                                 fragment_shader=fragment_shader)
         return program
+
+
+def loading_screen(surface):
+    
+    pg.display.set_caption('image')
+    img = pg.image.load("./textures/ls.jpg").convert()
+
+    surface.blit(img, (0, 0))
+    
+    pg.display.flip()
+    time.sleep(6.5)
+    

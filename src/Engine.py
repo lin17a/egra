@@ -205,6 +205,7 @@ class GraphicsEngine:
             if play:
                 self.menu_active = False
                 self.menu_music.stop()
+                loading_screen(self.surface)
                 if self.players == 1:
                     self.one_player(players_color)
                 elif self.players == 2:

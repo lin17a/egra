@@ -21,11 +21,11 @@ class Car:
         self.distance = 0
         
         self.values = []
-        self.increase = 0
+        self.increase = 10
         
         self.velocity = 0 #[x, y]
         self.friction = 0
-        self.velmax = 30
+        self.velmax = 20
         self.physics = Physics((self.position[0], self.position[2]), dt = 0.05, 
                                maxVel = self.velmax)
 
@@ -200,7 +200,7 @@ class Car:
         radar.append(self.velocity)
         
         radar = np.round(np.array(radar), 0)
-        print(radar)
+        #print(radar)
         
         #print(f"vel: {self.physics.Vel}")
         #print(f"miu: {self.physics.miu}")
@@ -245,7 +245,7 @@ class Car:
         
         self.m_model = glm.translate(self.m_model, glm.vec3(self.physics.Vel[0]/20, 0, 0))#self.position - old_position)
 
-        self.distance_to_off_circuit()
+        #self.distance_to_off_circuit()
         
         #print(f"velocidad de la física: {self.physics.Vel}")
         #print(f"velocidad que se le da: {self.velocity}")

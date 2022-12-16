@@ -109,7 +109,8 @@ class ai:
         radar = np.array(radar)
         
         #radar[radar > 30] = 30
-        print(radar)
+        
+        
         
         output = self.nets[self.current_car].activate(radar)
         i = output.index(max(output))

@@ -109,6 +109,7 @@ class ai:
         radar = np.array(radar)
         
         #radar[radar > 30] = 30
+        print(radar)
         
         output = self.nets[self.current_car].activate(radar)
         i = output.index(max(output))
@@ -180,6 +181,8 @@ class ai:
         #reward = 100 if reward > 100 else reward
         #reward += 40 if self.speed > 10 else 0
         reward = distance / (time_spent / 5)
+        
+        #reward += 100 if self.app.car.check_if_on_checkpoint() else 0
         
         reward /= 100
             

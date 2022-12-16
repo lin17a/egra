@@ -21,11 +21,11 @@ class Car:
         self.distance = 0
         
         self.values = []
-        self.increase = 10
+        self.increase = 0
         
         self.velocity = 0 #[x, y]
         self.friction = 0
-        self.velmax = 10
+        self.velmax = 30
         self.physics = Physics((self.position[0], self.position[2]), dt = 0.05, 
                                maxVel = self.velmax)
 
@@ -195,8 +195,15 @@ class Car:
         
         self.increase = 780 if self.increase > 780 else self.increase
         
-        print(f"vel: {self.physics.Vel}")
-        print(f"miu: {self.physics.miu}")
+        radar = self.distance_to_off_circuit()
+        
+        radar.append(self.velocity)
+        
+        radar = np.round(np.array(radar), 0)
+        print(radar)
+        
+        #print(f"vel: {self.physics.Vel}")
+        #print(f"miu: {self.physics.miu}")
         
     
     def move_backward(self):
@@ -204,8 +211,8 @@ class Car:
         self.increase -= 5
         self.increase = -30 if self.increase < -30 else self.increase
         self.velocity = self.physics.accelerate(self.increase, self.on_circuit())
-        print(f"vel: {self.physics.Vel}")
-        print(f"increase: {self.increase}")
+        #print(f"vel: {self.physics.Vel}")
+        #print(f"increase: {self.increase}")
 
         
     def up(self):

@@ -179,7 +179,7 @@ class ai:
         
         #reward = 100 if reward > 100 else reward
         #reward += 40 if self.speed > 10 else 0
-        reward += ((distance) ) - (time_spent/200)
+        reward = distance / (time_spent / 5)
         
         reward /= 100
             

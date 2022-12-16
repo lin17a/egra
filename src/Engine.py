@@ -5,9 +5,13 @@ import sys
 import itertools as it
 import numpy as np
 from OpenGL.GL import *
-from Camera import Camera, Axis, DriverCamera
-from Circuito import Circuito
-from car_AI import Car
+
+
+from Camera import Camera, Axis, DriverCamera, Minimap
+from Circuito import Circuito, MinimapCircuito
+from car_IA_2 import Car, MinimapCar
+
+
 from Light import Light
 from texturing import *
 import time
@@ -35,9 +39,8 @@ class GraphicsEngine:
         # Se crea la instancia
         
 
-        # Sounds
-        self.ingame_music = MusicPlayer("musica1", volume=0.5)
-        self.menu_music = MusicPlayer("menu", volume=0.3)
+        self.ingame_music = MusicPlayer("musica1", volume=0.0)
+        self.menu_music = MusicPlayer("menu", volume=0.0)
         self.menu_music.play()
 
     def start_menu(self):
@@ -56,6 +59,7 @@ class GraphicsEngine:
         self.ctx = mgl.create_context()
         # camera
         self.camera = Camera(self)
+        self.camera_2 = None
         self.camera_mode = "bird"
         # scene
         self.scene = Circuito(self)
@@ -69,6 +73,12 @@ class GraphicsEngine:
         
         # axis
         #self.axis = Axis(self)
+        # Minimap
+        
+        self.minimap = Minimap(self)
+        self.minimap_car = MinimapCar(self, player=1)
+        self.minimap_scene = MinimapCircuito(self, self.scene.all_vertex, self.scene.color_vertex)
+        
         self.ingame_music.load("musica1")
         self.ingame_music.play()
         self.change_camera()
@@ -97,7 +107,14 @@ class GraphicsEngine:
         self.car_2 = Car(self, player = 2, color = players_color[2])
         # axis
         #self.axis = Axis(self)
-
+        
+        # Minimap
+        self.minimap = Minimap(self)
+        self.minimap_2 = Minimap(self, player = 2)
+        self.minimap_car = MinimapCar(self)
+        self.minimap_car_2 = MinimapCar(self, player = 2)
+        self.minimap_scene = MinimapCircuito(self, self.scene.all_vertex, self.scene.color_vertex)
+        
         self.ingame_music.load("musica1")
         self.ingame_music.play()
 
@@ -158,23 +175,33 @@ class GraphicsEngine:
         if self.players == 2:
             if keys[pg.K_w]:
                 self.car_2.move_forward()
+                self.minimap_car_2.move_forward()
             if keys[pg.K_d]:
                 self.car_2.move_right()
+                self.minimap_car_2.move_right()
             if keys[pg.K_a]:
                 self.car_2.move_left()
+                self.minimap_car_2.move_left()
             if keys[pg.K_s]:
                 self.car_2.move_backward()
+                self.minimap_car_2.move_backward()
             self.car_2.up()
             self.car_2.on_init()
-
+            self.minimap_car_2.up()
+            self.minimap_car_2.on_init(player = 2)
+            self.minimap_scene.render(player = 2)
+            self.car_2.check_if_on_checkpoint()
 
         if keys[pg.K_r]:
             self.scene.new_road()
+            self.minimap_scene.new_road(self.scene.all_vertex, self.scene.color_vertex)
             self.car.move_to_start()
+            self.minimap_car.move_to_start()
+            
             if self.players == 2:
                 self.car_2.move_to_start()
-            
-
+                self.minimap_car_2.move_to_start()
+                
         if keys[pg.K_UP]:
             self.car.move_forward()
             radar = self.car.distance_to_off_circuit()
@@ -184,9 +211,11 @@ class GraphicsEngine:
             
             self.car.values.append(radar)
             self.start = True
+            self.minimap_car.move_forward()
             
         if keys[pg.K_RIGHT]:
             self.car.move_right()
+            self.minimap_car.move_right()
             radar = self.car.distance_to_off_circuit()
             radar.append(self.car.velocity)
             radar.append(2)
@@ -196,6 +225,7 @@ class GraphicsEngine:
             self.start = True
             
         if keys[pg.K_LEFT]:
+            self.minimap_car.move_left()
             self.car.move_left()
             radar = self.car.distance_to_off_circuit()
             radar.append(self.car.velocity)
@@ -206,7 +236,8 @@ class GraphicsEngine:
             self.start = True
             
         if keys[pg.K_DOWN]:
-            self.car.move_backward()    
+            self.car.move_backward()
+            #self.car.move_backward()
             
         if (not keys[pg.K_UP]) and (not keys[pg.K_RIGHT]) and (not keys[pg.K_LEFT]):
             if self.start:
@@ -222,11 +253,15 @@ class GraphicsEngine:
             
         
         self.car.up()
+        self.minimap_car.up()
+        self.car.check_if_on_checkpoint()
         self.car.on_init()
+        self.minimap_car.on_init()
         self.grass.on_init()
         self.skybox.on_init()
         self.scene.on_init()
-        
+        self.minimap_scene.render()
+
     def render(self):
         if self.menu_active:
             self.players, play, self.map, players_color = self.menu.render()
@@ -241,6 +276,7 @@ class GraphicsEngine:
             # clear framebuffer
             self.ctx.clear(color=(0, 0, 0))
             if self.players == 1:
+                self.ctx.viewport = (0, 0, self.WIN_SIZE[0], self.WIN_SIZE[1])
                 self.camera.update()
                 self.skybox.render(player = 1)
                 # render scene
@@ -253,13 +289,20 @@ class GraphicsEngine:
                 self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
                 # render axis
                 #self.axis.render()
+                # render minimap
+                self.ctx.viewport = (int(self.WIN_SIZE[0] * 0.65), int(self.WIN_SIZE[1] * 0.6), int(self.WIN_SIZE[0] * 0.4), int(self.WIN_SIZE[1] * 0.4))
+                self.minimap.update()
+                self.minimap_scene.render(player = 1)
+                self.ctx.enable(mgl.DEPTH_TEST | mgl.CULL_FACE)
+                self.minimap_car.render()
+                self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
                 # swap buffers
                 self.ai.run_car()
                 #self.ai.step()
                 pg.display.flip()
 
             if self.players == 2:                
-                self.ctx.viewport = (0, self.WIN_SIZE[1]//2, self.WIN_SIZE[0], self.WIN_SIZE[1]//2)
+                self.ctx.viewport = (0, int(self.WIN_SIZE[1]//2), self.WIN_SIZE[0], int(self.WIN_SIZE[1]//2))
                 self.camera.update()
                 # render scene
                 self.skybox.render(player = 2)
@@ -273,8 +316,16 @@ class GraphicsEngine:
                 self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
                 # render axis
                 #self.axis.render()
+                self.ctx.viewport = (int(self.WIN_SIZE[0] * 0.65), int(self.WIN_SIZE[1] * 0.6), int(self.WIN_SIZE[0] * 0.4),
+                                     int(self.WIN_SIZE[1]* 0.4))
+                self.minimap.update()
+                self.minimap_scene.render(player=1)
+                self.ctx.enable(mgl.DEPTH_TEST | mgl.CULL_FACE)
+                self.minimap_car.render()
+                self.minimap_car_2.render()
+                self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
 
-                self.ctx.viewport = (0, 0, self.WIN_SIZE[0], self.WIN_SIZE[1]//2)
+                self.ctx.viewport = (0, 0, self.WIN_SIZE[0], int(self.WIN_SIZE[1]//2))
                 self.camera_2.update()
                 # render scene
                 self.skybox.render(player = 1)
@@ -288,6 +339,16 @@ class GraphicsEngine:
                 self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
                 # render axis
                 #self.axis.render()
+                # render minimap
+                self.ctx.viewport = (int(self.WIN_SIZE[0] * 0.65), int(self.WIN_SIZE[1] * 0.1), int(self.WIN_SIZE[0] * 0.4),
+                                     int(self.WIN_SIZE[1] * 0.4))
+                
+                self.minimap_2.update()
+                self.minimap_scene.render(player=1)
+                self.ctx.enable(mgl.DEPTH_TEST | mgl.CULL_FACE)
+                self.minimap_car.render()
+                self.minimap_car_2.render()
+                self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
                 
 
                 # swap buffers

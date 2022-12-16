@@ -14,7 +14,10 @@ class Circuito:
         self.edgy = 0.1
         self.rad = 0.1
         self.current_vertex = None
+        self.color_vertex = None
         self.all_vertex = np.empty(0,  dtype='f4')
+        self.curves = []
+        self.checkpoints = []
         self.vbo, self.vboc = self.get_vbo()
         self.shader_program = self.get_shader_program('circuito')
         self.vao = self.get_vao()
@@ -81,7 +84,16 @@ class Circuito:
         d = cdist(start_vertex, vertex_data)
         idx_inicio = np.argmin(d)*2
         color = np.array([(0.2,0.2,0.2) for _ in range(vertex_2d.shape[0])], dtype='f4')
+        self.curves = self.get_curvyness()
+        checkpoint_thickness = 32
+        for curve_idx in self.curves:
+            idx_start = curve_idx - checkpoint_thickness
+            if idx_start > 0:
+                idx_end = curve_idx + checkpoint_thickness % len(color)
+                color[idx_start:idx_end] = (0.4, 0.4, 0.4)
+                self.checkpoints.append(vertex_2d[idx_start:idx_end])
         color[idx_inicio-2:idx_inicio+2] = (1,1,1)
+        self.color_vertex = color
         self.current_vertex = idx_inicio
 
         return vertex_2d, color
@@ -113,6 +125,84 @@ class Circuito:
         program = self.ctx.program(vertex_shader=vertex_shader,
                                    fragment_shader=fragment_shader)
         return program
+
+    def get_curvyness(self):
+        vertices = self.all_vertex
+        # number of nodes to take into account when calculating the curviness
+        # (on each side of the node, so in total 2 * num_neighbours + 1 are taken into account)
+        num_neighbours = 5
+        # curviness at each vertexpair of the circuit
+        curviness = np.zeros(int(len(vertices) / 2))
+        # coordinates of the middle line
+        middle_line = np.zeros((int(len(vertices) / 2), 3))
+
+        for vert in range(0, len(vertices), 2):
+            # define first and last node on each side that are considered for the current point on the circuit
+            first_left = vert - 2 * num_neighbours
+            last_left = (vert + 2 * num_neighbours) % len(vertices)
+            first_right = vert - 2 * num_neighbours - 1
+            last_right = (vert + 2 * num_neighbours - 1) % len(vertices)
+
+            # get a list of nodes, that should be considered on each side
+            if (first_left < 0 and last_left > 0) or first_left > (last_left % len(vertices)):
+                idx_left_border = np.concatenate(
+                    (np.arange((len(vertices) + first_left) % len(vertices), len(vertices), 2),
+                     np.arange(0, last_left + 1 % len(vertices), 2)))
+            else:
+                idx_left_border = np.arange(first_left, last_left + 1, 2)
+
+            if (first_right < 0 and last_right > 0) or first_right > (last_right % len(vertices)):
+                idx_right_border = np.concatenate(
+                    (np.arange((len(vertices) + first_right) % len(vertices), len(vertices), 2),
+                     np.arange(1, last_right + 1 % len(vertices), 2)))
+            else:
+                idx_right_border = np.arange(first_right, last_right + 1, 2)
+
+            # calculate the length of the circuit on both sides
+            length_left = sum(
+                [sum(abs(vertices[i] - vertices[j])) for i, j in zip(idx_left_border[0:-1], idx_left_border[1:])])
+            length_right = sum(
+                [sum(abs(vertices[i] - vertices[j])) for i, j in zip(idx_right_border[0:-1], idx_right_border[1:])])
+
+            # curviness is the ratio of the two length
+            curviness[int(vert / 2)] = length_left / length_right
+
+            # calculate middle point of the circuit for plotting
+            middle_line[int(vert / 2)] = (vertices[vert] + vertices[vert - 1]) / 2
+
+        # take the logarithm to see the curves better
+        curviness = np.sign(curviness) * np.log(abs(curviness))
+
+        curves = [True if (point > 0.9 or point < -0.9) else False for point in curviness]
+        curves_mids = [False] * len(curviness)  # [[0, 0, 0, 0]] * len(curviness)
+        i = 0
+        end = False
+        while not end:
+            if curves[i]:
+                j = i
+                last_curve = i
+                num_curves = 0
+                while curves[j] or j - last_curve < 18:
+                    if curves[j]:
+                        last_curve = j
+                        num_curves = num_curves + 1
+                    if j + 1 >= len(curviness):
+                        end = True
+                    j = (j + 1) % len(curviness)
+                if num_curves > 3:
+                    curve_middle = int(i + (last_curve - i) / 2)
+                    curves_mids[curve_middle] = True  # [0, 1, 0, 1]
+                i = j
+            else:
+                if i + 1 >= len(curviness):
+                    end = True
+                i = i + 1
+
+        curve_idx = []
+        for i, curve in enumerate(curves_mids):
+            if curve:
+                curve_idx.append(2 * i)
+        return curve_idx
 
     @staticmethod
     @jit(nopython=True)
@@ -171,3 +261,37 @@ class Circuito:
         on_track = np.logical_and(in_out_outer, np.logical_not(in_out_inner))
 
         return test_points.reshape(201, 201, 2), on_track.reshape(201, 201)
+
+class MinimapCircuito(Circuito):
+    def __init__(self, app, all_vertex, color_vertex):
+        self.app = app
+        self.ctx = app.ctx
+        self.edgy = 0.1
+        self.rad = 0.1
+        self.current_vertex = None
+        self.color_vertex = color_vertex
+        self.all_vertex = all_vertex
+        self.vbo, self.vboc = self.get_vbo(all_vertex, color_vertex)
+        self.shader_program = self.get_shader_program('circuito')
+        self.vao = self.get_vao()
+        self.m_model = self.get_model_matrix()
+        self.on_init()
+
+    def new_road(self, all_vertex, color_vertex):
+        self.vbo, self.vboc = self.get_vbo(all_vertex, color_vertex)
+        self.vao = self.get_vao()
+        self.render()
+
+    def get_vbo(self, all_vertex, color_vertex):
+        vbo = self.ctx.buffer(all_vertex)
+        vboc = self.ctx.buffer(color_vertex)
+        return vbo, vboc
+
+    def render(self, player=1):
+        if player == 1:
+            self.shader_program['m_proj'].write(self.app.minimap.m_proj)
+            self.shader_program['m_view'].write(self.app.minimap.m_view)
+        elif player == 2:
+            self.shader_program['m_proj'].write(self.app.minimap_2.m_proj)
+            self.shader_program['m_view'].write(self.app.minimap_2.m_view)
+        self.vao.render(mgl.TRIANGLE_STRIP)

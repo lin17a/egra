@@ -3,7 +3,7 @@ import numpy as np
 from scipy.special import binom
 from scipy.interpolate import interp1d
 
-#np.random.seed(123456)
+np.random.seed(13)
 
 
 def bernstein(n, k, t):

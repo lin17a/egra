@@ -9,19 +9,24 @@ from mypopulation import Population
 import pickle
 import numpy as np
 from joblib import dump, load
+import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
 
 class ai:
     
     
-    def __init__(self, app):
+    def __init__(self, app, test = False):
+        self.test = test
         self.model = load('JERS.joblib') 
         self.app = app
         self.p = None
         self.time_spent = 0
         self.generation = 0
-        
-        self.car_per_generation = 15
+        self.best_fitness_generation = []
+        if test:
+            self.car_per_generation = 1
+        else:    
+            self.car_per_generation = 15
         self.current_car = 0
         self.nets = []
         
@@ -29,11 +34,12 @@ class ai:
         
         
         
-    def on_start(self):
+    def on_start(self, test = False):
         config_path = "./config-feedforward.txt"
         config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction,
                                     neat.DefaultSpeciesSet, neat.DefaultStagnation, config_path)
     
+            
         # Create core evolution algorithm class
         self.p = Population(config)
     
@@ -55,7 +61,19 @@ class ai:
         
         
     def initialize_fitness(self):
-        genomes, config = self.p.get_genome()
+        if self.test:
+            genome_path = 'winners/winner_gen_349.pkl'
+                # Unpickle saved winner
+            with open(genome_path, "rb") as f:
+                genome = pickle.load(f)
+        
+            genomes = [(1, genome)]
+            config_path = "./config-feedforward.txt"
+            config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction,
+                                        neat.DefaultSpeciesSet, neat.DefaultStagnation, config_path)
+
+        else:
+            genomes, config = self.p.get_genome()
 
         self.nets = []
         
@@ -64,34 +82,7 @@ class ai:
             self.nets.append(net)
             g.fitness = 0
         
-        
-    
-    def step(self):
-        radar = self.app.car.distance_to_off_circuit()
-        radar.append(self.app.car.velocity)
-        radar = np.array(radar)
-        
-        i = int(self.model.predict(radar.reshape(-1,1).T))
-        
-        
-        if i == 0:
-            pass
-            print(f"wait")
-            
-        elif i == 1:
-            self.app.car.move_left()
-            print(f"Action: Move left")
-        elif i == 2:
-            self.app.car.move_forward()
-            
-            print(f"Action: Move forward")
-        elif i == 3:
-            self.app.car.move_right()
-            print(f"Action: right")
-            
-        
-        
-        
+              
     
     def run_car(self):
         
@@ -133,17 +124,19 @@ class ai:
             print(f"--------- CAR {self.current_car} for generation {self.generation} ---------")
             print(f"reward until time {self.time_spent}: {genomes[self.current_car][1].fitness}")
         
-        if self.time_spent > 1000:
+        if self.time_spent > 10_0000:
             death = True
             
         # Update car and fitness
         
-        genomes[self.current_car][1].fitness += self.get_reward(self.app.car.velocity,
+        if not self.test:
+            genomes[self.current_car][1].fitness += self.get_reward(self.app.car.velocity,
                                                   self.app.car.distance, 
                                                          self.time_spent)
         #print(f"Fitness: {genomes[self.current_car][1].fitness}")
         if not self.app.car.on_circuit():
-            genomes[self.current_car][1].fitness -= 1e2
+            if not self.test:
+                genomes[self.current_car][1].fitness -= 1e2
             death = True
     
     
@@ -158,9 +151,12 @@ class ai:
         if self.current_car == self.car_per_generation:
             self.generation += 1
             self.current_car = 0
-            self.p.reproduce()
-            self.initialize_fitness()
-            self.save()
+            if not self.test:
+                self.p.reproduce()
+                self.best_fitness_generation.append(self.p.best_genome.fitness)
+                pd.DataFrame(self.best_fitness_generation).to_csv("Generations.csv")
+                self.initialize_fitness()
+                self.save()
     
     
     def save(self):

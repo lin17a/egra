@@ -2,6 +2,7 @@
 
 from neat.math_util import mean
 from neat.reporting import ReporterSet
+import pickle
 
 
 class CompleteExtinctionException(Exception):
@@ -18,8 +19,10 @@ class Population(object):
         5. Go to 1.
     """
 
-    def __init__(self, config, initial_state=None):
-
+    def __init__(self, config, initial_state=None, path_best = None):
+        
+        self.test = False if path_best == None else True
+        
         self.reporters = ReporterSet()
         self.config = config
         stagnation = config.stagnation_type(config.stagnation_config, self.reporters)
@@ -47,7 +50,16 @@ class Population(object):
         else:
             self.population, self.species, self.generation = initial_state
 
-        self.best_genome = None
+        
+        if path_best == None:
+            
+            self.best_genome = None
+            
+        else:
+            with open(path_best, "rb") as f:
+                self.best_genome = pickle.load(f)
+                
+            self.best_genome = [(1, self.best_genome)]
 
     def add_reporter(self, reporter):
         self.reporters.add(reporter)
@@ -140,6 +152,10 @@ class Population(object):
     def get_genome(self):
         
         return list(self.population.items()), self.config
+    
+    
+    def get_best_genome(self):
+        return self.best_genome
     
     
     def reproduce(self):

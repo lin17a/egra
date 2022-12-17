@@ -21,11 +21,11 @@ class Car:
         self.distance = 0
         
         self.values = []
-        self.increase = 10
+        self.increase = 5
         
         self.velocity = 0 #[x, y]
         self.friction = 0
-        self.velmax = 20
+        self.velmax = 15
         self.physics = Physics((self.position[0], self.position[2]), dt = 0.05, 
                                maxVel = self.velmax)
 

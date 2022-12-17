@@ -68,7 +68,7 @@ class GraphicsEngine:
         # Car
         self.light = Light(self.map)
         self.car = Car(self, color = players_color[1])
-        self.ai = ai(self)
+        self.ai = ai(self, test = True)
         
         
         # axis

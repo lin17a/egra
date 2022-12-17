@@ -116,8 +116,8 @@ class GraphicsEngine:
         if self.players == 2:
             if self.camera_mode == "bird":
                 self.camera_mode = "drive"
-                self.camera = DriverCamera(self, player = 1)
-                self.camera_2 = DriverCamera(self, player = 2)
+                self.camera = DriverCamera(self, player = 1, radians = 75)
+                self.camera_2 = DriverCamera(self, player = 2, radians = 75)
             else:
                 self.camera_mode = "bird"
                 self.camera = Camera(self, player = 1)
@@ -252,7 +252,8 @@ class GraphicsEngine:
                 self.car_2.render(player=1)
                 self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
                 if self.camera_mode == "drive":
-                    self.ctx.viewport = (int(self.WIN_SIZE[0] * 0.65), int(self.WIN_SIZE[1] * 0.6), int(self.WIN_SIZE[0] * 0.4),
+                    # TODO: Move minmap to the left
+                    self.ctx.viewport = (int(self.WIN_SIZE[0] * 0.65), int(self.WIN_SIZE[1] * 0.60), int(self.WIN_SIZE[0] * 0.4),
                                         int(self.WIN_SIZE[1]* 0.4))
                     self.minimap.update()
                     self.minimap_scene.render(player=1)

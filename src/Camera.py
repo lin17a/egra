@@ -76,7 +76,7 @@ class Camera:
 
 
 class DriverCamera(Camera):
-    def __init__(self, app, player = None):
+    def __init__(self, app, player = None, radians = 103):
         self.app = app
         self.player = player
         if self.player == 1 or self.player == 2:
@@ -87,7 +87,7 @@ class DriverCamera(Camera):
         self.position = self.get_position()
         self.up = glm.vec3(0, 1, 0)
         self.lookat = self.get_look_at()
-        self.radians = 110
+        self.radians = radians
         # view_matrix
         self.m_view = self.get_view_matrix()
         # projection matrix

@@ -48,6 +48,7 @@ class GraphicsEngine:
         self.menu = menu(self)
         self.menu_active = True
         
+        
     def one_player(self, players_color):
         # set opengl attr
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION,3)
@@ -68,7 +69,7 @@ class GraphicsEngine:
         # Car
         self.light = Light(self.map)
         self.car = Car(self, color = players_color[1])
-        self.ai = ai(self, test = True)
+        self.ai = ai(self, test = False)
         
         
         # axis

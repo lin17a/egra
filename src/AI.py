@@ -95,7 +95,10 @@ class ai:
         # Input my data and get result from network
         radar = self.app.car.distance_to_off_circuit()
         
-        radar.append(self.app.car.velocity)
+        #radar.append(self.app.car.velocity)
+        
+        radar.append(self.app.car.get_curviness())
+        
         
         radar = np.array(radar)
         

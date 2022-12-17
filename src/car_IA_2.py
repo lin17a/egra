@@ -98,6 +98,15 @@ class Car:
             self.shader_program['view_pos'].write(self.app.camera_2.position)
         self.shader_program['m_model'].write(self.m_model)
 
+    def get_curviness(self):
+        points = self.app.scene.layout_points
+        x, y = self.position[0], self.position[2]
+        distances = np.sqrt((points[:, :, 0] - x) ** 2 + (points[:, :, 1] - y) ** 2)
+        closest_point = np.unravel_index(distances.argmin(), distances.shape)
+        curve_matrix = self.app.scene.curve_matrix
+        curviness = curve_matrix[closest_point]
+        return curviness
+
     def render(self, player):
         self.shader_program['light.position'].write(self.app.light.position)
         if player == 1 or self.player == None:

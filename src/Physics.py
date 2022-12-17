@@ -96,10 +96,12 @@ class Physics:
         # ======= Derivadas =========
         PrimDer = None
         if self.TimeStep > 1 :    
-            PrimDer = self.getFirstDerivate((x,y))
+            #PrimDer = self.getFirstDerivate((x,y))
+            pass
             
         if self.TimeStep > 2:
-            SegDer = self.getSecondDerivate((x,y))
+            #SegDer = self.getSecondDerivate((x,y))
+            pass
         
         self.PastPos = [x, y]    
         # ======= Componentes de la posición =========

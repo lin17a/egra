@@ -5,20 +5,27 @@ import sys
 import itertools as it
 import numpy as np
 from OpenGL.GL import *
+
+
 from Camera import Camera, Axis, DriverCamera, Minimap
 from Circuito import Circuito, MinimapCircuito
-from car import Car, MinimapCar
+from car_IA_2 import Car, MinimapCar
+
+
 from Light import Light
 from texturing import *
 import time
 from UI import menu
 from Music import MusicPlayer
 import glcontext
+from AI import ai
+from sklearn.neural_network import MLPClassifier
 
 
 class GraphicsEngine:
     def __init__(self, win_size=(1280, 960)):
         # init pygame modules
+        self.start = False
         pg.init()
         # window sizeq
         self.WIN_SIZE = win_size
@@ -28,10 +35,12 @@ class GraphicsEngine:
         self.start_menu()
         self.map = None
         self.players = None
+        
+        # Se crea la instancia
+        
 
-        # Sounds
-        self.ingame_music = MusicPlayer("musica1", volume=0.5)
-        self.menu_music = MusicPlayer("menu", volume=0.3)
+        self.ingame_music = MusicPlayer("musica1", volume=0.0)
+        self.menu_music = MusicPlayer("menu", volume=0.0)
         self.menu_music.play()
 
     def start_menu(self):
@@ -59,15 +68,21 @@ class GraphicsEngine:
         # Car
         self.light = Light(self.map)
         self.car = Car(self, color = players_color[1])
+        self.ai = ai(self)
+        
+        
         # axis
         #self.axis = Axis(self)
         # Minimap
+        
         self.minimap = Minimap(self)
         self.minimap_car = MinimapCar(self, player=1)
         self.minimap_scene = MinimapCircuito(self, self.scene.all_vertex, self.scene.color_vertex)
+        
         self.ingame_music.load("musica1")
         self.ingame_music.play()
         self.change_camera()
+        
 
     def two_players(self, players_color):
         # set opengl attr
@@ -92,13 +107,14 @@ class GraphicsEngine:
         self.car_2 = Car(self, player = 2, color = players_color[2])
         # axis
         #self.axis = Axis(self)
+        
         # Minimap
         self.minimap = Minimap(self)
         self.minimap_2 = Minimap(self, player = 2)
         self.minimap_car = MinimapCar(self)
         self.minimap_car_2 = MinimapCar(self, player = 2)
         self.minimap_scene = MinimapCircuito(self, self.scene.all_vertex, self.scene.color_vertex)
-
+        
         self.ingame_music.load("musica1")
         self.ingame_music.play()
 
@@ -181,22 +197,60 @@ class GraphicsEngine:
             self.minimap_scene.new_road(self.scene.all_vertex, self.scene.color_vertex)
             self.car.move_to_start()
             self.minimap_car.move_to_start()
+            
             if self.players == 2:
                 self.car_2.move_to_start()
                 self.minimap_car_2.move_to_start()
-
+                
         if keys[pg.K_UP]:
             self.car.move_forward()
+            radar = self.car.distance_to_off_circuit()
+            radar.append(self.car.velocity)
+            radar.append(1)
+            radar = np.array(radar)
+            
+            self.car.values.append(radar)
+            self.start = True
             self.minimap_car.move_forward()
+            
         if keys[pg.K_RIGHT]:
             self.car.move_right()
             self.minimap_car.move_right()
+            radar = self.car.distance_to_off_circuit()
+            radar.append(self.car.velocity)
+            radar.append(2)
+            radar = np.array(radar)
+            
+            self.car.values.append(radar)
+            self.start = True
+            
         if keys[pg.K_LEFT]:
-            self.car.move_left()
             self.minimap_car.move_left()
+            self.car.move_left()
+            radar = self.car.distance_to_off_circuit()
+            radar.append(self.car.velocity)
+            radar.append(3)
+            radar = np.array(radar)
+            
+            self.car.values.append(radar)
+            self.start = True
+            
         if keys[pg.K_DOWN]:
             self.car.move_backward()
-            self.minimap_car.move_backward()
+            #self.car.move_backward()
+            
+        if (not keys[pg.K_UP]) and (not keys[pg.K_RIGHT]) and (not keys[pg.K_LEFT]):
+            if self.start:
+                radar = self.car.distance_to_off_circuit()
+                radar.append(self.car.velocity)
+                radar.append(0)
+                radar = np.array(radar)
+                
+                self.car.values.append(radar)
+            
+        if keys[pg.K_g]:
+            self.car.save()
+            
         
         self.car.up()
         self.minimap_car.up()
@@ -243,6 +297,8 @@ class GraphicsEngine:
                 self.minimap_car.render()
                 self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
                 # swap buffers
+                #self.ai.run_car()
+                #self.ai.step()
                 pg.display.flip()
 
             if self.players == 2:                
@@ -286,17 +342,20 @@ class GraphicsEngine:
                 # render minimap
                 self.ctx.viewport = (int(self.WIN_SIZE[0] * 0.65), int(self.WIN_SIZE[1] * 0.1), int(self.WIN_SIZE[0] * 0.4),
                                      int(self.WIN_SIZE[1] * 0.4))
+                
                 self.minimap_2.update()
                 self.minimap_scene.render(player=1)
                 self.ctx.enable(mgl.DEPTH_TEST | mgl.CULL_FACE)
                 self.minimap_car.render()
                 self.minimap_car_2.render()
                 self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
+                
 
                 # swap buffers
                 pg.display.flip()
 
     def run(self):
+        
         while True:
             self.get_time()
             self.check_events()

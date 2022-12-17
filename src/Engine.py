@@ -116,8 +116,8 @@ class GraphicsEngine:
         if self.players == 2:
             if self.camera_mode == "bird":
                 self.camera_mode = "drive"
-                self.camera = DriverCamera(self, player = 1, radians = 75)
-                self.camera_2 = DriverCamera(self, player = 2, radians = 75)
+                self.camera = DriverCamera(self, player = 1, radians = 82)
+                self.camera_2 = DriverCamera(self, player = 2, radians = 82)
             else:
                 self.camera_mode = "bird"
                 self.camera = Camera(self, player = 1)

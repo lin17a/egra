@@ -29,6 +29,12 @@ class GraphicsEngine:
         self.map = None
         self.players = None
         self.end_game = False
+        # FIXME: timer
+        self.start_timer_sp_cond = True
+        self.start_timer_1p_cond = True
+        self.start_timer_2p_cond = True
+        self.bool_timer = True
+
 
         # Sounds
         self.ingame_music = MusicPlayer("musica1", volume=0.5)
@@ -149,6 +155,10 @@ class GraphicsEngine:
             if keys[pg.K_w]:
                 self.car_2.move_forward()
                 self.minimap_car_2.move_forward()
+                # FIXME: timer
+                if self.start_timer_2p_cond:
+                    self.start_timer2 = time.time()
+                    self.start_timer2_cond = False
             if keys[pg.K_d]:
                 self.car_2.move_right()
                 self.minimap_car_2.move_right()
@@ -177,11 +187,19 @@ class GraphicsEngine:
                 self.minimap_car_2.move_to_start()
             # NOTE: Start again
             self.end_game = False
+            # FIXME: Timer
+            self.start_timer_sp_cond = True
+            self.start_timer2_cond = True
+            self.bool_timer = True
             self.start_timer = time.time()
 
         if keys[pg.K_UP]:
             self.car.move_forward()
             self.minimap_car.move_forward()
+            # FIXME: Timer
+            if self.start_timer_sp_cond:
+                self.start_timer_sp = time.time()
+                self.start_timer_sp_cond = False
         if keys[pg.K_RIGHT]:
             self.car.move_right()
             self.minimap_car.move_right()
@@ -211,8 +229,6 @@ class GraphicsEngine:
                 self.menu_active = False
                 self.menu_music.stop()
                 loading_screen(self.surface)
-                # FIXME: start time
-                self.start_timer = time.time()
                 if self.players == 1:
                     self.one_player(players_color)
                 elif self.players == 2:
@@ -299,6 +315,7 @@ class GraphicsEngine:
 
             # Check if the game is over
             self.end_game_logic()
+
             # calculate stats
             self.stats()
 
@@ -327,10 +344,23 @@ class GraphicsEngine:
                     self.end_game = True
     
         if self.end_game:
-            current_n_checkpoints = np.count_nonzero(self.car.checkpoints_l)
             print(f"\n\n--------------- END ----------------")
 
+            if self.players == 1:
+                if self.bool_timer:
+                    self.end_timer = time.time()
+                    self.ftime = self.end_timer - self.start_timer
+                    self.bool_timer = False
+
             if self.players == 2:
+                # FIXME: Timer
+                if self.bool_timer:
+                    self.end_timer1 = time.time()
+                    self.ftime1 = self.end_timer1 - self.start_timer1
+                    self.end_timer1 = time.time()
+                    self.ftime2 = self.end_timer1 - self.start_timer1
+                    self.bool_timer = False
+
                 # check who has completed more checkpoints
                 chk_car_1 = np.count_nonzero(self.car.checkpoints_l)
                 total_n_checkpoints = len(self.scene.checkpoints)
@@ -341,17 +371,22 @@ class GraphicsEngine:
 
                 print(f"======== {str(self.winner).upper()} player wins!  ========")
         
-
+        
     def stats(self):
         """
-        avg_car1_vel = 
-        n_off_track_car1 =
+        if self.players == 1:
+            avg_car1_vel = 
+            n_off_track_car1 =
+            race_time = self.ftime
 
         if self.players == 2:
+            avg_car1_vel =
+            n_off_track_car1 =
+            race_time1 = self.ftime
+
             avg_car2_vel =
             n_off_track_car2 =
-
-        self.winner.timer = 
+            race_time2 = self.ftime
         """
 
 if __name__ == '__main__':

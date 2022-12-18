@@ -3,8 +3,7 @@ import numpy as np
 from scipy.special import binom
 from scipy.interpolate import interp1d
 
-np.random.seed(13)
-
+np.random.seed(616)
 
 def bernstein(n, k, t):
     return binom(n,k) * t**k * (1.-t)**(n-k)

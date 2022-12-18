@@ -62,7 +62,7 @@ class ai:
         
     def initialize_fitness(self):
         if self.test:
-            genome_path = 'winners/winner_gen_349.pkl'
+            genome_path = 'winners/1_winner_gen_0271.pkl'
                 # Unpickle saved winner
             with open(genome_path, "rb") as f:
                 genome = pickle.load(f)
@@ -104,13 +104,16 @@ class ai:
         
         #radar[radar > 30] = 30
         
+        #output = self.nets[self.current_car].activate(radar)
+        #i = output.index(max(output))
         
+        i = self.model.predict(radar.reshape(1,-1))
         
-        output = self.nets[self.current_car].activate(radar)
-        i = output.index(max(output))
+        print(self.model.predict_proba(radar.reshape(1,-1)))
         
         if i == 0:
-            self.app.car.move_forward()
+            #self.app.car.move_forward()
+            pass
             #print(f"Action: Move towards")
             
         elif i == 1:
@@ -164,7 +167,7 @@ class ai:
     
     def save(self):
         
-        with open(f"winners/winner_gen_{self.generation}.pkl", "wb") as f:
+        with open(f"winners/winner_gen_{(4 - len(str(self.generation)) )* '0' + str(self.generation)}.pkl", "wb") as f:
             pickle.dump(self.p.best_genome, f)
             f.close()
     

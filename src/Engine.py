@@ -19,7 +19,7 @@ from UI import menu
 from Music import MusicPlayer
 import glcontext
 from AI import ai
-from sklearn.neural_network import MLPClassifier
+
 
 
 class GraphicsEngine:
@@ -207,10 +207,10 @@ class GraphicsEngine:
             self.car.move_forward()
             radar = self.car.distance_to_off_circuit()
             radar.append(self.car.velocity)
-            radar.append(1)
+            radar.append("-")
             radar = np.array(radar)
             
-            self.car.values.append(radar)
+            #self.car.values.append(radar)
             self.start = True
             self.minimap_car.move_forward()
             
@@ -218,7 +218,7 @@ class GraphicsEngine:
             self.car.move_right()
             self.minimap_car.move_right()
             radar = self.car.distance_to_off_circuit()
-            radar.append(self.car.velocity)
+            radar.append(self.car.get_curviness())
             radar.append(2)
             radar = np.array(radar)
             
@@ -229,8 +229,8 @@ class GraphicsEngine:
             self.minimap_car.move_left()
             self.car.move_left()
             radar = self.car.distance_to_off_circuit()
-            radar.append(self.car.velocity)
-            radar.append(3)
+            radar.append(self.car.get_curviness())
+            radar.append(1)
             radar = np.array(radar)
             
             self.car.values.append(radar)
@@ -243,7 +243,7 @@ class GraphicsEngine:
         if (not keys[pg.K_UP]) and (not keys[pg.K_RIGHT]) and (not keys[pg.K_LEFT]):
             if self.start:
                 radar = self.car.distance_to_off_circuit()
-                radar.append(self.car.velocity)
+                radar.append(self.car.get_curviness())
                 radar.append(0)
                 radar = np.array(radar)
                 
@@ -299,7 +299,7 @@ class GraphicsEngine:
                 self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
                 # swap buffers
                 self.ai.run_car()
-                #self.ai.step()
+                
                 pg.display.flip()
 
             if self.players == 2:                

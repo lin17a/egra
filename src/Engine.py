@@ -313,13 +313,10 @@ class GraphicsEngine:
     def end_game_logic(self):
 
         # If all checkpoints are completed, end game
-        # FIXME: It only works the frist time, if you press R
-        #        it stops working
         if self.players == 1:
-            done = np.count_nonzero(self.car.checkpoints_l)
-            total = len(self.car.checkpoints_l)
-            print(f"{done}/{total}")
-            #print(all(self.car.checkpoints_l))
+            done_chkps = np.count_nonzero(self.car.checkpoints_l)
+            total_chkps = len(self.car.checkpoints_l)
+            print(f"chks: {done_chkps}/{total_chkps}")
             if all(self.car.checkpoints_l):
                 self.end_game = True
 

@@ -28,6 +28,7 @@ class GraphicsEngine:
         self.start_menu()
         self.map = None
         self.players = None
+        self.end_game = False
 
         # Sounds
         self.ingame_music = MusicPlayer("musica1", volume=0.5)
@@ -173,6 +174,9 @@ class GraphicsEngine:
             if self.players == 2:
                 self.car_2.move_to_start()
                 self.minimap_car_2.move_to_start()
+            # NOTE: Start again
+            self.end_game = False
+            self.start_timer = time.time()
 
         if keys[pg.K_UP]:
             self.car.move_forward()
@@ -206,6 +210,8 @@ class GraphicsEngine:
                 self.menu_active = False
                 self.menu_music.stop()
                 loading_screen(self.surface)
+                # FIXME: start time
+                self.start_timer = time.time()
                 if self.players == 1:
                     self.one_player(players_color)
                 elif self.players == 2:
@@ -290,6 +296,11 @@ class GraphicsEngine:
                 # swap buffers
                 pg.display.flip()
 
+            # Check if the game is over
+            self.end_game_logic()
+            # calculate stats
+            self.stats()
+
     def run(self):
         while True:
             self.get_time()
@@ -297,6 +308,52 @@ class GraphicsEngine:
             self.render()
             self.clock.tick(60)
 
+
+    def end_game_logic(self):
+
+        # If all checkpoints are completed, end game
+        # FIXME: It only works the frist time, uf you press R
+        #        it stops working
+        if self.players == 1:
+            print(np.count_nonzero(self.car.completed_checkpoints))
+            print(all(self.car.completed_checkpoints))
+            if all(self.car.completed_checkpoints):
+                self.end_game = True
+
+        elif self.players == 2:
+            if all(self.car.completed_checkpoints) or \
+                all(self.car_2.completed_checkpoints):
+                # TODO: AND they crossed the finish line
+                    self.end_game = True
+    
+        if self.end_game:
+            current_n_checkpoints = np.count_nonzero(self.car.completed_checkpoints)
+            total_n_checkpoints = len(self.car.completed_checkpoints)
+            print(f"\n\n--------------- END ----------------")
+
+            if self.players == 2:
+                # check who has completed more checkpoints
+                chk_car_1 = np.count_nonzero(self.car.completed_checkpoints)
+                chk_car_2 = np.count_nonzero(self.car_2.completed_checkpoints)
+                if chk_car_1 > chk_car_2:
+                    self.winner = self.car.color
+                else:
+                    self.winner = self.car_2.color
+
+                print(f"======== {str(self.winner).upper()} player wins!  ========")
+        
+
+    def stats(self):
+        """
+        avg_car1_vel = 
+        n_off_track_car1 =
+
+        if self.players == 2:
+            avg_car2_vel =
+            n_off_track_car2 =
+
+        self.winner.timer = 
+        """
 
 if __name__ == '__main__':
     app = GraphicsEngine()

@@ -61,7 +61,7 @@ class GraphicsEngine:
         self.car = Car(self, color = players_color[1])
         # Minimap
         self.minimap = Minimap(self)
-        self.minimap_car = MinimapCar(self, player=1)
+        self.minimap_car = MinimapCar(self)
         self.minimap_scene = MinimapCircuito(self, self.scene.all_vertex, self.scene.color_vertex)
         # Music
         self.ingame_music.load("musica1")
@@ -91,9 +91,9 @@ class GraphicsEngine:
         self.car = Car(self, player = 1, color = players_color[1])
         self.car_2 = Car(self, player = 2, color = players_color[2])
         # Minimap
-        self.minimap = Minimap(self)
+        self.minimap = Minimap(self, player = 1)
         self.minimap_2 = Minimap(self, player = 2)
-        self.minimap_car = MinimapCar(self, color = players_color[1])
+        self.minimap_car = MinimapCar(self, player = 1, color = players_color[1])
         self.minimap_car_2 = MinimapCar(self, player = 2, color = players_color[2])
         self.minimap_scene = MinimapCircuito(self, self.scene.all_vertex, self.scene.color_vertex)
         # Music

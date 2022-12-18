@@ -298,7 +298,7 @@ class GraphicsEngine:
                 self.minimap_car.render()
                 self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
                 # swap buffers
-                self.ai.run_car()
+                #self.ai.run_car()
                 
                 pg.display.flip()
 

@@ -321,7 +321,7 @@ class Car:
         return direction_vector
     
     def save(self):
-        with open('JERS_values.npy', 'wb') as f:
+        with open('LINA_values.npy', 'wb') as f:
             np.save(f, np.array(self.values), allow_pickle=True)
     
     @staticmethod

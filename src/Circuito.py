@@ -25,6 +25,9 @@ class Circuito:
         self.layout_points, self.layout_matrix = self.get_layout_matrix()
         self.on_init()
 
+    def zero_checkpoints(self):
+        self.checkpoints = []
+
     def get_model_matrix(self):
         m_model = glm.rotate(glm.mat4(), glm.radians(0), glm.vec3(0,1,0))
         return m_model

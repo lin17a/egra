@@ -167,6 +167,7 @@ class GraphicsEngine:
                 self.minimap_scene.render(player = 2)
 
         if keys[pg.K_r]:
+            self.scene.zero_checkpoints()
             self.scene.new_road()
             self.minimap_scene.new_road(self.scene.all_vertex, self.scene.color_vertex)
             self.car.move_to_start()
@@ -315,24 +316,26 @@ class GraphicsEngine:
         # FIXME: It only works the frist time, if you press R
         #        it stops working
         if self.players == 1:
-            print(np.count_nonzero(self.car.completed_checkpoints))
-            print(all(self.car.completed_checkpoints))
-            if all(self.car.completed_checkpoints):
+            done = np.count_nonzero(self.car.checkpoints_l)
+            total = len(self.car.checkpoints_l)
+            print(f"{done}/{total}")
+            #print(all(self.car.checkpoints_l))
+            if all(self.car.checkpoints_l):
                 self.end_game = True
 
         elif self.players == 2:
-            if all(self.car.completed_checkpoints) or \
-                all(self.car_2.completed_checkpoints):
+            if all(self.car.checkpoints_l) or \
+                all(self.car_2.checkpoints_l):
                 # TODO: AND they crossed the finish line
                     self.end_game = True
     
         if self.end_game:
-            current_n_checkpoints = np.count_nonzero(self.car.completed_checkpoints)
+            current_n_checkpoints = np.count_nonzero(self.car.checkpoints_l)
             print(f"\n\n--------------- END ----------------")
 
             if self.players == 2:
                 # check who has completed more checkpoints
-                chk_car_1 = np.count_nonzero(self.car.completed_checkpoints)
+                chk_car_1 = np.count_nonzero(self.car.checkpoints_l)
                 total_n_checkpoints = len(self.scene.checkpoints)
                 if chk_car_1 == total_n_checkpoints:
                     self.winner = self.car.color

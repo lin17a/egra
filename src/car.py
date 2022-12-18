@@ -31,6 +31,10 @@ class Car:
 
         self.on_init()
 
+    @property
+    def checkpoints_l(self):
+        return self.completed_checkpoints
+
     def get_start_position(self):
         vertex = self.app.scene.all_vertex[self.app.scene.current_vertex - 20]
         next_vertex = self.app.scene.all_vertex[self.app.scene.current_vertex - 19]

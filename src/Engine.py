@@ -328,14 +328,13 @@ class GraphicsEngine:
     
         if self.end_game:
             current_n_checkpoints = np.count_nonzero(self.car.completed_checkpoints)
-            total_n_checkpoints = len(self.car.completed_checkpoints)
             print(f"\n\n--------------- END ----------------")
 
             if self.players == 2:
                 # check who has completed more checkpoints
                 chk_car_1 = np.count_nonzero(self.car.completed_checkpoints)
-                chk_car_2 = np.count_nonzero(self.car_2.completed_checkpoints)
-                if chk_car_1 > chk_car_2:
+                total_n_checkpoints = len(self.scene.checkpoints)
+                if chk_car_1 == total_n_checkpoints:
                     self.winner = self.car.color
                 else:
                     self.winner = self.car_2.color

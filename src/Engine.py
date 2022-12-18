@@ -252,8 +252,8 @@ class GraphicsEngine:
                 self.car_2.render(player=1)
                 self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
                 if self.camera_mode == "drive":
-                    # TODO: Move minmap to the left
-                    self.ctx.viewport = (int(self.WIN_SIZE[0] * 0.65), int(self.WIN_SIZE[1] * 0.60), int(self.WIN_SIZE[0] * 0.4),
+                    # FIXME: Move minmap a little bit more to the left?
+                    self.ctx.viewport = (0, int(self.WIN_SIZE[1] * 0.60), int(self.WIN_SIZE[0] * 0.4),
                                         int(self.WIN_SIZE[1]* 0.4))
                     self.minimap.update()
                     self.minimap_scene.render(player=1)

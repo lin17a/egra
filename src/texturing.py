@@ -218,7 +218,7 @@ class Grass:
 
 def loading_screen(surface):
     
-    pg.display.set_caption('image')
+    pg.display.set_caption('Loading...')
     img = pg.image.load("./textures/ls.jpg").convert()
 
     surface.blit(img, (0, 0))

@@ -18,6 +18,7 @@ class Circuito:
         self.all_vertex = np.empty(0,  dtype='f4')
         self.curves = []
         self.checkpoints = []
+        self.start_line = []
         self.vbo, self.vboc = self.get_vbo()
         self.shader_program = self.get_shader_program('circuito')
         self.vao = self.get_vao()
@@ -92,6 +93,7 @@ class Circuito:
                 idx_end = curve_idx + checkpoint_thickness % len(color)
                 color[idx_start:idx_end] = (0.4, 0.4, 0.4)
                 self.checkpoints.append(vertex_2d[idx_start:idx_end])
+        self.start_line = vertex_2d[idx_inicio-2:idx_inicio+2]
         color[idx_inicio-2:idx_inicio+2] = (1,1,1)
         self.color_vertex = color
         self.current_vertex = idx_inicio
@@ -99,6 +101,7 @@ class Circuito:
         return vertex_2d, color
 
     def new_road(self):
+        self.checkpoints = []
         self.vbo, self.vboc = self.get_vbo()
         self.vao = self.get_vao()
         self.render()

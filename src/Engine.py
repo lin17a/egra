@@ -14,6 +14,8 @@ import time
 from UI import menu
 from Music import MusicPlayer
 import glcontext
+import pandas as pd
+
 
 
 class GraphicsEngine:
@@ -411,10 +413,26 @@ class GraphicsEngine:
         
     def save_stats(self):
         if self.players == 1:
-            # avg_car1_vel = 
+            avg_car1_vel = [] # TODO
             off_track_percent_car1 = round((self.off_track.count(False) / len(self.off_track)) * 100, 2)
             race_time = self.last_time
 
+            # save data
+            time_data = {'time':  [race_time]}
+            off_track_percent_data = {'off_track_percent':  [off_track_percent_car1]}
+            avg_car1_vel_data = {'time':  list(map(lambda x : x[0], avg_car1_vel)), 
+                                'velocity' : list(map(lambda x : x[1], avg_car1_vel))}
+
+            race_time_df = pd.DataFrame(time_data)
+            off_track_df = pd.DataFrame(off_track_percent_data)
+            avg_car1_vel_df = pd.DataFrame(avg_car1_vel_data)
+
+            race_time_df.to_csv("./stats_data/race_time.csv")
+            off_track_df.to_csv("./stats_data/off_track.csv")
+            avg_car1_vel_df.to_csv("./stats_data/avg_car_vel.csv")
+
+
+        # TODO: Stats for multiplayer
         elif self.players == 2:
             #avg_car1_vel =
             #n_off_track_car1 =

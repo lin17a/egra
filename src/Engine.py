@@ -68,6 +68,7 @@ class GraphicsEngine:
         # Music
         self.ingame_music.load("musica1")
         self.ingame_music.play()
+        self.winner = None
 
         self.change_camera()
 
@@ -102,6 +103,7 @@ class GraphicsEngine:
         # Music
         self.ingame_music.load("musica1")
         self.ingame_music.play()
+        self.winner = None
 
         self.change_camera()
 
@@ -344,10 +346,14 @@ class GraphicsEngine:
                 pg.display.set_caption("Time: {:.2f} - Game Over".format(self.last_time, checkpoint, velocity))
             else:
                 self.last_time = time
-                pg.display.set_caption("Time: {:.2f} - Checkpoint: {} - Velocity: {}".format(time, checkpoint, velocity))
+                pg.display.set_caption("Time: {:.2f} - Checkpoint: {} - Velocity: {:.2f}".format(time, checkpoint, velocity))
         if self.players == 2:
-            pg.display.set_caption("Time: {:.2f} - Checkpoint: {} - Velocity: {} - Checkpoint: {} - Velocity: {}".format(time, checkpoint[0], velocity[0], checkpoint[1], velocity[1]))
+            if self.end_game:
+                pg.display.set_caption("Time: {:.2f} - Winner {}".format(self.last_time, self.winner.upper()))
 
+            else:
+                self.last_time = time
+                pg.display.set_caption("Time: {:.2f} - Checkpoint: {} - Velocity: {:.2f} - Checkpoint: {} - Velocity: {:.2f}".format(time, checkpoint[0], velocity[0], checkpoint[1], velocity[1]))
 
 
     def end_game_logic(self):
@@ -357,7 +363,9 @@ class GraphicsEngine:
         if self.players == 1:
             current_n_checkpoints = np.count_nonzero(self.car.completed_checkpoints)
             total_n_checkpoints = len(self.car.completed_checkpoints)
-            self.change_title(self.time - self.start_time, "{}/{}".format(current_n_checkpoints, total_n_checkpoints), self.car.velocity)
+            self.change_title(self.time - self.start_time, 
+                            "{}/{}".format(current_n_checkpoints, total_n_checkpoints), 
+                            self.car.physics.Vel[0])
 
             if all(self.car.checkpoints_l) and self.car.crossed_finish:
                 self.end_game = True
@@ -369,7 +377,10 @@ class GraphicsEngine:
             if (all(self.car.completed_checkpoints) and self.car.crossed_finish) or \
                     (all(self.car_2.completed_checkpoints) and self.car_2.crossed_finish):
                     self.end_game = True
-            self.change_title(self.time - self.start_time, ("{}/{}".format(current_n_checkpoints_1, total_n_checkpoints), "{}/{}".format(current_n_checkpoints_2, total_n_checkpoints)), (self.car.velocity, self.car_2.velocity))
+            self.change_title(self.time - self.start_time, 
+                            ("{}/{}".format(current_n_checkpoints_1, total_n_checkpoints), 
+                            "{}/{}".format(current_n_checkpoints_2, total_n_checkpoints)), 
+                            (self.car.physics.Vel[0], self.car_2.physics.Vel[0]))
 
 
 
@@ -386,8 +397,6 @@ class GraphicsEngine:
                     self.winner = self.car.color
                 else:
                     self.winner = self.car_2.color
-
-                print(f"======== {str(self.winner).upper()} player wins!  ========")
         
         
     def stats(self):

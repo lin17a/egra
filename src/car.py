@@ -32,6 +32,10 @@ class Car:
 
         self.on_init()
 
+    @property
+    def checkpoints_l(self):
+        return self.completed_checkpoints
+
     def get_start_position(self):
         vertex = self.app.scene.all_vertex[self.app.scene.current_vertex - 20]
         next_vertex = self.app.scene.all_vertex[self.app.scene.current_vertex - 19]
@@ -307,7 +311,8 @@ class Car:
         start_line = self.app.scene.start_line
         if (self.is_in_triangle(start_line[0][[2,0]], start_line[1][[2,0]], start_line[2][[2,0]], [self.position[2], self.position[0]]) or
             self.is_in_triangle(start_line[1][[2,0]], start_line[2][[2,0]], start_line[3][[2,0]], [self.position[2], self.position[0]])):
-            self.crossed_finish = True
+            if all(self.completed_checkpoints):
+                self.crossed_finish = True
 
     def get_shader_program(self):
         program = self.ctx.program(    

@@ -15,6 +15,7 @@ from UI import menu
 from Music import MusicPlayer
 import glcontext
 import pandas as pd
+import os
 
 
 
@@ -378,6 +379,11 @@ class GraphicsEngine:
                 self.start_menu()
                 # save game stats
                 self.save_stats()
+                # open dashboard
+                pg.quit()
+                file1 = "./stats_dashboard.py"
+                os.system(f'streamlit run {file1}')
+                
 
 
         elif self.players == 2:
@@ -399,6 +405,7 @@ class GraphicsEngine:
                     self.start_menu()
                     # save game stats
                     self.save_stats()
+                    
 
         if self.end_game:
             if self.players == 2:

@@ -314,9 +314,6 @@ class GraphicsEngine:
             # Check if the game is over
             self.end_game_logic()
 
-            # calculate stats
-            self.stats()
-
     def run(self):
         while True:
             self.get_time()
@@ -351,7 +348,6 @@ class GraphicsEngine:
         if self.players == 2:
             if self.end_game:
                 pg.display.set_caption("Time: {:.2f} - Winner {}".format(self.last_time, self.winner.upper()))
-
             else:
                 self.last_time = time
                 pg.display.set_caption("Time: {:.2f} - Checkpoint: {} - Velocity: {:.2f} - Checkpoint: {} - Velocity: {:.2f}".format(time, checkpoint[0], velocity[0], checkpoint[1], velocity[1]))
@@ -370,52 +366,56 @@ class GraphicsEngine:
 
             if all(self.car.checkpoints_l) and self.car.crossed_finish:
                 self.end_game = True
+                # back to menu
+                self.start_menu()
+                # save game stats
+                self.save_stats()
+
 
         elif self.players == 2:
             current_n_checkpoints_1 = np.count_nonzero(self.car.completed_checkpoints)
             current_n_checkpoints_2 = np.count_nonzero(self.car_2.completed_checkpoints)
             total_n_checkpoints = len(self.car.completed_checkpoints)
-            if (all(self.car.completed_checkpoints) and self.car.crossed_finish) or \
-                    (all(self.car_2.completed_checkpoints) and self.car_2.crossed_finish):
-                    self.end_game = True
             self.change_title(self.time - self.start_time, 
                             ("{}/{}".format(current_n_checkpoints_1, total_n_checkpoints), 
                             "{}/{}".format(current_n_checkpoints_2, total_n_checkpoints)), 
                             (self.car.physics.Vel[0], self.car_2.physics.Vel[0]))
 
+            if (all(self.car.completed_checkpoints) and self.car.crossed_finish) or \
+                (all(self.car_2.completed_checkpoints) and self.car_2.crossed_finish):
+                    self.end_game = True
+                    # back to menu
+                    self.start_menu()
+                    # save game stats
+                    self.save_stats()
 
-
-    
         if self.end_game:
-            if self.players == 1:
-                pass
-
             if self.players == 2:
                 # check who has completed more checkpoints
                 current_n_checkpoints = np.count_nonzero(self.car.completed_checkpoints)
                 total_n_checkpoints = len(self.scene.checkpoints)
-                if current_n_checkpoints == total_n_checkpoints:
+                if (current_n_checkpoints == total_n_checkpoints):
                     self.winner = self.car.color
                 else:
                     self.winner = self.car_2.color
         
         
-    def stats(self):
-        """
+    def save_stats(self):
         if self.players == 1:
-            avg_car1_vel = 
-            n_off_track_car1 =
-            race_time = self.ftime
+            #avg_car1_vel = sum(x[1] for x in self.vel_stats) / len(self.vel_stats)
+            #n_off_track_car1 =
+            #race_time
+            pass
+        elif self.players == 2:
+            #avg_car1_vel =
+            #n_off_track_car1 =
+            #race_time1 = self.ftime
 
-        if self.players == 2:
-            avg_car1_vel =
-            n_off_track_car1 =
-            race_time1 = self.ftime
+            #avg_car2_vel =
+            #n_off_track_car2 =
+            #race_time2 = self.ftime
+            pass
 
-            avg_car2_vel =
-            n_off_track_car2 =
-            race_time2 = self.ftime
-        """
 
     def stopwatch(self, multi: bool):
         # TODO:

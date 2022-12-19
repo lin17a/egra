@@ -367,6 +367,7 @@ class GraphicsEngine:
             if all(self.car.checkpoints_l) and self.car.crossed_finish:
                 self.end_game = True
                 # back to menu
+                self.ingame_music.stop()
                 self.start_menu()
                 # save game stats
                 self.save_stats()
@@ -385,6 +386,7 @@ class GraphicsEngine:
                 (all(self.car_2.completed_checkpoints) and self.car_2.crossed_finish):
                     self.end_game = True
                     # back to menu
+                    self.ingame_music.stop()
                     self.start_menu()
                     # save game stats
                     self.save_stats()
@@ -403,9 +405,9 @@ class GraphicsEngine:
     def save_stats(self):
         if self.players == 1:
             #avg_car1_vel = sum(x[1] for x in self.vel_stats) / len(self.vel_stats)
-            #n_off_track_car1 =
-            #race_time
-            pass
+            #n_off_track_car1 = 
+            race_time = self.last_time
+
         elif self.players == 2:
             #avg_car1_vel =
             #n_off_track_car1 =

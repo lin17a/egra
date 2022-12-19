@@ -107,6 +107,9 @@ class GraphicsEngine:
 
     def get_time(self):
         self.time = pg.time.get_ticks() * 0.001
+    
+    def start_timer(self):
+        self.start_time = self.time
 
     def change_camera(self):
         if self.players == 1:
@@ -320,6 +323,7 @@ class GraphicsEngine:
 
     def start_game(self):
         if self.start_game_phase == 2:
+            self.start_timer()
             self.start_game_phase = 1
         else:
             time.sleep(1)
@@ -330,55 +334,55 @@ class GraphicsEngine:
             print(1)
             time.sleep(1)
             print('Go')
-            self.start_time = time.time()
             self.start_game_phase = False
+            self.start_timer()
 
     #Change title of pygame window
     def change_title(self, time, checkpoint, velocity):
         if self.players == 1:
-            pg.display.set_caption("Time: {} - Checkpoint: {} - Velocity: {}".format(time, checkpoint, velocity))
+            if self.end_game:
+                pg.display.set_caption("Time: {:.2f} - Game Over".format(self.last_time, checkpoint, velocity))
+            else:
+                self.last_time = time
+                pg.display.set_caption("Time: {:.2f} - Checkpoint: {} - Velocity: {}".format(time, checkpoint, velocity))
         if self.players == 2:
-            pg.display.set_caption("Time: {} - Checkpoint: {} - Velocity: {} - Checkpoint: {} - Velocity: {}".format(time, checkpoint[0], velocity[0], checkpoint[1], velocity[1]))
+            pg.display.set_caption("Time: {:.2f} - Checkpoint: {} - Velocity: {} - Checkpoint: {} - Velocity: {}".format(time, checkpoint[0], velocity[0], checkpoint[1], velocity[1]))
 
 
 
     def end_game_logic(self):
         # NOTE: EVERYTHING inside this function is running inside a loop (game)
 
-        # TODO:
-        #self.stopwatch()
-
         # If all checkpoints are completed, end game
         if self.players == 1:
-            done_chkps = np.count_nonzero(self.car.checkpoints_l)
-            total_chkps = len(self.car.checkpoints_l)
-            print(f"chks: {done_chkps}/{total_chkps}")
-            print(self.car.crossed_finish)
+            current_n_checkpoints = np.count_nonzero(self.car.completed_checkpoints)
+            total_n_checkpoints = len(self.car.completed_checkpoints)
+            self.change_title(self.time - self.start_time, "{}/{}".format(current_n_checkpoints, total_n_checkpoints), self.car.velocity)
+
             if all(self.car.checkpoints_l) and self.car.crossed_finish:
                 self.end_game = True
 
         elif self.players == 2:
+            current_n_checkpoints_1 = np.count_nonzero(self.car.completed_checkpoints)
+            current_n_checkpoints_2 = np.count_nonzero(self.car_2.completed_checkpoints)
+            total_n_checkpoints = len(self.car.completed_checkpoints)
             if (all(self.car.completed_checkpoints) and self.car.crossed_finish) or \
                     (all(self.car_2.completed_checkpoints) and self.car_2.crossed_finish):
                     self.end_game = True
+            self.change_title(self.time - self.start_time, ("{}/{}".format(current_n_checkpoints_1, total_n_checkpoints), "{}/{}".format(current_n_checkpoints_2, total_n_checkpoints)), (self.car.velocity, self.car_2.velocity))
+
+
+
     
         if self.end_game:
-            lap_time = time.time() - self.start_time
-            print(lap_time)
-
-            current_n_checkpoints = np.count_nonzero(self.car.completed_checkpoints)
-            total_n_checkpoints = len(self.car.completed_checkpoints)
-
-            print(f"\n\n--------------- END ----------------")
-
             if self.players == 1:
                 pass
 
             if self.players == 2:
                 # check who has completed more checkpoints
-                chk_car_1 = np.count_nonzero(self.car.checkpoints_l)
+                current_n_checkpoints = np.count_nonzero(self.car.completed_checkpoints)
                 total_n_checkpoints = len(self.scene.checkpoints)
-                if chk_car_1 == total_n_checkpoints:
+                if current_n_checkpoints == total_n_checkpoints:
                     self.winner = self.car.color
                 else:
                     self.winner = self.car_2.color

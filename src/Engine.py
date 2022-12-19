@@ -182,6 +182,7 @@ class GraphicsEngine:
             self.scene.new_road()
             self.minimap_scene.new_road(self.scene.all_vertex, self.scene.color_vertex)
             self.car.move_to_start()
+            self.start_timer()
             self.minimap_car.move_to_start()
             if self.players == 2:
                 self.car_2.move_to_start()

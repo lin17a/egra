@@ -333,6 +333,15 @@ class GraphicsEngine:
             self.start_time = time.time()
             self.start_game_phase = False
 
+    #Change title of pygame window
+    def change_title(self, time, checkpoint, velocity):
+        if self.players == 1:
+            pg.display.set_caption("Time: {} - Checkpoint: {} - Velocity: {}".format(time, checkpoint, velocity))
+        if self.players == 2:
+            pg.display.set_caption("Time: {} - Checkpoint: {} - Velocity: {} - Checkpoint: {} - Velocity: {}".format(time, checkpoint[0], velocity[0], checkpoint[1], velocity[1]))
+
+
+
     def end_game_logic(self):
         # NOTE: EVERYTHING inside this function is running inside a loop (game)
 

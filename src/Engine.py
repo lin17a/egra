@@ -36,6 +36,9 @@ class GraphicsEngine:
         self.menu_music = MusicPlayer("menu", volume=0.3)
         self.menu_music.play()
 
+        self.off_track = []
+
+    
     def start_menu(self):
         self.surface = pg.display.set_mode(self.WIN_SIZE)
         self.menu = menu(self)
@@ -364,6 +367,8 @@ class GraphicsEngine:
                             "{}/{}".format(current_n_checkpoints, total_n_checkpoints), 
                             self.car.physics.Vel[0])
 
+            self.off_track.append(self.car.on_circuit())
+
             if all(self.car.checkpoints_l) and self.car.crossed_finish:
                 self.end_game = True
                 # back to menu
@@ -381,6 +386,8 @@ class GraphicsEngine:
                             ("{}/{}".format(current_n_checkpoints_1, total_n_checkpoints), 
                             "{}/{}".format(current_n_checkpoints_2, total_n_checkpoints)), 
                             (self.car.physics.Vel[0], self.car_2.physics.Vel[0]))
+
+            # TODO: Add off track stats for multiplayer
 
             if (all(self.car.completed_checkpoints) and self.car.crossed_finish) or \
                 (all(self.car_2.completed_checkpoints) and self.car_2.crossed_finish):
@@ -404,8 +411,8 @@ class GraphicsEngine:
         
     def save_stats(self):
         if self.players == 1:
-            #avg_car1_vel = sum(x[1] for x in self.vel_stats) / len(self.vel_stats)
-            #n_off_track_car1 = 
+            # avg_car1_vel = 
+            off_track_percent_car1 = round((self.off_track.count(False) / len(self.off_track)) * 100, 2)
             race_time = self.last_time
 
         elif self.players == 2:

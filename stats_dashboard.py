@@ -15,10 +15,22 @@ st.header('Racing Simulador Dashboard')
 
 # Row B
 race_time_df = pd.read_csv("./stats_data/race_time.csv")
-t = race_time_df["time"].values[0]
 off_track_df = pd.read_csv("./stats_data/off_track.csv")
 vel_n_time_df = pd.read_csv("./stats_data/vel_n_time.csv")
-v = 40
+# Metrics
+rescaling = lambda x : ((x / 30) * 100) * 3.725 # Formula f1-car spped
+t = race_time_df["time"].values[0]
+avg_vel = vel_n_time_df["velocity"].mean()
+real_avg_vel = rescaling(avg_vel)
+top_speedd = vel_n_time_df["velocity"].max()
+real_top_speed = rescaling(top_speedd)
+
+# Show metrics
+col1, col2, col3 = st.columns(3)
+
+col1.metric("Race finished in", f"{round(t, 2)} s", )
+col2.metric("Average velocity", f"{round(real_avg_vel, 2)} KM/H") 
+col3.metric("Top speed", f"{round(real_top_speed, 2)} KM/H") 
 
 c1, c2 = st.columns((7,3)) # Columns
 
@@ -32,9 +44,6 @@ with c1:
             width=1000,
             pan_zoom='both',
             color = "green")
-    #st.plotly_chart(plot, use_container_width=True)
-    c1.metric("Race finished in", f"{t} s") # TODO: Add increase/decrease
-    c1.metric("Average velocity", f"{v} KM/H") # TODO: Add increase/decrease
 with c2:
     st.markdown('### Off track percentage')
     # Plot donut chart

@@ -40,6 +40,7 @@ class GraphicsEngine:
         self.menu_music.play()
 
         self.off_track = []
+        self.vel_data = []
 
     
     def start_menu(self):
@@ -371,6 +372,7 @@ class GraphicsEngine:
                             self.car.physics.Vel[0])
 
             self.off_track.append(self.car.on_circuit())
+            self.vel_data.append((round(self.car.physics.Vel[0], 2), round(self.time, 2)))
 
             if all(self.car.checkpoints_l) and self.car.crossed_finish:
                 self.end_game = True
@@ -420,19 +422,20 @@ class GraphicsEngine:
         
     def save_stats(self):
         if self.players == 1:
-            vel_n_time = [] # TODO
+            vel_n_time = self.vel_data
             off_track_percent_car1 = round((self.off_track.count(False) / len(self.off_track)) * 100, 2)
             race_time = self.last_time
 
             # save data
             time_data = {'time':  [race_time]}
             off_track_percent_data = {'off_track_percent':  [off_track_percent_car1]}
-            vel_n_time_data = {'time':  list(map(lambda x : x[0], vel_n_time)), 
-                                'velocity' : list(map(lambda x : x[1], vel_n_time))}
+            vel_n_time_data = {'time':  list(map(lambda x : x[1], vel_n_time)), 
+                                'velocity' : list(map(lambda x : x[0], vel_n_time))}
 
             race_time_df = pd.DataFrame(time_data)
             off_track_df = pd.DataFrame(off_track_percent_data)
             vel_n_time_df = pd.DataFrame(vel_n_time_data)
+            vel_n_time_df = vel_n_time_df.groupby(np.arange(len(vel_n_time_df))//2).mean()
 
             race_time_df.to_csv("./stats_data/race_time.csv")
             off_track_df.to_csv("./stats_data/off_track.csv")

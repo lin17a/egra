@@ -420,23 +420,23 @@ class GraphicsEngine:
         
     def save_stats(self):
         if self.players == 1:
-            avg_car1_vel = [] # TODO
+            vel_n_time = [] # TODO
             off_track_percent_car1 = round((self.off_track.count(False) / len(self.off_track)) * 100, 2)
             race_time = self.last_time
 
             # save data
             time_data = {'time':  [race_time]}
             off_track_percent_data = {'off_track_percent':  [off_track_percent_car1]}
-            avg_car1_vel_data = {'time':  list(map(lambda x : x[0], avg_car1_vel)), 
-                                'velocity' : list(map(lambda x : x[1], avg_car1_vel))}
+            vel_n_time_data = {'time':  list(map(lambda x : x[0], vel_n_time)), 
+                                'velocity' : list(map(lambda x : x[1], vel_n_time))}
 
             race_time_df = pd.DataFrame(time_data)
             off_track_df = pd.DataFrame(off_track_percent_data)
-            avg_car1_vel_df = pd.DataFrame(avg_car1_vel_data)
+            vel_n_time_df = pd.DataFrame(vel_n_time_data)
 
             race_time_df.to_csv("./stats_data/race_time.csv")
             off_track_df.to_csv("./stats_data/off_track.csv")
-            avg_car1_vel_df.to_csv("./stats_data/avg_car_vel.csv")
+            vel_n_time_df.to_csv("./stats_data/vel_n_time.csv")
 
 
         # TODO: Stats for multiplayer

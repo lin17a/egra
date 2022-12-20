@@ -37,7 +37,7 @@ with tab1:
     col1, col2, col3 = st.columns(3)
     c1, c2 = st.columns((7,3)) # Columns
     with c1:
-        st.markdown('### Line chart showing average velocity across time')
+        st.markdown('### Line chart showing velocity across time')
         # PLot bar chart
         plost.line_chart(
                 data=vel_n_time_df,
@@ -59,10 +59,6 @@ with tab1:
         #prog_fig = progress_bar_chart(workout_consist)
         #st.plotly_chart(prog_fig)
 with tab2:
-    plost.line_chart(
-        data=ia_data_df,
-        x='i',
-        y=('value_x', 'value_y'),
-        width=1000,
-        pan_zoom='both',
-        color = "#22181C", )  
+    st.markdown('### Line chart showing AI data')
+    fig = line_chart(ia_data_df)
+    st.plotly_chart(fig)

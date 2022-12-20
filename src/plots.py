@@ -6,7 +6,7 @@ def donut_chart(data):
     values = [data["off_track_percent"].values[0], 
                 100 - data["off_track_percent"].values[0]]
     
-    colors =  ['rgb(138, 107, 64)', 'rgb(43, 43, 43)']
+    colors =  ['#ef626c', '#312f2f']
 
     fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.65, marker_colors=colors)])
     fig.update_layout(width=800,

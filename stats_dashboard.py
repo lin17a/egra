@@ -4,6 +4,7 @@ import plotly.graph_objects as go
 from src.plots import *
 import time
 import plost
+import numpy as np
 
 
 st.set_page_config(layout='wide', initial_sidebar_state='expanded')
@@ -43,7 +44,7 @@ with c1:
             y='velocity',
             width=1000,
             pan_zoom='both',
-            color = "green")
+            color = "#22181C")
 with c2:
     st.markdown('### Off track percentage')
     # Plot donut chart

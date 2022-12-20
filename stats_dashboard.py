@@ -1,3 +1,7 @@
+# Color pallette
+# https://coolors.co/palette/f6e8ea-ef626c-22181c-312f2f-84dccf
+
+
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go

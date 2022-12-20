@@ -18,6 +18,12 @@ st.header('Racing Simulador Dashboard')
 race_time_df = pd.read_csv("./stats_data/race_time.csv")
 off_track_df = pd.read_csv("./stats_data/off_track.csv")
 vel_n_time_df = pd.read_csv("./stats_data/vel_n_time.csv")
+ia_data_df = pd.read_csv("./stats_data/Generations_1.csv")
+# Col renaming
+ia_cols = {'Unnamed: 0': 'i',
+            '0': 'value'}
+ia_data_df.rename(columns=ia_cols, inplace=True)
+
 # Metrics
 rescaling = lambda x : ((x / 30) * 100) * 3.725 # Formula f1-car spped
 t = race_time_df["time"].values[0]
@@ -33,23 +39,35 @@ col1.metric("Race finished in", f"{round(t, 2)} s", )
 col2.metric("Average velocity", f"{round(real_avg_vel, 2)} KM/H") 
 col3.metric("Top speed", f"{round(real_top_speed, 2)} KM/H") 
 
-c1, c2 = st.columns((7,3)) # Columns
+# Tabs
+tab1, tab2 = st.tabs(["Race data", "AI data"])
 
-with c1:
-    st.markdown('### Line chart showing average velocity across time')
-    # PLot bar chart
+
+with tab1:
+    c1, c2 = st.columns((7,3)) # Columns
+    with c1:
+        st.markdown('### Line chart showing average velocity across time')
+        # PLot bar chart
+        plost.line_chart(
+                data=vel_n_time_df,
+                x='time',
+                y='velocity',
+                width=1000,
+                pan_zoom='both',
+                color = "#22181C")
+    with c2:
+        st.markdown('### Off track percentage')
+        # Plot donut chart
+        fig = donut_chart(off_track_df)
+        st.plotly_chart(fig, use_container_width=True)
+        #st.markdown('### Consistency')
+        #prog_fig = progress_bar_chart(workout_consist)
+        #st.plotly_chart(prog_fig)
+with tab2:
     plost.line_chart(
-            data=vel_n_time_df,
-            x='time',
-            y='velocity',
-            width=1000,
-            pan_zoom='both',
-            color = "#22181C")
-with c2:
-    st.markdown('### Off track percentage')
-    # Plot donut chart
-    fig = donut_chart(off_track_df)
-    st.plotly_chart(fig, use_container_width=True)
-#st.markdown('### Consistency')
-#prog_fig = progress_bar_chart(workout_consist)
-#st.plotly_chart(prog_fig)
+        data=ia_data_df,
+        x='i',
+        y='value',
+        width=1000,
+        pan_zoom='both',
+        color = "#22181C")  

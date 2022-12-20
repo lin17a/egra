@@ -62,7 +62,8 @@ class ai:
         
     def initialize_fitness(self):
         if self.test:
-            genome_path = 'winners/1_winner_gen_0271.pkl'
+            #genome_path = 'winners/1_winner_gen_0271.pkl'
+            genome_path = 'winners/winner_gen_0007.pkl'
                 # Unpickle saved winner
             with open(genome_path, "rb") as f:
                 genome = pickle.load(f)
@@ -104,12 +105,12 @@ class ai:
         
         #radar[radar > 30] = 30
         
-        #output = self.nets[self.current_car].activate(radar)
-        #i = output.index(max(output))
+        output = self.nets[self.current_car].activate(radar)
+        i = output.index(max(output))
         
-        i = self.model.predict(radar.reshape(1,-1))
+        #i = self.model.predict(radar.reshape(1,-1))
         
-        print(self.model.predict_proba(radar.reshape(1,-1)))
+        #print(self.model.predict_proba(radar.reshape(1,-1)))
         
         if i == 0:
             #self.app.car.move_forward()

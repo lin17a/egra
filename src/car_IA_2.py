@@ -21,11 +21,13 @@ class Car:
         self.distance = 0
         
         self.values = []
-        self.increase = 10
+        self.increase = 20
+        #self.increase = 0
         
         self.velocity = 0 #[x, y]
         self.friction = 0
-        self.velmax = 10
+        self.velmax = 20
+        #self.velmax = 30
         self.physics = Physics((self.position[0], self.position[2]), dt = 0.05, 
                                maxVel = self.velmax)
 
@@ -181,14 +183,18 @@ class Car:
         return vbo
 
     def move_right(self):
-        degree = -0.025 #* self.velocity / 30
+        #degree = -0.05 * self.velocity / 30
+        #degree = -0.025
+        degree = -0.04
         self.rotation = (self.rotation + degree) % (2 * np.pi)
         self.m_model = glm.translate(self.m_model, -self.position)
         self.m_model = glm.rotate(self.m_model, degree, glm.vec3(0,1,0))
         self.m_model = glm.translate(self.m_model,  glm.rotate(self.position, -degree, glm.vec3(0,1,0)))
 
     def move_left(self):
-        degree = 0.025 #* self.velocity / 30
+        #degree = 0.05 * self.velocity / 30
+        #degree = 0.025
+        degree = 0.04
         self.rotation = (self.rotation + degree) % (2 * np.pi)
         self.m_model = glm.translate(self.m_model, -self.position)
         self.m_model = glm.rotate(self.m_model, degree, glm.vec3(0,1,0))
@@ -204,13 +210,13 @@ class Car:
         
         self.increase = 780 if self.increase > 780 else self.increase
         
-        #radar = self.distance_to_off_circuit()
+        radar = self.distance_to_off_circuit()
         
-        #radar.append(self.get_curviness())
+        radar.append(self.get_curviness())
         
-        #radar = np.round(np.array(radar), 3)
+        radar = np.round(np.array(radar), 1)
         
-        #print(radar)
+        print(radar)
         
         #print(f"vel: {self.physics.Vel}")
         #print(f"miu: {self.physics.miu}")

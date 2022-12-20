@@ -69,7 +69,7 @@ class GraphicsEngine:
         # Car
         self.light = Light(self.map)
         self.car = Car(self, color = players_color[1])
-        self.ai = ai(self, test = False)
+        self.ai = ai(self, test = True)
         
         
         # axis
@@ -277,6 +277,7 @@ class GraphicsEngine:
             # clear framebuffer
             self.ctx.clear(color=(0, 0, 0))
             if self.players == 1:
+                #"""
                 self.ctx.viewport = (0, 0, self.WIN_SIZE[0], self.WIN_SIZE[1])
                 self.camera.update()
                 self.skybox.render(player = 1)
@@ -298,7 +299,8 @@ class GraphicsEngine:
                 self.minimap_car.render()
                 self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
                 # swap buffers
-                #self.ai.run_car()
+                #"""
+                self.ai.run_car()
                 
                 pg.display.flip()
 
@@ -361,7 +363,8 @@ class GraphicsEngine:
             self.get_time()
             self.check_events()
             self.render()
-            self.clock.tick(60)
+            
+            #self.clock.tick(60)
 
 
 if __name__ == '__main__':

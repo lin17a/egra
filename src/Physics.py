@@ -9,6 +9,7 @@ class Physics:
         self.PastDer = None
         self.PastVel = [0, 0]
         self.maxVel = maxVel
+        self.Vel = [0, 0]
         
         self.TimeStep = 1
         self.long = np.arange(-10, 10, 0.2)

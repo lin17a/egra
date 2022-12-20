@@ -28,8 +28,13 @@ class Car:
         self.velmin = 0
 
         self.completed_checkpoints = [False] * len(self.app.scene.checkpoints)
+        self.crossed_finish = False
 
         self.on_init()
+
+    @property
+    def checkpoints_l(self):
+        return self.completed_checkpoints
 
     def get_start_position(self):
         vertex = self.app.scene.all_vertex[self.app.scene.current_vertex - 20]
@@ -64,6 +69,7 @@ class Car:
         self.rotation = self.get_start_rotation()
         self.m_model = self.get_model_matrix()
         self.completed_checkpoints = [False] * len(self.app.scene.checkpoints)
+        self.crossed_finish = False
         self.on_init()
 
     def on_init(self):
@@ -301,6 +307,12 @@ class Car:
             #print(self.position)
             #print(checkpoint)
 
+    def check_if_on_start_line(self):
+        start_line = self.app.scene.start_line
+        if (self.is_in_triangle(start_line[0][[2,0]], start_line[1][[2,0]], start_line[2][[2,0]], [self.position[2], self.position[0]]) or
+            self.is_in_triangle(start_line[1][[2,0]], start_line[2][[2,0]], start_line[3][[2,0]], [self.position[2], self.position[0]])):
+            if all(self.completed_checkpoints):
+                self.crossed_finish = True
 
     def get_shader_program(self):
         program = self.ctx.program(    

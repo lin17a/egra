@@ -14,6 +14,9 @@ import time
 from UI import menu
 from Music import MusicPlayer
 import glcontext
+import pandas as pd
+import os
+
 
 
 class GraphicsEngine:
@@ -28,12 +31,18 @@ class GraphicsEngine:
         self.start_menu()
         self.map = None
         self.players = None
+        self.end_game = False
+        self.start_game_phase = False
 
         # Sounds
         self.ingame_music = MusicPlayer("musica1", volume=0.5)
         self.menu_music = MusicPlayer("menu", volume=0.3)
         self.menu_music.play()
 
+        self.off_track = []
+        self.vel_data = []
+
+    
     def start_menu(self):
         self.surface = pg.display.set_mode(self.WIN_SIZE)
         self.menu = menu(self)
@@ -66,6 +75,7 @@ class GraphicsEngine:
         # Music
         self.ingame_music.load("musica1")
         self.ingame_music.play()
+        self.winner = None
 
         self.change_camera()
 
@@ -96,14 +106,19 @@ class GraphicsEngine:
         self.minimap_car = MinimapCar(self, player = 1, color = players_color[1])
         self.minimap_car_2 = MinimapCar(self, player = 2, color = players_color[2])
         self.minimap_scene = MinimapCircuito(self, self.scene.all_vertex, self.scene.color_vertex)
+
         # Music
         self.ingame_music.load("musica1")
         self.ingame_music.play()
+        self.winner = None
 
         self.change_camera()
 
     def get_time(self):
         self.time = pg.time.get_ticks() * 0.001
+    
+    def start_timer(self):
+        self.start_time = self.time
 
     def change_camera(self):
         if self.players == 1:
@@ -142,6 +157,9 @@ class GraphicsEngine:
                 if self.players == 2:
                     self.camera_2.zoom(-event.y*3)
 
+        if self.start_game_phase:
+            return
+
         keys = pg.key.get_pressed()
 
         if self.players == 2:
@@ -160,19 +178,24 @@ class GraphicsEngine:
             self.car_2.up()
             self.car_2.on_init()
             self.car_2.check_if_on_checkpoint()
+            self.car_2.check_if_on_start_line()
             if self.camera_mode == "drive":
                 self.minimap_car_2.up()
                 self.minimap_car_2.on_init(player = 2)
                 self.minimap_scene.render(player = 2)
 
         if keys[pg.K_r]:
+            self.scene.zero_checkpoints()
             self.scene.new_road()
             self.minimap_scene.new_road(self.scene.all_vertex, self.scene.color_vertex)
             self.car.move_to_start()
+            self.start_timer()
             self.minimap_car.move_to_start()
             if self.players == 2:
                 self.car_2.move_to_start()
                 self.minimap_car_2.move_to_start()
+            # NOTE: Start again
+            self.end_game = False
 
         if keys[pg.K_UP]:
             self.car.move_forward()
@@ -194,6 +217,7 @@ class GraphicsEngine:
 
         self.car.up()
         self.car.check_if_on_checkpoint()
+        self.car.check_if_on_start_line()
         self.car.on_init()
         self.grass.on_init()
         self.skybox.on_init()
@@ -210,6 +234,7 @@ class GraphicsEngine:
                     self.one_player(players_color)
                 elif self.players == 2:
                     self.two_players(players_color)
+                self.start_game_phase = 2
         else:
             # clear framebuffer
             self.ctx.clear(color=(0, 0, 0))
@@ -290,6 +315,12 @@ class GraphicsEngine:
                 # swap buffers
                 pg.display.flip()
 
+            if self.start_game_phase:
+                self.start_game()
+
+            # Check if the game is over
+            self.end_game_logic()
+
     def run(self):
         while True:
             self.get_time()
@@ -297,6 +328,149 @@ class GraphicsEngine:
             self.render()
             self.clock.tick(60)
 
+    def start_game(self):
+        if self.start_game_phase == 2:
+            self.start_timer()
+            self.start_game_phase = 1
+        else:
+            time.sleep(1)
+            print(3)
+            time.sleep(1)
+            print(2)
+            time.sleep(1)
+            print(1)
+            time.sleep(1)
+            print('Go')
+            self.start_game_phase = False
+            self.start_timer()
+
+    #Change title of pygame window
+    def change_title(self, time, checkpoint, velocity):
+        if self.players == 1:
+            if self.end_game:
+                pg.display.set_caption("Time: {:.2f} - Game Over".format(self.last_time, checkpoint, velocity))
+            else:
+                self.last_time = time
+                pg.display.set_caption("Time: {:.2f} - Checkpoint: {} - Velocity: {:.2f}".format(time, checkpoint, velocity))
+        if self.players == 2:
+            if self.end_game:
+                pg.display.set_caption("Time: {:.2f} - Winner {}".format(self.last_time, self.winner.upper()))
+            else:
+                self.last_time = time
+                pg.display.set_caption("Time: {:.2f} - Checkpoint: {} - Velocity: {:.2f} - Checkpoint: {} - Velocity: {:.2f}".format(time, checkpoint[0], velocity[0], checkpoint[1], velocity[1]))
+
+
+    def end_game_logic(self):
+        # NOTE: EVERYTHING inside this function is running inside a loop (game)
+
+        # If all checkpoints are completed, end game
+        if self.players == 1:
+            current_n_checkpoints = np.count_nonzero(self.car.completed_checkpoints)
+            total_n_checkpoints = len(self.car.completed_checkpoints)
+            self.change_title(self.time - self.start_time, 
+                            "{}/{}".format(current_n_checkpoints, total_n_checkpoints), 
+                            self.car.physics.Vel[0])
+
+            self.off_track.append(self.car.on_circuit())
+            self.vel_data.append((round(self.car.physics.Vel[0], 2), round(self.time, 2)))
+
+            if all(self.car.checkpoints_l) and self.car.crossed_finish:
+                self.end_game = True
+                # back to menu
+                self.ingame_music.stop()
+                self.start_menu()
+                # save game stats
+                self.save_stats()
+                # open dashboard
+                pg.quit()
+                file1 = "./stats_dashboard.py"
+                os.system(f'streamlit run {file1}')
+                
+
+
+        elif self.players == 2:
+            current_n_checkpoints_1 = np.count_nonzero(self.car.completed_checkpoints)
+            current_n_checkpoints_2 = np.count_nonzero(self.car_2.completed_checkpoints)
+            total_n_checkpoints = len(self.car.completed_checkpoints)
+            self.change_title(self.time - self.start_time, 
+                            ("{}/{}".format(current_n_checkpoints_1, total_n_checkpoints), 
+                            "{}/{}".format(current_n_checkpoints_2, total_n_checkpoints)), 
+                            (self.car.physics.Vel[0], self.car_2.physics.Vel[0]))
+
+            # TODO: Add off track stats for multiplayer
+
+            if (all(self.car.completed_checkpoints) and self.car.crossed_finish) or \
+                (all(self.car_2.completed_checkpoints) and self.car_2.crossed_finish):
+                    self.end_game = True
+                    # back to menu
+                    self.ingame_music.stop()
+                    self.start_menu()
+                    # save game stats
+                    self.save_stats()
+                    
+
+        if self.end_game:
+            if self.players == 2:
+                # check who has completed more checkpoints
+                current_n_checkpoints = np.count_nonzero(self.car.completed_checkpoints)
+                total_n_checkpoints = len(self.scene.checkpoints)
+                if (current_n_checkpoints == total_n_checkpoints):
+                    self.winner = self.car.color
+                else:
+                    self.winner = self.car_2.color
+        
+        
+    def save_stats(self):
+        if self.players == 1:
+            vel_n_time = self.vel_data
+            off_track_percent_car1 = round((self.off_track.count(False) / len(self.off_track)) * 100, 2)
+            race_time = self.last_time
+
+            # save data
+            time_data = {'time':  [race_time]}
+            off_track_percent_data = {'off_track_percent':  [off_track_percent_car1]}
+            vel_n_time_data = {'time':  list(map(lambda x : x[1], vel_n_time)), 
+                                'velocity' : list(map(lambda x : x[0], vel_n_time))}
+
+            race_time_df = pd.DataFrame(time_data)
+            off_track_df = pd.DataFrame(off_track_percent_data)
+            vel_n_time_df = pd.DataFrame(vel_n_time_data)
+            vel_n_time_df = vel_n_time_df.groupby(np.arange(len(vel_n_time_df)) // 4).mean()
+
+            race_time_df.to_csv("./stats_data/race_time.csv")
+            off_track_df.to_csv("./stats_data/off_track.csv")
+            vel_n_time_df.to_csv("./stats_data/vel_n_time.csv")
+
+
+        # TODO: Stats for multiplayer
+        elif self.players == 2:
+            #avg_car1_vel =
+            #n_off_track_car1 =
+            #race_time1 = self.ftime
+
+            #avg_car2_vel =
+            #n_off_track_car2 =
+            #race_time2 = self.ftime
+            pass
+
+
+    def stopwatch(self, multi: bool):
+        # TODO:
+
+        # if not multi:
+            # if not self.end_game and car is not moving and car in the start line:
+                # start the timer
+            # elif if self.end_game:
+                # stop the timer
+
+        # if multi:
+            # if not self.end_game and car_1 is not moving and car_1 in the start line:
+                # start car_1 timer
+            # elif not self.end_game and car_2 is not moving and car_2 in the start line:
+                # start car_2 timer
+            # elif if self.end_game:
+                # stop both cars timers and the lowest one is the winner
+        pass
 
 if __name__ == '__main__':
     app = GraphicsEngine()

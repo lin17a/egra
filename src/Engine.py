@@ -435,7 +435,7 @@ class GraphicsEngine:
             race_time_df = pd.DataFrame(time_data)
             off_track_df = pd.DataFrame(off_track_percent_data)
             vel_n_time_df = pd.DataFrame(vel_n_time_data)
-            vel_n_time_df = vel_n_time_df.groupby(np.arange(len(vel_n_time_df))//2).mean()
+            vel_n_time_df = vel_n_time_df.groupby(np.arange(len(vel_n_time_df)) // 4).mean()
 
             race_time_df.to_csv("./stats_data/race_time.csv")
             off_track_df.to_csv("./stats_data/off_track.csv")

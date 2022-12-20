@@ -10,6 +10,10 @@
 # Create python environemnt
 python -m venv egra_env
 
+# Activate it
+source egra_env/bin/activate # On Linux
+.\egra_env\Scripts\activate.bat # On Windows
+
 # Install dependencies
 python -m pip install requirements.txt
 ```

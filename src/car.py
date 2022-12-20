@@ -196,8 +196,8 @@ class Car:
         
         self.increase = 780 if self.increase > 780 else self.increase
         
-        print(f"vel: {self.physics.Vel}")
-        print(f"miu: {self.physics.miu}")
+        #print(f"vel: {self.physics.Vel}")
+        #print(f"miu: {self.physics.miu}")
         
     
     def move_backward(self):
@@ -205,8 +205,8 @@ class Car:
         self.increase -= 5
         self.increase = -30 if self.increase < -30 else self.increase
         self.velocity = self.physics.accelerate(self.increase, self.on_circuit())
-        print(f"vel: {self.physics.Vel}")
-        print(f"increase: {self.increase}")
+        #print(f"vel: {self.physics.Vel}")
+        #print(f"increase: {self.increase}")
 
         
     def up(self):
@@ -303,7 +303,7 @@ class Car:
             if (self.is_in_triangle(checkpoint[0][[2,0]], checkpoint[1][[2,0]], checkpoint[2][[2,0]], [self.position[2], self.position[0]]) or
                 self.is_in_triangle(checkpoint[1][[2,0]], checkpoint[2][[2,0]], checkpoint[3][[2,0]], [self.position[2], self.position[0]])):
                 self.completed_checkpoints[i] = True
-                print("checkpoint ", i, " reached")
+                #print("checkpoint ", i, " reached")
             #print(self.position)
             #print(checkpoint)
 

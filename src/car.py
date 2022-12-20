@@ -380,6 +380,10 @@ class Car:
 
 
 class MinimapCar(Car):
+    def __init__(self, app, player = None, color = "red"):
+        self.scale = 5
+        super().__init__(app, player, color)
+        
 
     def on_init(self, player = 1):
         self.shader_program['light.position'].write(self.app.light.position)
@@ -423,3 +427,24 @@ class MinimapCar(Car):
         self.shader_program['m_model'].write(self.m_model)
         #print(self.player, self.position)
         self.vao.render()
+    
+    def get_model_matrix(self):
+        m_model = glm.mat4()
+        m_model = glm.translate(m_model, self.position)
+        m_model = glm.rotate(m_model, self.rotation, glm.vec3(0, 1, 0))
+        m_model = glm.scale(m_model, glm.vec3(0.2, 0.2, 0.2)*self.scale)
+        return m_model
+
+    def up(self):
+        if self.increase > 0:
+            self.increase -= 2.5
+        if self.increase == 0:
+            self.physics.aant = [0, 0]
+            self.physics.Fant = [0, 0]
+        self.velocity = self.physics.accelerate(self.increase, self.on_circuit())
+        self.friction = self.get_friction()
+        self.physics.update_miu(self.get_friction(), self.on_circuit())
+        self.physics.Update(self.velocity, [1,0], self.physics.miu)
+        direction_vector = self.direction_vector(self.rotation)
+        self.position = self.position + self.physics.Vel[0]/20 * direction_vector
+        self.m_model = glm.translate(self.m_model, glm.vec3(self.physics.Vel[0]/(20*self.scale), 0, 0))

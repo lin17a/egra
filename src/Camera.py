@@ -126,10 +126,7 @@ class Minimap(Camera):
     def __init__(self, app, player=None):
         self.app = app
         self.player = player
-        if self.player == 1 or self.player == 2:
-            self.aspect_ratio = app.WIN_SIZE[0] / (app.WIN_SIZE[1] / 2)
-        elif self.player == None:
-            self.aspect_ratio = app.WIN_SIZE[0] / app.WIN_SIZE[1]
+        self.aspect_ratio = app.WIN_SIZE[0] / app.WIN_SIZE[1]
         self.position = glm.vec3(0, 60, 0)
         self.up = glm.vec3(1, 0, 0)
         self.lookat = glm.vec3(0)

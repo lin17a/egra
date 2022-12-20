@@ -15,5 +15,5 @@ source egra_env/bin/activate      # On Linux
 .\egra_env\Scripts\activate.bat   # On Windows
 
 # Install dependencies
-python -m pip install requirements.txt
+python -m pip install -r requirements.txt
 ```

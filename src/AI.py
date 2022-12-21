@@ -63,7 +63,7 @@ class ai:
     def initialize_fitness(self):
         if self.test:
             #genome_path = 'winners/1_winner_gen_0271.pkl'
-            genome_path = 'winners/winner_gen_0007.pkl'
+            genome_path = 'winners/1_winner_gen_0007.pkl'
                 # Unpickle saved winner
             with open(genome_path, "rb") as f:
                 genome = pickle.load(f)

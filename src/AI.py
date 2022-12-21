@@ -17,7 +17,8 @@ class ai:
     
     def __init__(self, app, test = False):
         self.test = test
-        self.model = load('JERS.joblib') 
+        self.ex_dir = "./stats_data/"
+        self.model = load(self.ex_dir + "JERS.joblib") 
         self.app = app
         self.p = None
         self.time_spent = 0
@@ -35,7 +36,7 @@ class ai:
         
         
     def on_start(self, test = False):
-        config_path = "./config-feedforward.txt"
+        config_path = "./stats_data/config-feedforward.txt"
         config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction,
                                     neat.DefaultSpeciesSet, neat.DefaultStagnation, config_path)
     
@@ -69,7 +70,7 @@ class ai:
                 genome = pickle.load(f)
         
             genomes = [(1, genome)]
-            config_path = "./config-feedforward.txt"
+            config_path = "./stats_data/config-feedforward.txt"
             config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction,
                                         neat.DefaultSpeciesSet, neat.DefaultStagnation, config_path)
 

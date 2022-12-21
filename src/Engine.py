@@ -473,7 +473,11 @@ class GraphicsEngine:
                             "{}/{}".format(current_n_checkpoints_2, total_n_checkpoints)), 
                             (self.car.physics.Vel[0], self.car_2.physics.Vel[0]))
 
-            # TODO: Add off track stats for multiplayer
+
+            self.off_track.append(self.car.on_circuit())
+            self.vel_data.append((round(self.car.physics.Vel[0], 2), round(self.time, 2)))
+            # TODO: Add stats for car 2
+
 
             if (all(self.car.completed_checkpoints) and self.car.crossed_finish) or \
                 (all(self.car_2.completed_checkpoints) and self.car_2.crossed_finish):
@@ -500,29 +504,28 @@ class GraphicsEngine:
         
         
     def save_stats(self):
-        if self.players == 1:
-            vel_n_time = self.vel_data
-            off_track_percent_car1 = round((self.off_track.count(False) / len(self.off_track)) * 100, 2)
-            race_time = self.last_time
+        # TODO : Save stats for 2 players
+        #if self.players == 1:
+        vel_n_time = self.vel_data
+        off_track_percent_car1 = round((self.off_track.count(False) / len(self.off_track)) * 100, 2)
+        race_time = self.last_time
 
-            # save data
-            time_data = {'time':  [race_time]}
-            off_track_percent_data = {'off_track_percent':  [off_track_percent_car1]}
-            vel_n_time_data = {'time':  list(map(lambda x : x[1], vel_n_time)), 
-                                'velocity' : list(map(lambda x : x[0], vel_n_time))}
+        # save data
+        time_data = {'time':  [race_time]}
+        off_track_percent_data = {'off_track_percent':  [off_track_percent_car1]}
+        vel_n_time_data = {'time':  list(map(lambda x : x[1], vel_n_time)), 
+                            'velocity' : list(map(lambda x : x[0], vel_n_time))}
 
-            race_time_df = pd.DataFrame(time_data)
-            off_track_df = pd.DataFrame(off_track_percent_data)
-            vel_n_time_df = pd.DataFrame(vel_n_time_data)
-            vel_n_time_df = vel_n_time_df.groupby(np.arange(len(vel_n_time_df)) // 4).mean()
+        race_time_df = pd.DataFrame(time_data)
+        off_track_df = pd.DataFrame(off_track_percent_data)
+        vel_n_time_df = pd.DataFrame(vel_n_time_data)
+        vel_n_time_df = vel_n_time_df.groupby(np.arange(len(vel_n_time_df)) // 4).mean()
 
-            race_time_df.to_csv("./stats_data/race_time.csv")
-            off_track_df.to_csv("./stats_data/off_track.csv")
-            vel_n_time_df.to_csv("./stats_data/vel_n_time.csv")
+        race_time_df.to_csv("./stats_data/race_time.csv")
+        off_track_df.to_csv("./stats_data/off_track.csv")
+        vel_n_time_df.to_csv("./stats_data/vel_n_time.csv")
 
-
-        # TODO: Stats for multiplayer
-        elif self.players == 2:
+        #elif self.players == 2:
             #avg_car1_vel =
             #n_off_track_car1 =
             #race_time1 = self.ftime
@@ -530,12 +533,13 @@ class GraphicsEngine:
             #avg_car2_vel =
             #n_off_track_car2 =
             #race_time2 = self.ftime
-            pass
 
     def open_stats_dshb(self):
         pg.quit()
         file1 = "./stats_dashboard.py"
         os.system(f'streamlit run {file1}')
+
+
 
 if __name__ == '__main__':
     app = GraphicsEngine()

@@ -28,8 +28,6 @@ import pandas as pd
 import os
 
 
-# TODO : Arreglar minimapa AI
-
 
 class GraphicsEngine:
     def __init__(self, win_size=(1280, 960)):
@@ -102,7 +100,8 @@ class GraphicsEngine:
         self.change_camera()
         
 
-    def two_players(self, players_color):
+    def two_players(self, players_color, AI):
+        self.AI = AI
         # set opengl attr
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION,3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION,3)
@@ -124,14 +123,18 @@ class GraphicsEngine:
         self.light = Light(self.map)
         self.car = Car(self, player = 1, color = players_color[1])
         #self.car_2 = Car(self, player = 2, color = players_color[2])
-        self.car_2 = CarAI(self, player = 2, color = players_color[2])
-        self.ai = ai(self, test = True) 
-
-        # Minimap
         self.minimap = Minimap(self, player = 1)
         self.minimap_2 = Minimap(self, player = 2)
+        if self.AI:
+            self.car_2 = CarAI(self, player = 2, color = players_color[2])
+            self.ai = ai(self, test = True) 
+            self.minimap_car_2 = MinimapCarAI(self, player = 2, color = players_color[2])
+        else:
+            self.car_2 = Car(self, player = 2, color = players_color[2])
+            self.minimap_car_2 = MinimapCar(self, player = 2, color = players_color[2])
+
+        # Minimap
         self.minimap_car = MinimapCar(self, player = 1, color = players_color[1])
-        self.minimap_car_2 = MinimapCarAI(self, player = 2, color = players_color[2])
         self.minimap_scene = MinimapCircuito(self, self.scene.all_vertex, self.scene.color_vertex)
 
 
@@ -238,8 +241,6 @@ class GraphicsEngine:
             #self.car.values.append(radar)
             self.start = True
             self.minimap_car.move_forward()
-            if self.players == 2:
-                self.minimap_car_2.move_forward()
             
         if keys[pg.K_RIGHT]:
             self.car.move_right()
@@ -295,15 +296,20 @@ class GraphicsEngine:
 
     def render(self):
         if self.menu_active:
-            self.players, play, self.map, players_color = self.menu.render()
+            mode, play, self.map, players_color = self.menu.render()
             if play:
                 self.menu_active = False
                 self.menu_music.stop()
                 loading_screen(self.surface)
-                if self.players == 1:
+                if mode == 1:
+                    self.players = 1
                     self.one_player(players_color)
-                elif self.players == 2:
-                    self.two_players(players_color)
+                elif mode == 2:
+                    self.players = 2
+                    self.two_players(players_color, AI = False)
+                elif mode == 3:
+                    self.players = 2
+                    self.two_players(players_color, AI = True)
                 self.start_game_phase = 2
         else:
             # clear framebuffer
@@ -387,8 +393,8 @@ class GraphicsEngine:
                     self.minimap_car_2.render()
                     self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
 
-                # Run AI
-                self.ai.run_car()
+                if self.AI:
+                    self.ai.run_car()
 
                 # swap buffers
                 pg.display.flip()

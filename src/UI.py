@@ -9,6 +9,7 @@ class menu:
         self.players = 1
         self.play = False
         self.map = "field"
+        self.mode = 1
         self.set_menu(0)
         self.players_color = {1: "red", 2: "blue"}
         self.colors_avaibles = ["Red", "Blue", "Green", "Purple", "Turquoise", "White"]
@@ -35,7 +36,7 @@ class menu:
                                         )
         if select == 0:
             pg.display.set_caption("Menu")
-            self.menu.add.selector('Mode:', [("Single Player", 1), ("Player vs AI", 2)], onchange=self.set_player).translate(X, Y)
+            self.menu.add.selector('Mode:', [("Single Player", 1), ("Two Players", 2), ("Player vs AI", 3)], onchange=self.set_mode).translate(X, Y)
             self.menu.add.selector('Maps:', [("Field", 1), ("Sunset", 2), ("Desert", 3)], onchange=self.set_map).translate(X, Y)    
             self.menu.add.button('Start', self.next).translate(X, Y)
             self.menu.add.button('Quit', pygame_menu.events.EXIT).translate(X, Y)
@@ -51,7 +52,7 @@ class menu:
             self.menu.add.selector('Select Color Player 1:', [(color, 1) for color in self.colors_avaibles], onchange=self.set_color).translate(X, Y)
             colors = [(color, 2) for color in self.colors_avaibles]
             colors.append(colors.pop(0))
-            self.menu.add.selector('Select Color AI:', colors, onchange=self.set_color).translate(X, Y)    
+            self.menu.add.selector('Select Color Player 2:', colors, onchange=self.set_color).translate(X, Y)    
             self.menu.add.button('Start', self.start).translate(X, Y)
             self.menu.add.button('Back', self.back).translate(X, Y)
 
@@ -60,21 +61,32 @@ class menu:
             self.menu.add.button('See stats', self.app.open_stats_dshb).translate(X, Y)
             self.menu.add.button('Back', self.back).translate(X, Y)
             self.menu.add.button('Quit', pygame_menu.events.EXIT).translate(X, Y)
+        
+        elif select == 4:
+            pg.display.set_caption("Menu")
+            self.menu.add.selector('Select Color Player 1:', [(color, 1) for color in self.colors_avaibles], onchange=self.set_color).translate(X, Y)
+            colors = [(color, 2) for color in self.colors_avaibles]
+            colors.append(colors.pop(0))
+            self.menu.add.selector('Select Color AI:', colors, onchange=self.set_color).translate(X, Y)    
+            self.menu.add.button('Start', self.start).translate(X, Y)
+            self.menu.add.button('Back', self.back).translate(X, Y)
 
     def set_color(self, color, player):
         self.players_color[player] = color[0][0].lower()
 
-    def set_player(self, _, players):
-        self.players = players
+    def set_mode(self, _, mode):
+        self.mode = mode
 
     def set_map(self, map, _):
         self.map = map[0][0].lower()
 
     def next(self):
-        if self.players == 1:
+        if self.mode == 1:
             self.set_menu(1)
-        else:
+        elif self.mode == 2:
             self.set_menu(2)
+        elif self.mode == 3:
+            self.set_menu(4)
 
     def start(self):
         self.play = True
@@ -84,4 +96,4 @@ class menu:
 
     def render(self):
         self.menu.mainloop(self.app.surface, disable_loop = True)
-        return self.players, self.play, self.map, self.players_color
+        return self.mode, self.play, self.map, self.players_color

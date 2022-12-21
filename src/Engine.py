@@ -146,7 +146,6 @@ class GraphicsEngine:
     
     def remove_objects(self):
         self.car.destroy()
-        #self.camera.destroy()
         self.scene.destroy()
         self.skybox.destroy()
         self.grass.destroy()
@@ -154,7 +153,7 @@ class GraphicsEngine:
         self.minimap_scene.destroy()
         if self.players == 2:
             self.car_2.destroy()
-            self.minimap_car_2.destroy()        
+            self.minimap_car_2.destroy()
 
     def change_camera(self):
         if self.players == 1:

@@ -224,4 +224,4 @@ def loading_screen(surface):
     surface.blit(img, (0, 0))
     
     pg.display.flip()
-    time.sleep(6.5)
+    time.sleep(5)

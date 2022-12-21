@@ -129,9 +129,7 @@ class GraphicsEngine:
         self.minimap_car = MinimapCar(self, player = 1, color = players_color[1])
         self.minimap_scene = MinimapCircuito(self, self.scene.all_vertex, self.scene.color_vertex)
 
-
         # Music
-
         self.ingame_music.load("musica1")
         self.ingame_music.play()
         self.winner = "Red"
@@ -144,16 +142,26 @@ class GraphicsEngine:
     def start_timer(self):
         self.start_time = self.time
     
-    def remove_objects(self):
+    def destroy_race_objects(self):
         self.car.destroy()
         self.scene.destroy()
         self.skybox.destroy()
         self.grass.destroy()
         self.minimap_car.destroy()
         self.minimap_scene.destroy()
+        del self.car
+        del self.scene
+        del self.skybox
+        del self.grass
+        del self.minimap_car
+        del self.minimap_scene
+        del self.camera
         if self.players == 2:
             self.car_2.destroy()
             self.minimap_car_2.destroy()
+            del self.car_2
+            del self.minimap_car_2
+            del self.camera_2
 
     def change_camera(self):
         if self.players == 1:
@@ -184,7 +192,7 @@ class GraphicsEngine:
             if event.type == pg.KEYDOWN and event.key == pg.K_c:
                 self.change_camera()
             if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
-                self.remove_objects()
+                self.destroy_race_objects()
                 self.menu_music.load("menu")
                 self.menu_music.play()
                 self.start_menu()
@@ -226,8 +234,8 @@ class GraphicsEngine:
             self.scene.zero_checkpoints()
             self.scene.new_road()
             self.minimap_scene.new_road(self.scene.all_vertex, self.scene.color_vertex)
-            self.car.move_to_start()
             self.start_timer()
+            self.car.move_to_start()
             self.minimap_car.move_to_start()
             
             if self.players == 2:
@@ -239,53 +247,19 @@ class GraphicsEngine:
 
         if keys[pg.K_UP]:
             self.car.move_forward()
-            radar = self.car.distance_to_off_circuit()
-            radar.append(self.car.velocity)
-            radar.append("-")
-            radar = np.array(radar)
-            
-            #self.car.values.append(radar)
-            self.start = True
             self.minimap_car.move_forward()
             
         if keys[pg.K_RIGHT]:
             self.car.move_right()
             self.minimap_car.move_right()
-            radar = self.car.distance_to_off_circuit()
-            radar.append(self.car.get_curviness())
-            radar.append(2)
-            radar = np.array(radar)
-            
-            #self.car.values.append(radar)
-            self.start = True
             
         if keys[pg.K_LEFT]:
             self.minimap_car.move_left()
             self.car.move_left()
-            radar = self.car.distance_to_off_circuit()
-            radar.append(self.car.get_curviness())
-            radar.append(1)
-            radar = np.array(radar)
-            
-            #self.car.values.append(radar)
-            self.start = True
             
         if keys[pg.K_DOWN]:
             self.car.move_backward()
-            #self.car.move_backward()
-            
-        if (not keys[pg.K_UP]) and (not keys[pg.K_RIGHT]) and (not keys[pg.K_LEFT]):
-            if self.start:
-                radar = self.car.distance_to_off_circuit()
-                radar.append(self.car.get_curviness())
-                radar.append(0)
-                radar = np.array(radar)
-                
-                #self.car.values.append(radar)
-            
-        if keys[pg.K_g]:
-            self.car.save()
-            
+            self.minimap_car.move_backward()
         
         if self.camera_mode == "drive":
             self.minimap_car.up()
@@ -466,7 +440,7 @@ class GraphicsEngine:
                 self.ingame_music.stop()
                 self.start_menu()
                 # remove objects
-                self.remove_objects()
+                self.destroy_race_objects()
                 # save game stats
                 self.save_stats()
                 self.menu.set_menu(3)

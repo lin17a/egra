@@ -150,14 +150,10 @@ class GraphicsEngine:
         self.scene.destroy()
         self.skybox.destroy()
         self.grass.destroy()
-        #self.light.destroy()
-        #self.minimap.destroy()
         self.minimap_car.destroy()
         self.minimap_scene.destroy()
         if self.players == 2:
             self.car_2.destroy()
-            #self.camera_2.destroy()
-            #self.minimap_2.destroy()
             self.minimap_car_2.destroy()        
 
     def change_camera(self):

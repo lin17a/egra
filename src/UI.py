@@ -11,10 +11,10 @@ class menu:
         self.map = "field"
         self.mode = 1
         self.set_menu(0)
-        self.players_color = {1: "red", 2: "blue"}
-        self.colors_avaibles = ["Red", "Blue", "Green", "Purple", "Turquoise", "White"]
+        self.players_color = {1: "red", 2: "white"}
+        self.colors_avaibles = ["Red", "White", "Blue", "Green", "Purple", "Turquoise"]
 
-    def set_menu(self, select):
+    def set_menu(self, select, label = ""):
         font = pygame_menu.font.FONT_MUNRO
         mytheme = Theme(background_color = (0, 0, 0, 0), 
                         widget_font = font, 
@@ -57,7 +57,7 @@ class menu:
             self.menu.add.button('Back', self.back).translate(X, Y)
 
         elif select == 3:
-            self.menu.add.label('Game Over', font_size=80).translate(X, Y)
+            self.menu.add.label("GAME OVER: "+label, font_size=80).translate(X, Y)
             self.menu.add.button('See stats', self.app.open_stats_dshb).translate(X, Y)
             self.menu.add.button('Back', self.back).translate(X, Y)
             self.menu.add.button('Quit', pygame_menu.events.EXIT).translate(X, Y)

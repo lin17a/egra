@@ -483,11 +483,12 @@ class GraphicsEngine:
                     self.start_menu()
                     # save game stats
                     self.save_stats()
-                    self.menu.set_menu(3)
                     
 
         if self.end_game:
-            if self.players == 2:
+            if self.players == 1:
+                self.menu.set_menu(3)
+            elif self.players == 2:
                 # check who has completed more checkpoints
                 current_n_checkpoints = np.count_nonzero(self.car.completed_checkpoints)
                 total_n_checkpoints = len(self.scene.checkpoints)
@@ -495,6 +496,7 @@ class GraphicsEngine:
                     self.winner = self.car.color
                 else:
                     self.winner = self.car_2.color
+                self.menu.set_menu(3, self.winner.upper()+" WINS!")
         
         
     def save_stats(self):

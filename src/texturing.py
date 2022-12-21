@@ -2,6 +2,7 @@ import glm
 import numpy as np
 import pygame as pg
 import os
+import time
 
 
 
@@ -223,3 +224,4 @@ def loading_screen(surface):
     surface.blit(img, (0, 0))
     
     pg.display.flip()
+    time.sleep(6.5)

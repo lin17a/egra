@@ -94,11 +94,11 @@ class ai:
         self.time_spent += 1     
 
         # Input my data and get result from network
-        radar = self.app.car.distance_to_off_circuit()
+        radar = self.app.car_2.distance_to_off_circuit()
         
         #radar.append(self.app.car.velocity)
         
-        radar.append(self.app.car.get_curviness())
+        radar.append(self.app.car_2.get_curviness())
         
         
         radar = np.array(radar)
@@ -118,10 +118,10 @@ class ai:
             #print(f"Action: Move towards")
             
         elif i == 1:
-            self.app.car.move_left()
+            self.app.car_2.move_left()
             #print(f"Action: Move left")
         elif i == 2:
-            self.app.car.move_right()
+            self.app.car_2.move_right()
             #print(f"Action: Move right")
         elif i == 3:
             #print(f"Action: wait")
@@ -137,11 +137,11 @@ class ai:
         # Update car and fitness
         
         if not self.test:
-            genomes[self.current_car][1].fitness += self.get_reward(self.app.car.velocity,
-                                                  self.app.car.distance, 
+            genomes[self.current_car][1].fitness += self.get_reward(self.app.car_2.velocity,
+                                                  self.app.car_2.distance, 
                                                          self.time_spent)
         #print(f"Fitness: {genomes[self.current_car][1].fitness}")
-        if not self.app.car.on_circuit():
+        if not self.app.car_2.on_circuit():
             if not self.test:
                 genomes[self.current_car][1].fitness -= 1e2
             death = True
@@ -149,8 +149,8 @@ class ai:
     
         if death:
             self.current_car += 1
-            self.app.car.distance = 0
-            self.app.car.move_to_start()
+            self.app.car_2.distance = 0
+            self.app.car_2.move_to_start()
             self.time_spent = 0
             print("New Car")
             #Y un reset a la posición del carro

@@ -9,7 +9,10 @@ from OpenGL.GL import *
 
 from Camera import Camera, Axis, DriverCamera, Minimap
 from Circuito import Circuito, MinimapCircuito
-from car_IA_2 import Car, MinimapCar
+from car_IA_2 import Car as CarAI
+from car_IA_2 import MinimapCar as MinimapCarAI
+from car import Car
+from car import MinimapCar
 
 
 from Light import Light
@@ -24,6 +27,11 @@ from AI import ai
 import pandas as pd
 import os
 
+
+# TODO : Activar musica
+# TODO : Cambiar label de 2 player a IA color....
+# TODO : Arreglar minimapa
+# TODO : Stats al final de modo multi + Game Over
 
 
 class GraphicsEngine:
@@ -80,7 +88,7 @@ class GraphicsEngine:
         self.light = Light(self.map)
         self.car = Car(self, color = players_color[1])
 
-        self.ai = ai(self, test = True)        
+        #self.ai = ai(self, test = True)        
         # axis
         #self.axis = Axis(self)
         # Minimap
@@ -116,13 +124,15 @@ class GraphicsEngine:
         # Car
         self.light = Light(self.map)
         self.car = Car(self, player = 1, color = players_color[1])
-        self.car_2 = Car(self, player = 2, color = players_color[2])
+        #self.car_2 = Car(self, player = 2, color = players_color[2])
+        self.car_2 = CarAI(self, player = 2, color = players_color[2])
+        self.ai = ai(self, test = True) 
 
         # Minimap
         self.minimap = Minimap(self, player = 1)
         self.minimap_2 = Minimap(self, player = 2)
         self.minimap_car = MinimapCar(self, player = 1, color = players_color[1])
-        self.minimap_car_2 = MinimapCar(self, player = 2, color = players_color[2])
+        self.minimap_car_2 = MinimapCarAI(self, player = 2, color = players_color[2])
         self.minimap_scene = MinimapCircuito(self, self.scene.all_vertex, self.scene.color_vertex)
 
 
@@ -238,7 +248,7 @@ class GraphicsEngine:
             radar.append(2)
             radar = np.array(radar)
             
-            self.car.values.append(radar)
+            #self.car.values.append(radar)
             self.start = True
             
         if keys[pg.K_LEFT]:
@@ -249,7 +259,7 @@ class GraphicsEngine:
             radar.append(1)
             radar = np.array(radar)
             
-            self.car.values.append(radar)
+            #self.car.values.append(radar)
             self.start = True
             
         if keys[pg.K_DOWN]:
@@ -263,7 +273,7 @@ class GraphicsEngine:
                 radar.append(0)
                 radar = np.array(radar)
                 
-                self.car.values.append(radar)
+                #self.car.values.append(radar)
             
         if keys[pg.K_g]:
             self.car.save()
@@ -322,7 +332,7 @@ class GraphicsEngine:
                     self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
                 # swap buffers
                 #"""
-                self.ai.run_car()
+                #self.ai.run_car()
                 
                 pg.display.flip()
 
@@ -375,6 +385,9 @@ class GraphicsEngine:
                     self.minimap_car.render()
                     self.minimap_car_2.render()
                     self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
+
+                # Run AI
+                self.ai.run_car()
 
                 # swap buffers
                 pg.display.flip()

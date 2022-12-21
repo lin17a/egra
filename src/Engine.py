@@ -381,11 +381,7 @@ class GraphicsEngine:
                 self.start_menu()
                 # save game stats
                 self.save_stats()
-                # open dashboard
-                pg.quit()
-                file1 = "./stats_dashboard.py"
-                os.system(f'streamlit run {file1}')
-                
+                self.menu.set_menu(3)
 
 
         elif self.players == 2:
@@ -453,6 +449,12 @@ class GraphicsEngine:
             #race_time2 = self.ftime
             pass
 
+
+    def open_stats_dshb(self):
+        # open dashboard
+        pg.quit()
+        file1 = "./stats_dashboard.py"
+        os.system(f'streamlit run {file1}')
 
     def stopwatch(self, multi: bool):
         # TODO:

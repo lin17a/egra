@@ -52,7 +52,11 @@ class menu:
             self.menu.add.button('Start', self.start).translate(X, Y)
             self.menu.add.button('Back', self.back).translate(X, Y)
 
-    
+        elif select == 3:
+            self.menu.add.label('Game Over', font_size=80).translate(X, Y)
+            self.menu.add.button('See stats', self.app.open_stats_dshb).translate(X, Y)
+            self.menu.add.button('Quit', pygame_menu.events.EXIT).translate(X, Y)
+
     def set_color(self, color, player):
         self.players_color[player] = color[0][0].lower()
 

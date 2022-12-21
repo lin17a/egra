@@ -130,3 +130,6 @@ dmypy.json
 .pyre/
 
 src/a.ipynb
+
+#Stats data
+stats_data/

@@ -65,6 +65,6 @@ with tab1:
         #prog_fig = progress_bar_chart(workout_consist)
         #st.plotly_chart(prog_fig)
 with tab2:
-    st.markdown('### Line chart showing AI data')
+    st.markdown('### Line chart showing AI trainning evolution')
     fig = line_chart(ia_data_df)
     st.plotly_chart(fig)

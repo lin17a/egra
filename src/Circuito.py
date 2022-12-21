@@ -24,6 +24,9 @@ class Circuito:
         self.vao = self.get_vao()
         self.m_model = self.get_model_matrix()
         self.layout_points, self.layout_matrix = self.get_layout_matrix()
+        self.curve_matrix = self.get_curve_matrix()
+        self.curviness = []
+        self.middle_line = []
         self.on_init()
 
     def zero_checkpoints(self):
@@ -179,6 +182,9 @@ class Circuito:
         # take the logarithm to see the curves better
         curviness = np.sign(curviness) * np.log(abs(curviness))
 
+        self.curviness = curviness
+        self.middle_line = middle_line
+
         curves = [True if (point > 0.9 or point < -0.9) else False for point in curviness]
         curves_mids = [False] * len(curviness)  # [[0, 0, 0, 0]] * len(curviness)
         i = 0
@@ -267,6 +273,27 @@ class Circuito:
         on_track = np.logical_and(in_out_outer, np.logical_not(in_out_inner))
 
         return test_points.reshape(201, 201, 2), on_track.reshape(201, 201)
+
+
+    def get_curve_matrix(self):
+        #curve_matrix = np.array(np.logical_not(self.layout_matrix), dtype=float)
+        curve_matrix = np.where(self.layout_matrix, 0, np.nan)
+        middle_point_idxs = []
+        for i, middle_point in enumerate(self.middle_line):
+            x, y = middle_point[0], middle_point[2]
+            distances = np.sqrt((self.layout_points[:, :, 0] - x) ** 2 + (self.layout_points[:, :, 1] - y) ** 2)
+            middle_point_idxs.append(np.unravel_index(distances.argmin(), distances.shape))
+            curve_matrix[middle_point_idxs[-1]] = self.curviness[(i + 40) % len(self.curviness)]
+        while not curve_matrix.all() or not middle_point_idxs:
+            new_middle_points = []
+            for (x, y) in middle_point_idxs:
+                for neighbour_idx in [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]]:
+                    if not curve_matrix[neighbour_idx[0], neighbour_idx[1]]:
+                        curve_matrix[neighbour_idx[0], neighbour_idx[1]] = curve_matrix[x, y]
+                        new_middle_points.append(neighbour_idx)
+            middle_point_idxs = new_middle_points
+        return curve_matrix
+
 
 class MinimapCircuito(Circuito):
     def __init__(self, app, all_vertex, color_vertex):

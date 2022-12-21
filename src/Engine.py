@@ -5,15 +5,22 @@ import sys
 import itertools as it
 import numpy as np
 from OpenGL.GL import *
+
+
 from Camera import Camera, Axis, DriverCamera, Minimap
 from Circuito import Circuito, MinimapCircuito
-from car import Car, MinimapCar
+from car_IA_2 import Car, MinimapCar
+
+
 from Light import Light
 from texturing import *
 import time
 from UI import menu
 from Music import MusicPlayer
 import glcontext
+
+from AI import ai
+
 import pandas as pd
 import os
 
@@ -22,6 +29,7 @@ import os
 class GraphicsEngine:
     def __init__(self, win_size=(1280, 960)):
         # init pygame modules
+        self.start = False
         pg.init()
         # window sizeq
         self.WIN_SIZE = win_size
@@ -31,12 +39,14 @@ class GraphicsEngine:
         self.start_menu()
         self.map = None
         self.players = None
+        
+        # Se crea la instancia
+        
         self.end_game = False
         self.start_game_phase = False
 
-        # Sounds
-        self.ingame_music = MusicPlayer("musica1", volume=0.5)
-        self.menu_music = MusicPlayer("menu", volume=0.3)
+        self.ingame_music = MusicPlayer("musica1", volume=0.0)
+        self.menu_music = MusicPlayer("menu", volume=0.0)
         self.menu_music.play()
 
         self.off_track = []
@@ -47,6 +57,7 @@ class GraphicsEngine:
         self.surface = pg.display.set_mode(self.WIN_SIZE)
         self.menu = menu(self)
         self.menu_active = True
+        
         
     def one_player(self, players_color):
         # set opengl attr
@@ -68,16 +79,22 @@ class GraphicsEngine:
         # Car
         self.light = Light(self.map)
         self.car = Car(self, color = players_color[1])
+
+        self.ai = ai(self, test = True)        
+        # axis
+        #self.axis = Axis(self)
         # Minimap
+        
         self.minimap = Minimap(self)
         self.minimap_car = MinimapCar(self)
         self.minimap_scene = MinimapCircuito(self, self.scene.all_vertex, self.scene.color_vertex)
-        # Music
+        
         self.ingame_music.load("musica1")
         self.ingame_music.play()
         self.winner = None
 
         self.change_camera()
+        
 
     def two_players(self, players_color):
         # set opengl attr
@@ -100,6 +117,7 @@ class GraphicsEngine:
         self.light = Light(self.map)
         self.car = Car(self, player = 1, color = players_color[1])
         self.car_2 = Car(self, player = 2, color = players_color[2])
+
         # Minimap
         self.minimap = Minimap(self, player = 1)
         self.minimap_2 = Minimap(self, player = 2)
@@ -107,7 +125,9 @@ class GraphicsEngine:
         self.minimap_car_2 = MinimapCar(self, player = 2, color = players_color[2])
         self.minimap_scene = MinimapCircuito(self, self.scene.all_vertex, self.scene.color_vertex)
 
+
         # Music
+
         self.ingame_music.load("musica1")
         self.ingame_music.play()
         self.winner = None
@@ -191,24 +211,63 @@ class GraphicsEngine:
             self.car.move_to_start()
             self.start_timer()
             self.minimap_car.move_to_start()
+            
             if self.players == 2:
                 self.car_2.move_to_start()
                 self.minimap_car_2.move_to_start()
+
             # NOTE: Start again
             self.end_game = False
 
         if keys[pg.K_UP]:
             self.car.move_forward()
+            radar = self.car.distance_to_off_circuit()
+            radar.append(self.car.velocity)
+            radar.append("-")
+            radar = np.array(radar)
+            
+            #self.car.values.append(radar)
+            self.start = True
             self.minimap_car.move_forward()
+            
         if keys[pg.K_RIGHT]:
             self.car.move_right()
             self.minimap_car.move_right()
+            radar = self.car.distance_to_off_circuit()
+            radar.append(self.car.get_curviness())
+            radar.append(2)
+            radar = np.array(radar)
+            
+            self.car.values.append(radar)
+            self.start = True
+            
         if keys[pg.K_LEFT]:
-            self.car.move_left()
             self.minimap_car.move_left()
+            self.car.move_left()
+            radar = self.car.distance_to_off_circuit()
+            radar.append(self.car.get_curviness())
+            radar.append(1)
+            radar = np.array(radar)
+            
+            self.car.values.append(radar)
+            self.start = True
+            
         if keys[pg.K_DOWN]:
             self.car.move_backward()
-            self.minimap_car.move_backward()
+            #self.car.move_backward()
+            
+        if (not keys[pg.K_UP]) and (not keys[pg.K_RIGHT]) and (not keys[pg.K_LEFT]):
+            if self.start:
+                radar = self.car.distance_to_off_circuit()
+                radar.append(self.car.get_curviness())
+                radar.append(0)
+                radar = np.array(radar)
+                
+                self.car.values.append(radar)
+            
+        if keys[pg.K_g]:
+            self.car.save()
+            
         
         if self.camera_mode == "drive":
             self.minimap_car.up()
@@ -239,6 +298,7 @@ class GraphicsEngine:
             # clear framebuffer
             self.ctx.clear(color=(0, 0, 0))
             if self.players == 1:
+                #"""
                 self.ctx.viewport = (0, 0, self.WIN_SIZE[0], self.WIN_SIZE[1])
                 self.camera.update()
                 self.skybox.render(player = 1)
@@ -261,6 +321,9 @@ class GraphicsEngine:
                     self.minimap_car.render()
                     self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
                 # swap buffers
+                #"""
+                self.ai.run_car()
+                
                 pg.display.flip()
 
             if self.players == 2:                
@@ -301,6 +364,7 @@ class GraphicsEngine:
                 self.ctx.disable(mgl.DEPTH_TEST | mgl.CULL_FACE)
                 # render axis
                 #self.axis.render()
+
                 if self.camera_mode == "drive":
                     # render minimap
                     self.ctx.viewport = (int(self.WIN_SIZE[0] * 0.65), int(self.WIN_SIZE[1] * 0.1), int(self.WIN_SIZE[0] * 0.4),
@@ -322,11 +386,13 @@ class GraphicsEngine:
             self.end_game_logic()
 
     def run(self):
+        
         while True:
             self.get_time()
             self.check_events()
             self.render()
-            self.clock.tick(60)
+            
+            #self.clock.tick(60)
 
     def start_game(self):
         if self.start_game_phase == 2:

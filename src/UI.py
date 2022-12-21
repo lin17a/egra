@@ -34,17 +34,20 @@ class menu:
                                             mouse_motion_selection=True
                                         )
         if select == 0:
+            pg.display.set_caption("Menu")
             self.menu.add.selector('Players:', ["1", "2"], onchange=self.set_player).translate(X, Y)
             self.menu.add.selector('Maps:', [("Field", 1), ("Sunset", 2), ("Desert", 3)], onchange=self.set_map).translate(X, Y)    
             self.menu.add.button('Start', self.next).translate(X, Y)
             self.menu.add.button('Quit', pygame_menu.events.EXIT).translate(X, Y)
         
         elif select == 1:
+            pg.display.set_caption("Menu")
             self.menu.add.selector('Select Color Car:', [(color, 1) for color in self.colors_avaibles], onchange=self.set_color).translate(X, Y)
             self.menu.add.button('Start', self.start).translate(X, Y)
             self.menu.add.button('Back', self.back).translate(X, Y)
         
         elif select == 2:
+            pg.display.set_caption("Menu")
             self.menu.add.selector('Select Color Player 1:', [(color, 1) for color in self.colors_avaibles], onchange=self.set_color).translate(X, Y)
             colors = [(color, 2) for color in self.colors_avaibles]
             colors.append(colors.pop(0))
@@ -55,7 +58,7 @@ class menu:
         elif select == 3:
             self.menu.add.label('Game Over', font_size=80).translate(X, Y)
             self.menu.add.button('See stats', self.app.open_stats_dshb).translate(X, Y)
-            self.menu.add.button('Quit', pygame_menu.events.EXIT).translate(X, Y)
+            self.menu.add.button('Back', self.back).translate(X, Y)
 
     def set_color(self, color, player):
         self.players_color[player] = color[0][0].lower()

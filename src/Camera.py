@@ -84,7 +84,9 @@ class DriverCamera(Camera):
         elif self.player == None:
             self.aspect_ratio = app.WIN_SIZE[0]/app.WIN_SIZE[1]          
         self.cam_dist = 5
+        self.delay = 2
         self.position = self.get_position()
+        self.last_position_list = [self.position] * self.delay
         self.up = glm.vec3(0, 1, 0)
         self.lookat = self.get_look_at()
         self.radians = radians
@@ -94,7 +96,9 @@ class DriverCamera(Camera):
         self.m_proj = self.get_projection_matrix()
 
     def update(self):
-        self.position = self.get_position()
+        tmp_position = self.get_position()
+        self.last_position_list.append(tmp_position)
+        self.position = self.last_position_list.pop(0)
         self.lookat = self.get_look_at()
         self.m_view = self.get_view_matrix()
         self.m_proj = self.get_projection_matrix()

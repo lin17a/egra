@@ -99,7 +99,7 @@ class GraphicsEngine:
         
         self.ingame_music.load("musica1")
         self.ingame_music.play()
-        self.winner = None
+        self.winner = "Red"
 
         self.change_camera()
         
@@ -140,7 +140,7 @@ class GraphicsEngine:
 
         self.ingame_music.load("musica1")
         self.ingame_music.play()
-        self.winner = None
+        self.winner = "Red"
 
         self.change_camera()
 
@@ -426,17 +426,11 @@ class GraphicsEngine:
     #Change title of pygame window
     def change_title(self, time, checkpoint, velocity):
         if self.players == 1:
-            if self.end_game:
-                pg.display.set_caption("Time: {:.2f} - Game Over".format(self.last_time, checkpoint, velocity))
-            else:
-                self.last_time = time
-                pg.display.set_caption("Time: {:.2f} - Checkpoint: {} - Velocity: {:.2f}".format(time, checkpoint, velocity))
+            self.last_time = time
+            pg.display.set_caption("Time: {:.2f} - Checkpoint: {} - Velocity: {:.2f}".format(time, checkpoint, ((velocity / 30) * 100) * 3.725))
         if self.players == 2:
-            if self.end_game:
-                pg.display.set_caption("Time: {:.2f} - Winner {}".format(self.last_time, self.winner.upper()))
-            else:
-                self.last_time = time
-                pg.display.set_caption("Time: {:.2f} - Checkpoint: {} - Velocity: {:.2f} - Checkpoint: {} - Velocity: {:.2f}".format(time, checkpoint[0], velocity[0], checkpoint[1], velocity[1]))
+            self.last_time = time
+            pg.display.set_caption("Time: {:.2f} - Checkpoint: {} - Velocity: {:.2f} - Checkpoint: {} - Velocity: {:.2f}".format(time, checkpoint[0], ((velocity[0] / 30) * 100) * 3.725, checkpoint[1], ((velocity[1] / 30) * 100) * 3.725))
 
 
     def end_game_logic(self):
@@ -461,7 +455,8 @@ class GraphicsEngine:
                 # save game stats
                 self.save_stats()
                 self.menu.set_menu(3)
-                
+
+
         elif self.players == 2:
             current_n_checkpoints_1 = np.count_nonzero(self.car.completed_checkpoints)
             current_n_checkpoints_2 = np.count_nonzero(self.car_2.completed_checkpoints)
@@ -481,6 +476,7 @@ class GraphicsEngine:
                     self.start_menu()
                     # save game stats
                     self.save_stats()
+                    self.menu.set_menu(3)
                     
 
         if self.end_game:
@@ -532,23 +528,11 @@ class GraphicsEngine:
         file1 = "./stats_dashboard.py"
         os.system(f'streamlit run {file1}')
 
-    def stopwatch(self, multi: bool):
-        # TODO:
-
-        # if not multi:
-            # if not self.end_game and car is not moving and car in the start line:
-                # start the timer
-            # elif if self.end_game:
-                # stop the timer
-
-        # if multi:
-            # if not self.end_game and car_1 is not moving and car_1 in the start line:
-                # start car_1 timer
-            # elif not self.end_game and car_2 is not moving and car_2 in the start line:
-                # start car_2 timer
-            # elif if self.end_game:
-                # stop both cars timers and the lowest one is the winner
-        pass
+    def open_stats_dshb(self):
+        # open dashboard
+        pg.quit()
+        file1 = "./stats_dashboard.py"
+        os.system(f'streamlit run {file1}')
 
 if __name__ == '__main__':
     app = GraphicsEngine()

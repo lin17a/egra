@@ -32,6 +32,8 @@ avg_vel = vel_n_time_df["velocity"].mean()
 real_avg_vel = rescaling(avg_vel)
 top_speedd = vel_n_time_df["velocity"].max()
 real_top_speed = rescaling(top_speedd)
+vel_n_time_df["velocity"] = vel_n_time_df["velocity"].apply(rescaling)
+vel_n_time_df["velocity"] = vel_n_time_df["velocity"].apply(lambda x: round(x, 2))
 
 # Tabs
 tab1, tab2 = st.tabs(["Race data", "AI data"])

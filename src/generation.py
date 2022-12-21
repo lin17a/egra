@@ -1,4 +1,3 @@
-from turtle import distance
 import numpy as np
 from scipy.special import binom
 from scipy.interpolate import interp1d

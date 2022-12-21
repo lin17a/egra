@@ -1,7 +1,6 @@
 import pygame as pg
 import pygame_menu
 from pygame_menu import Theme
-import moderngl as mgl
 
 class menu:
     def __init__(self, app):
@@ -92,6 +91,11 @@ class menu:
         self.play = True
     
     def back(self):
+        self.players = 1
+        self.play = False
+        self.map = "field"
+        self.mode = 1
+        self.players_color = {1: "red", 2: "white"}
         self.set_menu(0)
 
     def render(self):

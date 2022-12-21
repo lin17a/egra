@@ -10,7 +10,6 @@ import pickle
 import numpy as np
 from joblib import dump, load
 import pandas as pd
-from sklearn.tree import DecisionTreeClassifier
 
 class ai:
     

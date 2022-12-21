@@ -2,30 +2,22 @@ import pygame as pg
 import moderngl as mgl
 import glm
 import sys
-import itertools as it
 import numpy as np
 from OpenGL.GL import *
+import pandas as pd
+import os
 
-
-from Camera import Camera, Axis, DriverCamera, Minimap
+from Camera import Camera, DriverCamera, Minimap
 from Circuito import Circuito, MinimapCircuito
 from car_IA_2 import Car as CarAI
 from car_IA_2 import MinimapCar as MinimapCarAI
-from car import Car
-from car import MinimapCar
-
-
+from car import Car, MinimapCar
 from Light import Light
 from texturing import *
 import time
 from UI import menu
 from Music import MusicPlayer
-import glcontext
-
 from AI import ai
-
-import pandas as pd
-import os
 
 
 
@@ -151,6 +143,22 @@ class GraphicsEngine:
     
     def start_timer(self):
         self.start_time = self.time
+    
+    def remove_objects(self):
+        self.car.destroy()
+        #self.camera.destroy()
+        self.scene.destroy()
+        self.skybox.destroy()
+        self.grass.destroy()
+        #self.light.destroy()
+        #self.minimap.destroy()
+        self.minimap_car.destroy()
+        self.minimap_scene.destroy()
+        if self.players == 2:
+            self.car_2.destroy()
+            #self.camera_2.destroy()
+            #self.minimap_2.destroy()
+            self.minimap_car_2.destroy()        
 
     def change_camera(self):
         if self.players == 1:
@@ -181,9 +189,12 @@ class GraphicsEngine:
             if event.type == pg.KEYDOWN and event.key == pg.K_c:
                 self.change_camera()
             if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
+                self.remove_objects()
                 self.menu_music.load("menu")
                 self.menu_music.play()
                 self.start_menu()
+                return
+
             if event.type == pg.MOUSEWHEEL:
                 self.camera.zoom(-event.y*3)
                 if self.players == 2:
@@ -460,6 +471,8 @@ class GraphicsEngine:
                 # back to menu
                 self.ingame_music.stop()
                 self.start_menu()
+                # remove objects
+                self.remove_objects()
                 # save game stats
                 self.save_stats()
                 self.menu.set_menu(3)

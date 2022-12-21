@@ -417,7 +417,6 @@ class GraphicsEngine:
             self.get_time()
             self.check_events()
             self.render()
-            
             self.clock.tick(60)
 
     def start_game(self):
@@ -509,7 +508,7 @@ class GraphicsEngine:
                     self.winner = self.car.color
                 else:
                     self.winner = self.car_2.color
-                self.menu.set_menu(3, self.winner.upper()+" WINS!")
+                self.menu.set_menu(3, ": "+self.winner.upper()+" WINS!")
         
         
     def save_stats(self):

@@ -56,7 +56,7 @@ class menu:
             self.menu.add.button('Back', self.back).translate(X, Y)
 
         elif select == 3:
-            self.menu.add.label("GAME OVER: "+label, font_size=80).translate(X, Y)
+            self.menu.add.label("GAME OVER"+label, font_size=80).translate(X, Y)
             self.menu.add.button('See stats', self.app.open_stats_dshb).translate(X, Y)
             self.menu.add.button('Back', self.back).translate(X, Y)
             self.menu.add.button('Quit', pygame_menu.events.EXIT).translate(X, Y)

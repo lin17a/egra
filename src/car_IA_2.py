@@ -34,9 +34,16 @@ class Car:
         self.velmin = self.increase
 
         self.completed_checkpoints = [False] * len(self.app.scene.checkpoints)
+        
+        self.crossed_finish = False
 
         self.on_init()
 
+
+    @property
+    def checkpoints_l(self):
+        return self.completed_checkpoints
+    
     def get_start_position(self):
         vertex = self.app.scene.all_vertex[self.app.scene.current_vertex - 20]
         next_vertex = self.app.scene.all_vertex[self.app.scene.current_vertex - 19]
@@ -359,9 +366,16 @@ class Car:
             if (self.is_in_triangle(checkpoint[0][[2,0]], checkpoint[1][[2,0]], checkpoint[2][[2,0]], [self.position[2], self.position[0]]) or
                 self.is_in_triangle(checkpoint[1][[2,0]], checkpoint[2][[2,0]], checkpoint[3][[2,0]], [self.position[2], self.position[0]])):
                 self.completed_checkpoints[i] = True
-                print("checkpoint ", i, " reached")
+                #print("checkpoint ", i, " reached")
             #print(self.position)
             #print(checkpoint)
+
+    def check_if_on_start_line(self):
+        start_line = self.app.scene.start_line
+        if (self.is_in_triangle(start_line[0][[2,0]], start_line[1][[2,0]], start_line[2][[2,0]], [self.position[2], self.position[0]]) or
+            self.is_in_triangle(start_line[1][[2,0]], start_line[2][[2,0]], start_line[3][[2,0]], [self.position[2], self.position[0]])):
+            if all(self.completed_checkpoints):
+                self.crossed_finish = True
 
 
     def get_shader_program(self):
@@ -430,6 +444,10 @@ class Car:
 
 
 class MinimapCar(Car):
+    def __init__(self, app, player = None, color = "red"):
+        self.scale = 5
+        super().__init__(app, player, color)
+        
 
     def on_init(self, player = 1):
         self.shader_program['light.position'].write(self.app.light.position)
@@ -473,3 +491,24 @@ class MinimapCar(Car):
         self.shader_program['m_model'].write(self.m_model)
         #print(self.player, self.position)
         self.vao.render()
+    
+    def get_model_matrix(self):
+        m_model = glm.mat4()
+        m_model = glm.translate(m_model, self.position)
+        m_model = glm.rotate(m_model, self.rotation, glm.vec3(0, 1, 0))
+        m_model = glm.scale(m_model, glm.vec3(0.2, 0.2, 0.2)*self.scale)
+        return m_model
+
+    def up(self):
+        if self.increase > 0:
+            self.increase -= 2.5
+        if self.increase == 0:
+            self.physics.aant = [0, 0]
+            self.physics.Fant = [0, 0]
+        self.velocity = self.physics.accelerate(self.increase, self.on_circuit())
+        self.friction = self.get_friction()
+        self.physics.update_miu(self.get_friction(), self.on_circuit())
+        self.physics.Update(self.velocity, [1,0], self.physics.miu)
+        direction_vector = self.direction_vector(self.rotation)
+        self.position = self.position + self.physics.Vel[0]/20 * direction_vector
+        self.m_model = glm.translate(self.m_model, glm.vec3(self.physics.Vel[0]/(20*self.scale), 0, 0))

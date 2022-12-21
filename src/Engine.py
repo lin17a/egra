@@ -392,7 +392,7 @@ class GraphicsEngine:
             self.check_events()
             self.render()
             
-            #self.clock.tick(60)
+            self.clock.tick(60)
 
     def start_game(self):
         if self.start_game_phase == 2:

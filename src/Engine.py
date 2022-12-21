@@ -83,7 +83,7 @@ class GraphicsEngine:
         # Minimap
         
         self.minimap = Minimap(self)
-        self.minimap_car = MinimapCar(self)
+        self.minimap_car = MinimapCar(self, color = players_color[1])
         self.minimap_scene = MinimapCircuito(self, self.scene.all_vertex, self.scene.color_vertex)
         
         self.ingame_music.load("musica1")

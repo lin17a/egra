@@ -28,10 +28,8 @@ import pandas as pd
 import os
 
 
-# TODO : Activar musica
-# TODO : Cambiar label de 2 player a IA color....
-# TODO : Arreglar minimapa
-# TODO : Stats al final de modo multi + Game Over
+# TODO : Arreglar minimapa AI
+# TODO : Set seed circuito
 
 
 class GraphicsEngine:
@@ -53,8 +51,8 @@ class GraphicsEngine:
         self.end_game = False
         self.start_game_phase = False
 
-        self.ingame_music = MusicPlayer("musica1", volume=0.0)
-        self.menu_music = MusicPlayer("menu", volume=0.0)
+        self.ingame_music = MusicPlayer("musica1", volume=0.5)
+        self.menu_music = MusicPlayer("menu", volume=0.2)
         self.menu_music.play()
 
         self.off_track = []
@@ -81,6 +79,7 @@ class GraphicsEngine:
         self.camera_2 = None
         self.camera_mode = "bird"
         # scene
+        np.random.seed(3)
         self.scene = Circuito(self)
         self.skybox = Skybox(self, self.map)
         self.grass = Grass(self, self.map)
@@ -118,6 +117,7 @@ class GraphicsEngine:
         self.camera_2 = Camera(self, player = 2)
         self.camera_mode = "bird"
         # scene
+        np.random.seed(616)
         self.scene = Circuito(self)
         self.skybox = Skybox(self, self.map)
         self.grass = Grass(self, self.map)
@@ -239,6 +239,8 @@ class GraphicsEngine:
             #self.car.values.append(radar)
             self.start = True
             self.minimap_car.move_forward()
+            if self.players == 2:
+                self.minimap_car_2.move_forward()
             
         if keys[pg.K_RIGHT]:
             self.car.move_right()

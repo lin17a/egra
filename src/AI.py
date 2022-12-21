@@ -127,9 +127,9 @@ class ai:
             #print(f"Action: wait")
             pass
         
-        if self.time_spent% 100 == 0:
-            print(f"--------- CAR {self.current_car} for generation {self.generation} ---------")
-            print(f"reward until time {self.time_spent}: {genomes[self.current_car][1].fitness}")
+        #if self.time_spent% 100 == 0:
+            #print(f"--------- CAR {self.current_car} for generation {self.generation} ---------")
+            #print(f"reward until time {self.time_spent}: {genomes[self.current_car][1].fitness}")
         
         if self.time_spent > 10_0000:
             death = True

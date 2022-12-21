@@ -35,7 +35,7 @@ class menu:
                                         )
         if select == 0:
             pg.display.set_caption("Menu")
-            self.menu.add.selector('Players:', ["1", "2"], onchange=self.set_player).translate(X, Y)
+            self.menu.add.selector('Players:', [("1", 1), ("vs AI", 2)], onchange=self.set_player).translate(X, Y)
             self.menu.add.selector('Maps:', [("Field", 1), ("Sunset", 2), ("Desert", 3)], onchange=self.set_map).translate(X, Y)    
             self.menu.add.button('Start', self.next).translate(X, Y)
             self.menu.add.button('Quit', pygame_menu.events.EXIT).translate(X, Y)
@@ -51,7 +51,7 @@ class menu:
             self.menu.add.selector('Select Color Player 1:', [(color, 1) for color in self.colors_avaibles], onchange=self.set_color).translate(X, Y)
             colors = [(color, 2) for color in self.colors_avaibles]
             colors.append(colors.pop(0))
-            self.menu.add.selector('Select Color Player 2:', colors, onchange=self.set_color).translate(X, Y)    
+            self.menu.add.selector('Select Color AI:', colors, onchange=self.set_color).translate(X, Y)    
             self.menu.add.button('Start', self.start).translate(X, Y)
             self.menu.add.button('Back', self.back).translate(X, Y)
 
@@ -64,8 +64,8 @@ class menu:
     def set_color(self, color, player):
         self.players_color[player] = color[0][0].lower()
 
-    def set_player(self, players):
-        self.players = int(players[0])
+    def set_player(self, _, players):
+        self.players = players
 
     def set_map(self, map, _):
         self.map = map[0][0].lower()

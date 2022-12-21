@@ -264,7 +264,7 @@ class Car:
             if (self.is_in_triangle(checkpoint[0][[2,0]], checkpoint[1][[2,0]], checkpoint[2][[2,0]], [self.position[2], self.position[0]]) or
                 self.is_in_triangle(checkpoint[1][[2,0]], checkpoint[2][[2,0]], checkpoint[3][[2,0]], [self.position[2], self.position[0]])):
                 self.completed_checkpoints[i] = True
-                print("checkpoint ", i, " reached")
+                #print("checkpoint ", i, " reached")
 
 
     def on_circuit(self):

@@ -500,11 +500,12 @@ class MinimapCar(Car):
         return m_model
 
     def up(self):
-        if self.increase > 0:
+        if self.increase > self.velmin:
             self.increase -= 2.5
         if self.increase == 0:
             self.physics.aant = [0, 0]
             self.physics.Fant = [0, 0]
+        self.distance += 5
         self.velocity = self.physics.accelerate(self.increase, self.on_circuit())
         self.friction = self.get_friction()
         self.physics.update_miu(self.get_friction(), self.on_circuit())

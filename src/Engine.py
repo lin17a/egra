@@ -29,7 +29,6 @@ import os
 
 
 # TODO : Arreglar minimapa AI
-# TODO : Set seed circuito
 
 
 class GraphicsEngine:
@@ -206,9 +205,9 @@ class GraphicsEngine:
                 self.car_2.move_backward()
                 self.minimap_car_2.move_backward()
             self.car_2.up()
-            self.car_2.on_init()
             self.car_2.check_if_on_checkpoint()
             self.car_2.check_if_on_start_line()
+            self.car_2.on_init()
             if self.camera_mode == "drive":
                 self.minimap_car_2.up()
                 self.minimap_car_2.on_init(player = 2)

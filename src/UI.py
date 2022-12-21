@@ -35,7 +35,7 @@ class menu:
                                         )
         if select == 0:
             pg.display.set_caption("Menu")
-            self.menu.add.selector('Players:', [("1", 1), ("vs AI", 2)], onchange=self.set_player).translate(X, Y)
+            self.menu.add.selector('Mode:', [("Single Player", 1), ("Player vs AI", 2)], onchange=self.set_player).translate(X, Y)
             self.menu.add.selector('Maps:', [("Field", 1), ("Sunset", 2), ("Desert", 3)], onchange=self.set_map).translate(X, Y)    
             self.menu.add.button('Start', self.next).translate(X, Y)
             self.menu.add.button('Quit', pygame_menu.events.EXIT).translate(X, Y)

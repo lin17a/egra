@@ -119,9 +119,11 @@ class ai:
             
         elif i == 1:
             self.app.car_2.move_left()
+            self.app.minimap_car_2.move_left()
             #print(f"Action: Move left")
         elif i == 2:
             self.app.car_2.move_right()
+            self.app.minimap_car_2.move_right()
             #print(f"Action: Move right")
         elif i == 3:
             #print(f"Action: wait")
@@ -151,6 +153,7 @@ class ai:
             self.current_car += 1
             self.app.car_2.distance = 0
             self.app.car_2.move_to_start()
+            self.app.minimap_car_2.move_to_start()
             self.time_spent = 0
             print("New Car")
             #Y un reset a la posición del carro

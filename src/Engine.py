@@ -535,12 +535,6 @@ class GraphicsEngine:
         file1 = "./stats_dashboard.py"
         os.system(f'streamlit run {file1}')
 
-    def open_stats_dshb(self):
-        # open dashboard
-        pg.quit()
-        file1 = "./stats_dashboard.py"
-        os.system(f'streamlit run {file1}')
-
 if __name__ == '__main__':
     app = GraphicsEngine()
     app.run()

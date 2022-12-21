@@ -76,7 +76,7 @@ class Camera:
 
 
 class DriverCamera(Camera):
-    def __init__(self, app, player = None):
+    def __init__(self, app, player = None, radians = 103):
         self.app = app
         self.player = player
         if self.player == 1 or self.player == 2:
@@ -84,17 +84,21 @@ class DriverCamera(Camera):
         elif self.player == None:
             self.aspect_ratio = app.WIN_SIZE[0]/app.WIN_SIZE[1]          
         self.cam_dist = 5
+        self.delay = 2
         self.position = self.get_position()
+        self.last_position_list = [self.position] * self.delay
         self.up = glm.vec3(0, 1, 0)
         self.lookat = self.get_look_at()
-        self.radians = 110
+        self.radians = radians
         # view_matrix
         self.m_view = self.get_view_matrix()
         # projection matrix
         self.m_proj = self.get_projection_matrix()
 
     def update(self):
-        self.position = self.get_position()
+        tmp_position = self.get_position()
+        self.last_position_list.append(tmp_position)
+        self.position = self.last_position_list.pop(0)
         self.lookat = self.get_look_at()
         self.m_view = self.get_view_matrix()
         self.m_proj = self.get_projection_matrix()
@@ -123,14 +127,10 @@ class DriverCamera(Camera):
 
 
 class Minimap(Camera):
-
     def __init__(self, app, player=None):
         self.app = app
         self.player = player
-        if self.player == 1 or self.player == 2:
-            self.aspect_ratio = app.WIN_SIZE[0] / (app.WIN_SIZE[1] / 2)
-        elif self.player == None:
-            self.aspect_ratio = app.WIN_SIZE[0] / app.WIN_SIZE[1]
+        self.aspect_ratio = app.WIN_SIZE[0] / app.WIN_SIZE[1]
         self.position = glm.vec3(0, 60, 0)
         self.up = glm.vec3(1, 0, 0)
         self.lookat = glm.vec3(0)
@@ -139,6 +139,9 @@ class Minimap(Camera):
         self.m_view = self.get_view_matrix()
         # projection matrix
         self.m_proj = self.get_projection_matrix()
+    
+    def update(self):
+        pass
 
 
 class Axis:

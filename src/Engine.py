@@ -31,6 +31,9 @@ class GraphicsEngine:
         # clock
         self.clock = pg.time.Clock()
         self.time = 0
+
+        self.ingame_music = MusicPlayer("musica1", volume=0.5)
+        self.menu_music = MusicPlayer("menu", volume=0.2)
         self.start_menu()
         self.map = None
         self.players = None
@@ -40,15 +43,13 @@ class GraphicsEngine:
         self.end_game = False
         self.start_game_phase = False
 
-        self.ingame_music = MusicPlayer("musica1", volume=0.5)
-        self.menu_music = MusicPlayer("menu", volume=0.2)
-        self.menu_music.play()
-
         self.off_track = []
         self.vel_data = []
 
     
     def start_menu(self):
+        self.menu_music.load("menu")
+        self.menu_music.play()
         self.surface = pg.display.set_mode(self.WIN_SIZE)
         self.menu = menu(self)
         self.menu_active = True
@@ -149,17 +150,21 @@ class GraphicsEngine:
         self.grass.destroy()
         self.minimap_car.destroy()
         self.minimap_scene.destroy()
+        del self.car.physics
         del self.car
         del self.scene
         del self.skybox
         del self.grass
+        del self.minimap_car.physics
         del self.minimap_car
         del self.minimap_scene
         del self.camera
         if self.players == 2:
             self.car_2.destroy()
             self.minimap_car_2.destroy()
+            del self.car_2.physics
             del self.car_2
+            del self.minimap_car_2.physics
             del self.minimap_car_2
             del self.camera_2
 
@@ -193,8 +198,6 @@ class GraphicsEngine:
                 self.change_camera()
             if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
                 self.destroy_race_objects()
-                self.menu_music.load("menu")
-                self.menu_music.play()
                 self.start_menu()
                 return
 
@@ -414,10 +417,13 @@ class GraphicsEngine:
     def change_title(self, time, checkpoint, velocity):
         if self.players == 1:
             self.last_time = time
-            pg.display.set_caption("Time: {:.2f} - Checkpoint: {} - Velocity: {:.2f}".format(time, checkpoint, ((velocity / 30) * 100) * 3.725))
+            pg.display.set_caption("FPS: {:.0f} - Time: {:.2f} - Checkpoint: {} - Velocity: {:.2f}".format(self.clock.get_fps(), time, checkpoint, ((velocity / 30) * 100) * 3.725))
+            #pg.display.set_caption("Time: {:.2f} - Checkpoint: {} - Velocity: {:.2f}".format(time, checkpoint, ((velocity / 30) * 100) * 3.725))
+
         if self.players == 2:
             self.last_time = time
-            pg.display.set_caption("Time: {:.2f} - Checkpoint: {} - Velocity: {:.2f} - Checkpoint: {} - Velocity: {:.2f}".format(time, checkpoint[0], ((velocity[0] / 30) * 100) * 3.725, checkpoint[1], ((velocity[1] / 30) * 100) * 3.725))
+            pg.display.set_caption("FPS: {:.0f} - Time: {:.2f} - Checkpoint: {} - Velocity: {:.2f} - Checkpoint: {} - Velocity: {:.2f}".format(self.clock.get_fps(), time, checkpoint[0], ((velocity[0] / 30) * 100) * 3.725, checkpoint[1], ((velocity[1] / 30) * 100) * 3.725))
+            #pg.display.set_caption("Time: {:.2f} - Checkpoint: {} - Velocity: {:.2f} - Checkpoint: {} - Velocity: {:.2f}".format(time, checkpoint[0], ((velocity[0] / 30) * 100) * 3.725, checkpoint[1], ((velocity[1] / 30) * 100) * 3.725))
 
 
     def end_game_logic(self):
@@ -506,6 +512,10 @@ class GraphicsEngine:
         race_time_df.to_csv("./stats_data/race_time.csv")
         off_track_df.to_csv("./stats_data/off_track.csv")
         vel_n_time_df.to_csv("./stats_data/vel_n_time.csv")
+
+        del race_time_df
+        del off_track_df
+        del vel_n_time_df
 
         #elif self.players == 2:
             #avg_car1_vel =

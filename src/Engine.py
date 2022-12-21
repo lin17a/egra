@@ -420,14 +420,15 @@ class GraphicsEngine:
             self.start_game_phase = 1
         else:
             time.sleep(1)
-            print(3)
+            pg.display.set_caption("3")
             time.sleep(1)
-            print(2)
+            pg.display.set_caption("2")
             time.sleep(1)
-            print(1)
+            pg.display.set_caption("1")
             time.sleep(1)
-            print('Go')
+            pg.display.set_caption("Go")
             self.start_game_phase = False
+            self.get_time()
             self.start_timer()
 
     #Change title of pygame window

@@ -381,13 +381,8 @@ class GraphicsEngine:
                 self.start_menu()
                 # save game stats
                 self.save_stats()
-                # open dashboard
-                pg.quit()
-                file1 = "./stats_dashboard.py"
-                os.system(f'streamlit run {file1}')
+                self.menu.set_menu(3)
                 
-
-
         elif self.players == 2:
             current_n_checkpoints_1 = np.count_nonzero(self.car.completed_checkpoints)
             current_n_checkpoints_2 = np.count_nonzero(self.car_2.completed_checkpoints)
@@ -453,6 +448,10 @@ class GraphicsEngine:
             #race_time2 = self.ftime
             pass
 
+    def open_stats_dshb(self):
+        pg.quit()
+        file1 = "./stats_dashboard.py"
+        os.system(f'streamlit run {file1}')
 
     def stopwatch(self, multi: bool):
         # TODO:

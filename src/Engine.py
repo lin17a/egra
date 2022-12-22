@@ -69,7 +69,6 @@ class GraphicsEngine:
         self.camera_2 = None
         self.camera_mode = "bird"
         # scene
-        np.random.seed(3)
         self.scene = Circuito(self)
         self.skybox = Skybox(self, self.map)
         self.grass = Grass(self, self.map)
@@ -108,7 +107,6 @@ class GraphicsEngine:
         self.camera_2 = Camera(self, player = 2)
         self.camera_mode = "bird"
         # scene
-        np.random.seed(616)
         self.scene = Circuito(self)
         self.skybox = Skybox(self, self.map)
         self.grass = Grass(self, self.map)

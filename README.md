@@ -22,3 +22,5 @@ source egra_env/bin/activate      # On Linux
 # Install dependencies
 python -m pip install -r requirements.txt
 ```
+## Run
+Execute `src/Engine.py` file
